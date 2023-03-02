@@ -4,6 +4,8 @@ const EPSILON = 0.0000000001;
 const ONE_BY_LOG_TEN_THOUSAND = 1 / Math.log(10000);
 const ONE_BY_LOG_ONE_MILLION = 1 / Math.log(1000000);
 
+const FRACTO_PHP_URL_BASE = "http://dev.mikehallstudio.com/am-chill-whale/src/data/fracto";
+
 export const DEFAULT_FRACTO_VALUES = {
    scope: 2.5,
    focal_point: {x: -.75, y: 0.771}
@@ -12,6 +14,18 @@ export const DEFAULT_FRACTO_VALUES = {
 const HighlightBox = styled.div`
    position: fixed;
    border: 1px solid white;
+   pointer-events: none;
+`;
+
+const SelectedTileBox = styled.div`
+   position: fixed;
+   border: 2px dashed white;
+   pointer-events: none;
+`;
+
+const SelectedTileBoxOutline = styled.div`
+   position: fixed;
+   border: 2px dashed #888888;
    pointer-events: none;
 `;
 
@@ -87,14 +101,13 @@ export class FractoUtil {
 
    static color_cache = {};
 
-   static fracto_pattern_color = (pattern, iterations = 255) => {
+   static fracto_pattern_color_hsl = (pattern, iterations = 255) => {
       if (pattern === -1) {
-         return 'black'
+         return [0, 0, 0]
       }
       const cache_key = `(${pattern},${iterations})`;
       if (FractoUtil.color_cache[cache_key]) {
-         const [hue, sat_pct, lum_pct] = FractoUtil.color_cache[cache_key];
-         return `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`
+         return FractoUtil.color_cache[cache_key];
       }
       if (pattern === 0) {
          let offset = Math.log(iterations) * ONE_BY_LOG_TEN_THOUSAND;
@@ -103,9 +116,8 @@ export class FractoUtil {
          }
          const lum = 1.0 - offset;
          const lum_pct = Math.round(100 * lum)
-         const result = `hsl(0, 0%, ${lum_pct}%)`;
          FractoUtil.color_cache[cache_key] = [0, 0, lum_pct];
-         return result;
+         return FractoUtil.color_cache[cache_key];
       }
 
       const log2 = Math.log2(pattern);
@@ -113,9 +125,13 @@ export class FractoUtil {
       const lum = 0.15 + 0.75 * Math.log(iterations) * ONE_BY_LOG_ONE_MILLION;
 
       const lum_pct = Math.round(100 * lum)
-      const result = `hsl(${Math.round(hue)}, 75%, ${lum_pct}%)`;
       FractoUtil.color_cache[cache_key] = [Math.round(hue), 75, lum_pct];
-      return result;
+      return FractoUtil.color_cache[cache_key];
+   }
+
+   static fracto_pattern_color = (pattern, iterations = 255) => {
+      const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(pattern, iterations);
+      return `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`
    }
 
    dataURItoBlob = (dataURI) => {
@@ -141,12 +157,14 @@ export class FractoUtil {
       return new Blob([new Uint8Array(array)], {type: type});
    }
 
-   static data_to_canvas = (tile_points, ctx) => {
+   static data_to_canvas = (tile_points, ctx, width_px) => {
       if (!ctx || !tile_points) {
          return;
       }
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, 256, 256);
+      // ctx.fillStyle = 'white';
+      // ctx.fillRect(0, 0, width_px, width_px);
+      const scale_factor = width_px / 256;
+      const pixel_size = 1.375 * scale_factor
       for (let img_x = 0; img_x < 256; img_x++) {
          const y_values = tile_points[img_x];
          if (!y_values) {
@@ -155,7 +173,7 @@ export class FractoUtil {
          for (let img_y = 0; img_y < 256; img_y++) {
             const data_values = y_values[img_y];
             ctx.fillStyle = FractoUtil.fracto_pattern_color(data_values[0], data_values[1])
-            ctx.fillRect(img_x, img_y, 1, 1);
+            ctx.fillRect(img_x * scale_factor, img_y * scale_factor, pixel_size, pixel_size);
          }
       }
    }
@@ -257,6 +275,81 @@ export class FractoUtil {
             <HighlightBox style={highlight_outline_3}/>,
          ]
       })
+   }
+
+   static render_tile_outline = (wrapper_ref, bounds, focal_point, scope, width_px) => {
+      const pixel_width = scope / width_px;
+      const half_width_px = width_px / 2;
+      const half_height_px = width_px / 2;
+      const box_left = half_width_px - (focal_point.x - bounds.left) / pixel_width;
+      const box_right = half_width_px - (focal_point.x - bounds.right) / pixel_width;
+      const box_top = half_height_px - (bounds.top - focal_point.y) / pixel_width;
+      const box_bottom = half_height_px - (bounds.bottom - focal_point.y) / pixel_width;
+      const wrapper_bounds = wrapper_ref.current.getBoundingClientRect();
+      const white_border = {
+         left: `${box_left + wrapper_bounds.left}px`,
+         top: `${box_top + wrapper_bounds.top}px`,
+         width: `${box_right - box_left}px`,
+         height: `${box_bottom - box_top}px`
+      };
+      const black_border = {
+         left: `${box_left + wrapper_bounds.left - 2}px`,
+         top: `${box_top + wrapper_bounds.top - 2}px`,
+         width: `${box_right - box_left + 4}px`,
+         height: `${box_bottom - box_top + 4}px`
+      };
+      return [
+         <SelectedTileBoxOutline style={black_border}/>,
+         <SelectedTileBox style={white_border}/>
+      ]
+   }
+
+   static bounds_from_short_code = (short_code) => {
+      let left = -2;
+      let right = 2;
+      let top = 2;
+      let bottom = -2;
+      let scope = 4.0;
+      for (let i = 0; i < short_code.length; i++) {
+         const half_scope = scope / 2;
+         const digit = short_code[i];
+         switch (digit) {
+            case "0":
+               right -= half_scope;
+               bottom += half_scope;
+               break;
+            case "1":
+               left += half_scope;
+               bottom += half_scope;
+               break;
+            case "2":
+               right -= half_scope;
+               top -= half_scope;
+               break;
+            case "3":
+               left += half_scope;
+               top -= half_scope;
+               break;
+            default:
+               debugger;
+         }
+         scope = half_scope;
+      }
+      return {
+         left: left,
+         right: right,
+         top: top,
+         bottom: bottom
+      }
+   }
+
+   static tile_to_bin = (short_code, from, to, cb) => {
+      const url = `${FRACTO_PHP_URL_BASE}/tile_to_bin.php?from=${from}&to=${to}&short_code=${short_code}`;
+      fetch(url)
+         .then(response => response.json())
+         .then(result => {
+            cb(result)
+         })
    }
 }
 

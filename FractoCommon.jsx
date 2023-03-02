@@ -3,19 +3,18 @@ import styled from "styled-components";
 
 import Magnifier from "react-magnifier";
 
-import {AppStyles} from "app/AppImports";
-import CoolInputText from "common/cool/CoolInputText";
-import CoolModal from "common/cool/CoolModal";
-import CoolButton from "common/cool/CoolButton";
+import {CoolStyles, CoolColors, CoolInputText, CoolModal, CoolButton} from "common/ui/CoolImports";
 
 import FractoUtil from "./FractoUtil";
 import {render_modal_title} from "./FractoStyles";
 
+import Logo from "common/app/logo.jpg"
+
 const MAGNIFIER_WIDTH_PX = 220;
 const MAX_IMAGE_SIZE_PX = 650;
 
-const NamePrompt = styled(AppStyles.InlineBlock)`
-   ${AppStyles.bold}
+const NamePrompt = styled(CoolStyles.InlineBlock)`
+   ${CoolStyles.bold}
    color: #666666;
    font-size: 1rem;
    margin: 1rem 0 0 2rem;
@@ -23,48 +22,70 @@ const NamePrompt = styled(AppStyles.InlineBlock)`
    text-align: right;
 `;
 
-const NameInputWrapper = styled(AppStyles.InlineBlock)`
+const NameInputWrapper = styled(CoolStyles.InlineBlock)`
    font-size: 1rem;
    margin: 0.5rem 0 0 0.5rem;
 `;
 
-const DirPrompt = styled(AppStyles.InlineBlock)`
-   ${AppStyles.italic}
-   ${AppStyles.bold}
+const DirPrompt = styled(CoolStyles.InlineBlock)`
+   ${CoolStyles.italic}
+   ${CoolStyles.bold}
    font-size: 0.85rem;
    margin-left: 10.5rem;
    color: #999999;
 `;
 
-const DirName = styled(AppStyles.InlineBlock)`
-   ${AppStyles.monospace}
+const DirName = styled(CoolStyles.InlineBlock)`
+   ${CoolStyles.monospace}
    font-size: 0.85rem;
    margin-left: 0.25rem;
 `;
 
-const PromptWrapper = styled(AppStyles.Block)`
-   ${AppStyles.centered}
+const PromptWrapper = styled(CoolStyles.Block)`
+   ${CoolStyles.align_center}
    margin: 1rem 0;
    color: #333333;
    font-size: 1.25rem;
 `;
 
 const PromptSpan = styled.span`
-   ${AppStyles.bold}
+   ${CoolStyles.bold}
 `;
 
-const ButtonsRow = styled(AppStyles.Block)`
-   ${AppStyles.centered}
+const ButtonsRow = styled(CoolStyles.Block)`
+   ${CoolStyles.align_center}
    margin-bottom: 1rem;
 `;
 
-const ButtonWrapper = styled(AppStyles.InlineBlock)`
+const ButtonWrapper = styled(CoolStyles.InlineBlock)`
    margin: 0 0.5rem;
 `;
 
-const ImageWrapper = styled(AppStyles.InlineBlock)`
-   ${AppStyles.centered}
+const ImageWrapper = styled(CoolStyles.InlineBlock)`
+   ${CoolStyles.align_center}
    margin: 1rem;
+`;
+
+const LoadingWaitWrapper = styled(CoolStyles.Block)`
+   ${CoolStyles.align_center}
+   border: 0.5rem double ${CoolColors.cool_blue};
+   margin: 0;
+`;
+
+const CenteredBlock = styled(CoolStyles.Block)`
+   ${CoolStyles.align_center}
+`;
+
+const MessageText = styled(CoolStyles.Block)`
+   ${CoolStyles.align_center}
+   ${CoolStyles.italic}
+   padding-top: 0.5rem;
+   font-size: 1.125rem;
+`;
+
+const LogoImage = styled.img`
+    width: 120px;
+    padding: 0.5rem;
 `;
 
 export const ENTITY_STATUS_PREP = "PREP";
@@ -89,8 +110,8 @@ export class FractoCommon {
       const dir_name = <DirName>{FractoUtil.get_dirname_slug(entity_value)}</DirName>
 
       return [
-         <AppStyles.Block>{[name_prompt, name_input]}</AppStyles.Block>,
-         <AppStyles.Block>{[dir_prompt, dir_name]}</AppStyles.Block>
+         <CoolStyles.Block>{[name_prompt, name_input]}</CoolStyles.Block>,
+         <CoolStyles.Block>{[dir_prompt, dir_name]}</CoolStyles.Block>
       ]
    }
 
@@ -146,6 +167,23 @@ export class FractoCommon {
          ]}
          width={wrapper_width}
          response={r => cb()}
+      />
+   }
+
+   static loading_wait_notice = () => {
+      const modal_contents = <LoadingWaitWrapper>
+         <CenteredBlock><MessageText>{"Loading tile data, please look busy..."}</MessageText></CenteredBlock>
+         <CenteredBlock><LogoImage
+            width={100}
+            src={Logo}
+            alt={"am-chill-whale"}
+         />
+         </CenteredBlock>
+      </LoadingWaitWrapper>
+      return <CoolModal
+         width={"24rem"}
+         settings={{no_escape: true}}
+         contents={modal_contents}
       />
    }
 

@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 import styled from "styled-components";
 
 // import {AppStyles} from "app/AppImports";
-import StoreS3 from "common/StoreS3";
+import StoreS3 from 'common/system/StoreS3';
 
-import FractoData from "./FractoData";
-import FractoUtil from "./FractoUtil";
+import FractoData from "../data/FractoData";
+import FractoUtil from "../FractoUtil";
 
 const FractoCanvas = styled.canvas`
    margin: 0;
@@ -45,6 +45,9 @@ export class FractoLayeredCanvas extends Component {
       if (!focal_point_x_changed && !focal_point_y_changed && !scope_changed && !level_changed) {
          return;
       }
+      if (prevState.loading_tiles || this.state.loading_tiles) {
+         return;
+      }
       this.fill_canvas();
    }
 
@@ -59,7 +62,7 @@ export class FractoLayeredCanvas extends Component {
 
       const tile_span = tile_bounds.right - tile_bounds.left
       const tile_pixel_size = tile_span / 256;
-      const canvas_pixel_size = (width_px * tile_span * bg_factor) / (256 * scope)
+      const canvas_pixel_size = (1.25 * bg_factor / 100) * (width_px * tile_span) / (256 * scope)
 
       for (let tile_x = 0; tile_x < 256; tile_x++) {
          const left = tile_bounds.left + tile_x * tile_pixel_size;
@@ -77,7 +80,8 @@ export class FractoLayeredCanvas extends Component {
             const canvas_y = HEIGHT_PX_BY_CANVAS_HEIGHT * (canvas_bounds.top - top);
             if (Array.isArray(point_data[tile_x]) && Array.isArray(point_data[tile_x][tile_y])) {
                const [pattern, iterations] = point_data[tile_x][tile_y];
-               ctx.fillStyle = FractoUtil.fracto_pattern_color(pattern, iterations)
+               const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(pattern, iterations)
+               ctx.fillStyle = `hsla(${hue}, ${sat_pct}%, ${lum_pct}%, ${bg_factor}%)`
                ctx.fillRect(canvas_x, canvas_y, canvas_pixel_size, canvas_pixel_size);
                if (canvas_bounds.bottom < 0) {
                   const neg_canvas_y = HEIGHT_PX_BY_CANVAS_HEIGHT * (canvas_bounds.top + top);
@@ -94,11 +98,13 @@ export class FractoLayeredCanvas extends Component {
    fill_layer = (level, canvas_bounds, bg_factor, ctx, cb) => {
       const {focal_point, scope, aspect_ratio} = this.props;
       if (level < 2) {
+         console.log("invalid level", level)
          cb(true);
          return;
       }
       const tiles = FractoData.tiles_in_scope(level, focal_point, scope, aspect_ratio)
       if (tiles.length > 500) {
+         console.log("too many tiles", tiles.length)
          cb(true);
          return;
       }
@@ -139,18 +145,17 @@ export class FractoLayeredCanvas extends Component {
 
       const cache_keys = Object.keys(FractoLayeredCanvas.tile_cache).sort((a, b) =>
          FractoLayeredCanvas.cache_mru[a] - FractoLayeredCanvas.cache_mru[b])
-      console.log("FractoLayeredCanvas.cache_mru", FractoLayeredCanvas.cache_mru)
+      // console.log("FractoLayeredCanvas.cache_mru", FractoLayeredCanvas.cache_mru)
       for (let key_index = 0; key_index < cache_keys.length - MAX_TILE_CACHE; key_index++) {
          delete FractoLayeredCanvas.tile_cache[cache_keys[key_index]]
-         console.log("deleting tile from cache", cache_keys[key_index])
+         // console.log("deleting tile from cache", cache_keys[key_index])
       }
 
    }
 
    fill_canvas = () => {
       const {canvas_ref} = this.state;
-      const {width_px, aspect_ratio, level, focal_point, scope} = this.props;
-      const height_px = width_px * aspect_ratio;
+      const {aspect_ratio, level, focal_point, scope} = this.props;
 
       const canvas = canvas_ref.current;
       if (!canvas) {
@@ -158,8 +163,6 @@ export class FractoLayeredCanvas extends Component {
          return;
       }
       const ctx = canvas.getContext('2d');
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, width_px, height_px);
 
       const half_width = scope / 2;
       const half_height = (aspect_ratio * scope) / 2;
@@ -170,19 +173,19 @@ export class FractoLayeredCanvas extends Component {
          bottom: focal_point.y - half_height,
       }
 
-      this.fill_layer(level - 2, canvas_bounds, 0.85, ctx, result => {
+      this.fill_layer(level - 2, canvas_bounds, 60, ctx, result => {
          if (!result) {
             this.setState({loading_tiles: false});
             console.log("failed filling layer", level - 2)
             return;
          }
-         this.fill_layer(level - 1, canvas_bounds, 0.85, ctx, result => {
+         this.fill_layer(level - 1, canvas_bounds, 80, ctx, result => {
             if (!result) {
                this.setState({loading_tiles: false});
                console.log("failed filling layer", level -1)
                return;
             }
-            this.fill_layer(level, canvas_bounds, 1.5, ctx, result => {
+            this.fill_layer(level, canvas_bounds, 100, ctx, result => {
                this.setState({loading_tiles: false});
                if (!result) {
                   console.log("failed filling layer", level)
