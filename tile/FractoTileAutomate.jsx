@@ -32,6 +32,7 @@ export class FractoTileAutomate extends Component {
 
    static propTypes = {
       all_tiles: PropTypes.array.isRequired,
+      tile_index: PropTypes.number.isRequired,
       level: PropTypes.number.isRequired,
       tile_action: PropTypes.func.isRequired,
       on_tile_select: PropTypes.func.isRequired,
@@ -43,15 +44,14 @@ export class FractoTileAutomate extends Component {
    }
 
    state = {
-      tile_index: 0,
       automate: false,
    };
 
    act_on_tile = (tile_index) => {
       const {automate} = this.state;
-      const {tile_action} = this.props;
-      this.setState({tile_index: tile_index})
+      const {tile_action, on_tile_select} = this.props;
       const tile = this.get_active_tile(tile_index)
+      on_tile_select(tile_index)
       tile_action(tile, result => {
          if (automate) {
             setTimeout(() => {
@@ -62,7 +62,7 @@ export class FractoTileAutomate extends Component {
    }
 
    on_automate = (automate) => {
-      const {tile_index} = this.state;
+      const {tile_index} = this.props;
       this.setState({automate: automate});
       if (automate) {
          setTimeout(() => this.act_on_tile(tile_index), AUTOMATE_TIMEOUT_MS)
@@ -71,12 +71,14 @@ export class FractoTileAutomate extends Component {
 
    get_active_tile = (tile_index) => {
       const {all_tiles} = this.props
-      if (tile_index >= all_tiles.length) {
-         return "tile index out of range"
+      if (!all_tiles.length) {
+         console.log("!all_tiles.length")
+         return null
       }
       const tile = all_tiles[tile_index]
-      if (!tile.short_code) {
-         return "bad tile"
+      if (!tile) {
+         console.log("!tile")
+         return null
       }
       const tile_bounds = FractoUtil.bounds_from_short_code(tile.short_code)
       return {
@@ -87,18 +89,24 @@ export class FractoTileAutomate extends Component {
 
    on_index_change = (new_index) => {
       const {on_tile_select} = this.props
-      this.setState({tile_index: new_index})
+      console.log("on_index_change",new_index)
       const tile = this.get_active_tile(new_index)
-      on_tile_select(tile)
+      if (tile) {
+         on_tile_select(new_index)
+      }
    }
 
    render() {
-      const {tile_index, automate} = this.state;
+      const {automate} = this.state;
+      const {tile_index} = this.props;
       const {all_tiles, level,no_tile_mode} = this.props
       if (!all_tiles.length) {
          return "no tiles"
       }
       const tile = this.get_active_tile(tile_index)
+      if (!tile) {
+         return "no tile"
+      }
       return [
          <ContextWrapper
             key={`ContextWrapper_${tile.short_code}`}>

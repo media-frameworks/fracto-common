@@ -57,7 +57,7 @@ export class FractoTileRender extends Component {
       const {tile, width_px} = this.props;
       const json_name = `tiles/256/indexed/${tile.short_code}.json`;
       StoreS3.get_file_async(json_name, "fracto", json_str => {
-         console.log("StoreS3.get_file_async", json_name);
+         // console.log("StoreS3.get_file_async", json_name);
          if (!json_str) {
             console.log("Error loading indexed tile", json_name);
             this.setState({tile_loaded: false})
@@ -70,7 +70,7 @@ export class FractoTileRender extends Component {
    }
 
    render() {
-      const {canvas_ref, tile_loaded} = this.state;
+      const {canvas_ref} = this.state;
       const {tile, width_px, no_tile_mode} = this.props;
       const pixels = `${width_px}px`
       const canvas_style = {width: pixels, height: pixels}

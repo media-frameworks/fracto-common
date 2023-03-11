@@ -25,11 +25,11 @@ export class FractoDataLoader {
    static loaded_sets = [];
 
    static load_tile_set_async = (bin_verb, cb) => {
-      if (bin_verb in FractoDataLoader.loaded_sets) {
+      if (FractoDataLoader.loaded_sets.includes(bin_verb)) {
          cb(TILE_SET_LOADED);
          return;
       }
-      if (bin_verb in FractoDataLoader.loading_sets) {
+      if (FractoDataLoader.loading_sets.includes(bin_verb)) {
          cb(TILE_SET_LOADING);
          return;
       }

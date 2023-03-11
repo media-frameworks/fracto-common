@@ -7,7 +7,7 @@ import {CoolStyles} from 'common/ui/CoolImports';
 import {render_short_code, render_coordinates} from 'fracto/common/FractoStyles';
 
 const DetailsWrapper = styled(CoolStyles.InlineBlock)`
-   min-height: 100px;
+   margin-bottom: 1rem;
 `;
 
 const ShortCodeWrapper = styled(CoolStyles.InlineBlock)`

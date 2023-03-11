@@ -7,12 +7,25 @@ import StoreS3 from 'common/system/StoreS3';
 
 import FractoData from "../data/FractoData";
 import FractoUtil from "../FractoUtil";
+import FractoMruCache from "./FractoMruCache"
 
 const FractoCanvas = styled.canvas`
    margin: 0;
 `;
 
-const MAX_TILE_CACHE = 150;
+const REGULAR_PLAN = [
+   {level_adjust: -2, layer_opacity: 60},
+   {level_adjust: -1, layer_opacity: 80},
+   {level_adjust: 0, layer_opacity: 100},
+]
+
+const HQ_PLAN = [
+   {level_adjust: -4, layer_opacity: 100},
+   {level_adjust: -3, layer_opacity: 100},
+   {level_adjust: -2, layer_opacity: 100},
+   {level_adjust: -1, layer_opacity: 100},
+   {level_adjust: 0, layer_opacity: 100},
+]
 
 export class FractoLayeredCanvas extends Component {
 
@@ -22,15 +35,16 @@ export class FractoLayeredCanvas extends Component {
       focal_point: PropTypes.object.isRequired,
       scope: PropTypes.number.isRequired,
       level: PropTypes.number.isRequired,
+      high_quality: PropTypes.bool,
+      save_filename: PropTypes.string
    }
 
-   static tile_cache = {};
-   static cache_mru = {};
+   static defaultProps = {
+      high_quality: false
+   }
 
    state = {
       canvas_ref: React.createRef(),
-      loading_tiles: true,
-      highest_mru: 0
    };
 
    componentDidMount() {
@@ -43,9 +57,6 @@ export class FractoLayeredCanvas extends Component {
       const scope_changed = prevProps.scope !== this.props.scope;
       const level_changed = prevProps.level !== this.props.level;
       if (!focal_point_x_changed && !focal_point_y_changed && !scope_changed && !level_changed) {
-         return;
-      }
-      if (prevState.loading_tiles || this.state.loading_tiles) {
          return;
       }
       this.fill_canvas();
@@ -62,7 +73,7 @@ export class FractoLayeredCanvas extends Component {
 
       const tile_span = tile_bounds.right - tile_bounds.left
       const tile_pixel_size = tile_span / 256;
-      const canvas_pixel_size = (1.25 * bg_factor / 100) * (width_px * tile_span) / (256 * scope)
+      const canvas_pixel_size = (1.5 * bg_factor / 100) * (width_px * tile_span) / (256 * scope)
 
       for (let tile_x = 0; tile_x < 256; tile_x++) {
          const left = tile_bounds.left + tile_x * tile_pixel_size;
@@ -78,17 +89,21 @@ export class FractoLayeredCanvas extends Component {
                continue;
             }
             const canvas_y = HEIGHT_PX_BY_CANVAS_HEIGHT * (canvas_bounds.top - top);
-            if (Array.isArray(point_data[tile_x]) && Array.isArray(point_data[tile_x][tile_y])) {
-               const [pattern, iterations] = point_data[tile_x][tile_y];
-               const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(pattern, iterations)
-               ctx.fillStyle = `hsla(${hue}, ${sat_pct}%, ${lum_pct}%, ${bg_factor}%)`
-               ctx.fillRect(canvas_x, canvas_y, canvas_pixel_size, canvas_pixel_size);
-               if (canvas_bounds.bottom < 0) {
-                  const neg_canvas_y = HEIGHT_PX_BY_CANVAS_HEIGHT * (canvas_bounds.top + top);
-                  ctx.fillRect(canvas_x, neg_canvas_y, canvas_pixel_size, canvas_pixel_size);
-               }
+            if (!point_data) {
+               console.log("point_data error", tile_x, point_data)
             } else {
-               console.error("point_data is broken (point_data, tile_x, tile_y)", point_data, tile_x, tile_y);
+               if (Array.isArray(point_data[tile_x]) && Array.isArray(point_data[tile_x][tile_y])) {
+                  const [pattern, iterations] = point_data[tile_x][tile_y];
+                  const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(pattern, iterations)
+                  ctx.fillStyle = `hsla(${hue}, ${sat_pct}%, ${lum_pct}%, ${bg_factor}%)`
+                  ctx.fillRect(canvas_x, canvas_y, canvas_pixel_size, canvas_pixel_size);
+                  if (canvas_bounds.bottom < 0) {
+                     const neg_canvas_y = HEIGHT_PX_BY_CANVAS_HEIGHT * (canvas_bounds.top + top);
+                     ctx.fillRect(canvas_x, neg_canvas_y, canvas_pixel_size, canvas_pixel_size);
+                  }
+               } else {
+                  console.error("point_data is broken (point_data, tile_x, tile_y)", point_data, tile_x, tile_y);
+               }
             }
          }
       }
@@ -108,54 +123,45 @@ export class FractoLayeredCanvas extends Component {
          cb(true);
          return;
       }
-      let tiles_loaded = 0;
+      if (!tiles.length) {
+         console.log("no tiles", tiles.length)
+         cb(true);
+         return;
+      }
       let highest_mru = this.state.highest_mru
       for (let tile_index = 0; tile_index < tiles.length; tile_index++) {
          const tile = tiles[tile_index];
          const short_code = tile.short_code;
-         FractoLayeredCanvas.cache_mru[short_code] = highest_mru++;
-         if (!FractoLayeredCanvas.tile_cache[short_code]) {
-            const filepath = `tiles/256/indexed/${short_code}.json`
-            StoreS3.get_file_async(filepath, "fracto", data => {
-               // console.log("StoreS3.get_file_async", filepath);
-               if (!data) {
-                  console.log("data error");
-                  this.setState({loading_tiles: false});
-                  cb(false);
-               } else {
-                  const tile_data = JSON.parse(data);
-                  FractoLayeredCanvas.tile_cache[short_code] = tile_data;
-                  this.fill_tile(canvas_bounds, tile.bounds, tile_data, bg_factor, ctx);
-                  tiles_loaded += 1;
-                  if (tiles_loaded === tiles.length) {
-                     cb(true)
-                  }
-               }
-            }, false)
-         } else {
-            const tile_data = FractoLayeredCanvas.tile_cache[short_code];
-            this.fill_tile(canvas_bounds, tile.bounds, tile_data, bg_factor, ctx);
-            tiles_loaded += 1;
-            if (tiles_loaded === tiles.length) {
-               cb(true)
+         const tile_data = FractoMruCache.tile_cache[short_code];
+         this.fill_tile(canvas_bounds, tile.bounds, tile_data, bg_factor, ctx);
+      }
+      cb(true)
+   }
+
+   run_plan = (plan, canvas_bounds, ctx) => {
+      const {aspect_ratio, level, focal_point, scope} = this.props;
+      const step = plan.shift();
+      const adjusted_level = level + step.level_adjust;
+      const adjusted_level_tiles = FractoData.tiles_in_scope(adjusted_level, focal_point, scope, aspect_ratio)
+      const short_codes = adjusted_level_tiles.map(tile => tile.short_code)
+      FractoMruCache.get_tiles_async(short_codes, get_result => {
+         this.fill_layer(adjusted_level, canvas_bounds, step.layer_opacity, ctx, result => {
+            if (!result) {
+               console.log("failed filling layer", adjusted_level)
+               return;
             }
-         }
-      }
-      this.setState({highest_mru: highest_mru})
-
-      const cache_keys = Object.keys(FractoLayeredCanvas.tile_cache).sort((a, b) =>
-         FractoLayeredCanvas.cache_mru[a] - FractoLayeredCanvas.cache_mru[b])
-      // console.log("FractoLayeredCanvas.cache_mru", FractoLayeredCanvas.cache_mru)
-      for (let key_index = 0; key_index < cache_keys.length - MAX_TILE_CACHE; key_index++) {
-         delete FractoLayeredCanvas.tile_cache[cache_keys[key_index]]
-         // console.log("deleting tile from cache", cache_keys[key_index])
-      }
-
+            if (plan.length) {
+               this.run_plan(plan, canvas_bounds, ctx)
+            } else {
+               console.log("plan complete")
+            }
+         })
+      })
    }
 
    fill_canvas = () => {
       const {canvas_ref} = this.state;
-      const {aspect_ratio, level, focal_point, scope} = this.props;
+      const {aspect_ratio, level, focal_point, scope, high_quality} = this.props;
 
       const canvas = canvas_ref.current;
       if (!canvas) {
@@ -173,37 +179,37 @@ export class FractoLayeredCanvas extends Component {
          bottom: focal_point.y - half_height,
       }
 
-      this.fill_layer(level - 2, canvas_bounds, 60, ctx, result => {
-         if (!result) {
-            this.setState({loading_tiles: false});
-            console.log("failed filling layer", level - 2)
-            return;
-         }
-         this.fill_layer(level - 1, canvas_bounds, 80, ctx, result => {
-            if (!result) {
-               this.setState({loading_tiles: false});
-               console.log("failed filling layer", level -1)
-               return;
-            }
-            this.fill_layer(level, canvas_bounds, 100, ctx, result => {
-               this.setState({loading_tiles: false});
-               if (!result) {
-                  console.log("failed filling layer", level)
-                  return;
-               }
-            })
-         })
-      })
+      const plan = !high_quality ? REGULAR_PLAN : HQ_PLAN
+      const plan_copy = plan.map(step => Object.assign({}, step))
+      this.run_plan(plan_copy, canvas_bounds, ctx)
+   }
+
+   save_png = () => {
+      const {canvas_ref} = this.state;
+      const {save_filename} = this.props;
+      const canvas = canvas_ref.current;
+      if (!canvas) {
+         console.log('no canvas');
+         return;
+      }
+      if (!save_filename) {
+         console.log('no save_filename');
+         return;
+      }
+      var url = canvas.toDataURL("image/png");
+      var link = document.createElement('a');
+      link.download = `${save_filename}.png`;
+      link.href = url;
+      link.click();
    }
 
    render() {
-      const {canvas_ref, loading_tiles} = this.state;
+      const {canvas_ref} = this.state;
       const {width_px, aspect_ratio} = this.props;
       const height_px = width_px * aspect_ratio;
-      const canvas_style = {cursor: loading_tiles ? "wait" : "crosshair"}
       return <FractoCanvas
+         onClick={e => this.save_png()}
          ref={canvas_ref}
-         style={canvas_style}
          width={width_px}
          height={height_px}
       />
