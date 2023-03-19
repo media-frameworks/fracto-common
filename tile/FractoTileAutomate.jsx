@@ -51,6 +51,10 @@ export class FractoTileAutomate extends Component {
       const {automate} = this.state;
       const {tile_action, on_tile_select} = this.props;
       const tile = this.get_active_tile(tile_index)
+      if (!tile) {
+         this.setState({automate: false});
+         return;
+      }
       on_tile_select(tile_index)
       tile_action(tile, result => {
          if (automate) {
@@ -93,6 +97,9 @@ export class FractoTileAutomate extends Component {
       const tile = this.get_active_tile(new_index)
       if (tile) {
          on_tile_select(new_index)
+      }
+      else {
+         this.setState({automate: false})
       }
    }
 

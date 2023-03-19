@@ -104,6 +104,7 @@ export class FractoData extends Component {
          right: focal_point.x + width_by_two,
          bottom: focal_point.y - height_by_two,
       }
+      console.log("tiles_in_scope",level, focal_point, scope, aspect_ratio)
       const cache_key = `all_tiles_level_${level}`
       if (!FractoData.all_tiles_cache[cache_key]) {
          const completed_tiles = LEVEL_SCOPES[level][BIN_VERB_COMPLETED];

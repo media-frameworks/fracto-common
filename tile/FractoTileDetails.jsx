@@ -34,6 +34,9 @@ export class FractoTileDetails extends Component {
 
    render() {
       const {active_tile, width_px} = this.props;
+      if (!active_tile.short_code) {
+         return ""
+      }
       const short_code = render_short_code(active_tile.short_code)
       const focal_point = {
          x: (active_tile.bounds.right + active_tile.bounds.left) / 2,

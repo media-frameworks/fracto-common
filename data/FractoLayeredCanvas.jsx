@@ -2,9 +2,6 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import styled from "styled-components";
 
-// import {AppStyles} from "app/AppImports";
-import StoreS3 from 'common/system/StoreS3';
-
 import FractoData from "../data/FractoData";
 import FractoUtil from "../FractoUtil";
 import FractoMruCache from "./FractoMruCache"
@@ -99,7 +96,7 @@ export class FractoLayeredCanvas extends Component {
                   ctx.fillRect(canvas_x, canvas_y, canvas_pixel_size, canvas_pixel_size);
                   if (canvas_bounds.bottom < 0) {
                      const neg_canvas_y = HEIGHT_PX_BY_CANVAS_HEIGHT * (canvas_bounds.top + top);
-                     ctx.fillRect(canvas_x, neg_canvas_y, canvas_pixel_size, canvas_pixel_size);
+                     ctx.fillRect(canvas_x, neg_canvas_y - 1, canvas_pixel_size, canvas_pixel_size);
                   }
                } else {
                   console.error("point_data is broken (point_data, tile_x, tile_y)", point_data, tile_x, tile_y);
@@ -128,7 +125,6 @@ export class FractoLayeredCanvas extends Component {
          cb(true);
          return;
       }
-      let highest_mru = this.state.highest_mru
       for (let tile_index = 0; tile_index < tiles.length; tile_index++) {
          const tile = tiles[tile_index];
          const short_code = tile.short_code;
@@ -142,6 +138,14 @@ export class FractoLayeredCanvas extends Component {
       const {aspect_ratio, level, focal_point, scope} = this.props;
       const step = plan.shift();
       const adjusted_level = level + step.level_adjust;
+      if (adjusted_level < 2) {
+         if (plan.length) {
+            this.run_plan(plan, canvas_bounds, ctx)
+         } else {
+            console.log("plan complete")
+         }
+         return;
+      }
       const adjusted_level_tiles = FractoData.tiles_in_scope(adjusted_level, focal_point, scope, aspect_ratio)
       const short_codes = adjusted_level_tiles.map(tile => tile.short_code)
       FractoMruCache.get_tiles_async(short_codes, get_result => {
@@ -161,7 +165,7 @@ export class FractoLayeredCanvas extends Component {
 
    fill_canvas = () => {
       const {canvas_ref} = this.state;
-      const {aspect_ratio, level, focal_point, scope, high_quality} = this.props;
+      const {aspect_ratio, focal_point, scope, high_quality} = this.props;
 
       const canvas = canvas_ref.current;
       if (!canvas) {

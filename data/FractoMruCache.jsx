@@ -40,7 +40,7 @@ export class FractoMruCache {
          }
          chunk.push(filtered_list.shift());
       }
-      console.log(`chunk size: ${chunk.length}`)
+      // console.log(`chunk size: ${chunk.length}`)
       const short_code_list = chunk.join(',')
       const url = `${URL_BASE}/get_tiles.php?short_codes=${short_code_list}`
       fetch(url)
@@ -62,7 +62,7 @@ export class FractoMruCache {
    }
 
    static get_tiles_async = (short_codes, cb) => {
-      console.log(`requesting ${short_codes.length} tiles`)
+      // console.log(`requesting ${short_codes.length} tiles`)
       for (let i = 0; i < short_codes.length; i++) {
          FractoMruCache.cache_mru[short_codes[i]] = FractoMruCache.highest_mru++;
       }
@@ -71,7 +71,7 @@ export class FractoMruCache {
          cb(true)
          return;
       }
-      console.log(`chunking ${filtered_list.length} tiles`)
+      // console.log(`chunking ${filtered_list.length} tiles`)
       FractoMruCache.fetch_chunk(filtered_list, cb)
    }
 
