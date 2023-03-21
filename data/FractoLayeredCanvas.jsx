@@ -125,6 +125,7 @@ export class FractoLayeredCanvas extends Component {
          cb(true);
          return;
       }
+      console.log("fill_layer level", level, tiles.length)
       for (let tile_index = 0; tile_index < tiles.length; tile_index++) {
          const tile = tiles[tile_index];
          const short_code = tile.short_code;
@@ -165,7 +166,8 @@ export class FractoLayeredCanvas extends Component {
 
    fill_canvas = () => {
       const {canvas_ref} = this.state;
-      const {aspect_ratio, focal_point, scope, high_quality} = this.props;
+      const {width_px, aspect_ratio, focal_point, scope, high_quality} = this.props;
+      const height_px = width_px * aspect_ratio;
 
       const canvas = canvas_ref.current;
       if (!canvas) {
@@ -173,6 +175,8 @@ export class FractoLayeredCanvas extends Component {
          return;
       }
       const ctx = canvas.getContext('2d');
+      ctx.fillStyle = `white`
+      ctx.fillRect(0, 0, width_px, height_px);
 
       const half_width = scope / 2;
       const half_height = (aspect_ratio * scope) / 2;
