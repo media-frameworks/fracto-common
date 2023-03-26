@@ -33,7 +33,8 @@ export class FractoLayeredCanvas extends Component {
       scope: PropTypes.number.isRequired,
       level: PropTypes.number.isRequired,
       high_quality: PropTypes.bool,
-      save_filename: PropTypes.string
+      save_filename: PropTypes.string,
+      on_plan_complete: PropTypes.func
    }
 
    static defaultProps = {
@@ -115,7 +116,7 @@ export class FractoLayeredCanvas extends Component {
          return;
       }
       const tiles = FractoData.tiles_in_scope(level, focal_point, scope, aspect_ratio)
-      if (tiles.length > 500) {
+      if (tiles.length > 800) {
          console.log("too many tiles", tiles.length)
          cb(true);
          return;
@@ -125,7 +126,7 @@ export class FractoLayeredCanvas extends Component {
          cb(true);
          return;
       }
-      console.log("fill_layer level", level, tiles.length)
+      // console.log("fill_layer level", level, tiles.length)
       for (let tile_index = 0; tile_index < tiles.length; tile_index++) {
          const tile = tiles[tile_index];
          const short_code = tile.short_code;
@@ -136,7 +137,7 @@ export class FractoLayeredCanvas extends Component {
    }
 
    run_plan = (plan, canvas_bounds, ctx) => {
-      const {aspect_ratio, level, focal_point, scope} = this.props;
+      const {aspect_ratio, level, focal_point, scope, on_plan_complete} = this.props;
       const step = plan.shift();
       const adjusted_level = level + step.level_adjust;
       if (adjusted_level < 2) {
@@ -144,6 +145,9 @@ export class FractoLayeredCanvas extends Component {
             this.run_plan(plan, canvas_bounds, ctx)
          } else {
             console.log("plan complete")
+            if (on_plan_complete) {
+               on_plan_complete(true)
+            }
          }
          return;
       }
@@ -159,6 +163,9 @@ export class FractoLayeredCanvas extends Component {
                this.run_plan(plan, canvas_bounds, ctx)
             } else {
                console.log("plan complete")
+               if (on_plan_complete) {
+                  on_plan_complete(true)
+               }
             }
          })
       })

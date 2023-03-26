@@ -104,15 +104,17 @@ export class FractoData extends Component {
          right: focal_point.x + width_by_two,
          bottom: focal_point.y - height_by_two,
       }
-      // console.log("tiles_in_scope", level, focal_point, scope, aspect_ratio)
+      console.log("tiles_in_scope", level, focal_point, scope, aspect_ratio)
       const cache_key = `all_tiles_level_${level}`
-      if (!FractoData.all_tiles_cache[cache_key]) {
+      const existing_keys = Object.keys(FractoData.all_tiles_cache)
+      if (!existing_keys.includes(cache_key)) {
          const completed_tiles = LEVEL_SCOPES[level][BIN_VERB_COMPLETED];
          const indexed_tiles = LEVEL_SCOPES[level][BIN_VERB_INDEXED];
          FractoData.all_tiles_cache[cache_key] = Object.assign({}, completed_tiles, indexed_tiles)
       }
       const all_tiles = FractoData.all_tiles_cache[cache_key];
       const level_keys = Object.keys(all_tiles)
+      console.log(`${level_keys.length} tiles for level ${level}`)
       const filtered_keys = level_keys.filter(key => {
          const bounds = all_tiles[key];
          if (bounds.right < viewport.left) {
@@ -149,7 +151,7 @@ export class FractoData extends Component {
       if (!FractoData.tiles_cache[cache_key]) {
          console.log(`building cache for ${verb} tiles on level ${level}`)
          const level_keys = Object.keys(LEVEL_SCOPES[level][verb]);
-         const processed_tiles = level_keys.map(key => {
+         FractoData.tiles_cache[cache_key] = level_keys.map(key => {
             return {
                short_code: key,
                bounds: FractoUtil.bounds_from_short_code(key)
@@ -159,7 +161,6 @@ export class FractoData extends Component {
                (a.bounds.top > b.bounds.top ? -1 : 1) :
                (a.bounds.left > b.bounds.left ? 1 : -1)
          })
-         FractoData.tiles_cache[cache_key] = processed_tiles;
       }
       return FractoData.tiles_cache[cache_key]
    }

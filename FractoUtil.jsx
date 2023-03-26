@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import ComplexQuarternary from "common/math/ComplexQuarternary";
 
 const EPSILON = 0.0000000001;
 const ONE_BY_LOG_TEN_THOUSAND = 1 / Math.log(10000);
@@ -350,6 +351,20 @@ export class FractoUtil {
          .then(result => {
             cb(result)
          })
+   }
+
+   static CQ_code_from_point = (x, y) => {
+      const CQ_str = new ComplexQuarternary(x, y).to_string()
+      const cq_code = CQ_str.replace(/^0+/, '')
+      if (cq_code[0] === '.') {
+         return `0${cq_code}`
+      }
+      return cq_code
+   }
+
+   static bailiwick_name = (pattern, core_point, best_level) => {
+      const cq_code = FractoUtil.CQ_code_from_point(core_point.x, core_point.y)
+      return `B${pattern}-CP${cq_code.slice(0, best_level)}`
    }
 }
 
