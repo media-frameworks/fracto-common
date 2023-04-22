@@ -34,11 +34,13 @@ export class FractoLayeredCanvas extends Component {
       level: PropTypes.number.isRequired,
       high_quality: PropTypes.bool,
       save_filename: PropTypes.string,
-      on_plan_complete: PropTypes.func
+      on_plan_complete: PropTypes.func,
+      highlight_points: PropTypes.array
    }
 
    static defaultProps = {
-      high_quality: false
+      high_quality: false,
+      highlight_points: []
    }
 
    state = {
@@ -220,14 +222,22 @@ export class FractoLayeredCanvas extends Component {
 
    render() {
       const {canvas_ref} = this.state;
-      const {width_px, aspect_ratio} = this.props;
+      const {width_px, aspect_ratio, highlight_points, scope, focal_point} = this.props;
       const height_px = width_px * aspect_ratio;
-      return <FractoCanvas
-         onClick={e => this.save_png()}
-         ref={canvas_ref}
-         width={width_px}
-         height={height_px}
-      />
+      let highlights = ''
+      if (highlight_points.length) {
+         const fracto_values = {scope: scope, focal_point: focal_point}
+         highlights = FractoUtil.highlight_points(canvas_ref, fracto_values, highlight_points)
+      }
+      return [
+         <FractoCanvas
+            onClick={e => this.save_png()}
+            ref={canvas_ref}
+            width={width_px}
+            height={height_px}
+         />,
+         highlights
+      ]
    }
 }
 
