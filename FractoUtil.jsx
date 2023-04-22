@@ -300,8 +300,8 @@ export class FractoUtil {
          height: `${box_bottom - box_top + 4}px`
       };
       return [
-         <SelectedTileBoxOutline style={black_border}/>,
-         <SelectedTileBox style={white_border}/>
+         <SelectedTileBoxOutline key={"outline-1"} style={black_border}/>,
+         <SelectedTileBox key={"outline-2"}  style={white_border}/>
       ]
    }
 

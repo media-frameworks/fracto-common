@@ -9,6 +9,7 @@ const LEVEL_SCOPES = []
 export const BIN_VERB_INDEXED = "indexed";
 export const BIN_VERB_COMPLETED = "completed";
 export const BIN_VERB_READY = "ready";
+export const BIN_VERB_INLAND = "inland";
 export const BIN_VERB_POTENTIALS = "potentials";
 export const BIN_VERB_ERROR = "error";
 
@@ -18,6 +19,7 @@ for (let level = 0; level < MAX_LEVEL; level++) {
    LEVEL_SCOPES[level][BIN_VERB_COMPLETED] = {};
    LEVEL_SCOPES[level][BIN_VERB_POTENTIALS] = {};
    LEVEL_SCOPES[level][BIN_VERB_READY] = {};
+   LEVEL_SCOPES[level][BIN_VERB_INLAND] = {};
    LEVEL_SCOPES[level][BIN_VERB_INDEXED] = {};
    LEVEL_SCOPES[level][BIN_VERB_ERROR] = {};
 }
@@ -56,6 +58,7 @@ export class FractoData extends Component {
       BIN_VERB_INDEXED: 0,
       BIN_VERB_COMPLETED: 0,
       BIN_VERB_READY: 0,
+      BIN_VERB_INLAND: 0,
       BIN_VERB_POTENTIALS: 0,
       BIN_VERB_ERROR: 0,
    }
@@ -104,7 +107,7 @@ export class FractoData extends Component {
          right: focal_point.x + width_by_two,
          bottom: focal_point.y - height_by_two,
       }
-      console.log("tiles_in_scope", level, focal_point, scope, aspect_ratio)
+      // console.log("tiles_in_scope", level, focal_point, scope, aspect_ratio)
       const cache_key = `all_tiles_level_${level}`
       const existing_keys = Object.keys(FractoData.all_tiles_cache)
       if (!existing_keys.includes(cache_key)) {
@@ -114,7 +117,7 @@ export class FractoData extends Component {
       }
       const all_tiles = FractoData.all_tiles_cache[cache_key];
       const level_keys = Object.keys(all_tiles)
-      console.log(`${level_keys.length} tiles for level ${level}`)
+      // console.log(`${level_keys.length} tiles for level ${level}`)
       const filtered_keys = level_keys.filter(key => {
          const bounds = all_tiles[key];
          if (bounds.right < viewport.left) {
