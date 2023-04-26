@@ -3,6 +3,7 @@ import FractoData, {
    BIN_VERB_INDEXED,
    BIN_VERB_COMPLETED,
    BIN_VERB_READY,
+   BIN_VERB_INLAND,
    BIN_VERB_POTENTIALS,
    BIN_VERB_ERROR,
 } from "./FractoData"
@@ -12,6 +13,7 @@ const URL_BASE = "http://dev.mikehallstudio.com/am-chill-whale/src/data/fracto";
 const COMPLETED_TILES_URL = `${URL_BASE}/directory/complete.csv`;
 const POTENTIALS_TILES_URL = `${URL_BASE}/directory/new.csv`;
 const READY_TILES_URL = `${URL_BASE}/directory/ready.csv`;
+const INLAND_TILES_URL = `${URL_BASE}/directory/inland.csv`;
 const INDEXED_TILES_URL = `${URL_BASE}/directory/indexed.csv`;
 const ERROR_TILES_URL = `${URL_BASE}/directory/error.csv`;
 
@@ -59,6 +61,13 @@ export class FractoDataLoader {
          case BIN_VERB_READY:
             FractoData.fetch_bin_async(READY_TILES_URL, BIN_VERB_READY, result => {
                console.log("FractoData.fetch_bin_async", BIN_VERB_READY, result)
+               FractoDataLoader.loaded_sets.push(bin_verb)
+               cb(TILE_SET_LOADED);
+            })
+            break;
+         case BIN_VERB_INLAND:
+            FractoData.fetch_bin_async(INLAND_TILES_URL, BIN_VERB_INLAND, result => {
+               console.log("FractoData.fetch_bin_async", BIN_VERB_INLAND, result)
                FractoDataLoader.loaded_sets.push(bin_verb)
                cb(TILE_SET_LOADED);
             })

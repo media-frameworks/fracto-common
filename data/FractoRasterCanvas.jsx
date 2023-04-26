@@ -74,8 +74,8 @@ export class FractoRasterCanvas extends Component {
          });
          if (!tile) {
             continue;
-         }
-         FractoMruCache.get_tile_data(tile.short_code, point_data => {
+         }`
+         FractoMruCache.get_tile_data(tile.short_code, point_data => {`
             const tile_width = tile.bounds.right - tile.bounds.left
             const tile_x = Math.floor(255 * (x - tile.bounds.left) / tile_width);
             const tile_y = Math.floor(255 * (tile.bounds.top - y) / tile_width);

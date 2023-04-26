@@ -9,6 +9,7 @@ const LEVEL_SCOPES = []
 export const BIN_VERB_INDEXED = "indexed";
 export const BIN_VERB_COMPLETED = "completed";
 export const BIN_VERB_READY = "ready";
+export const BIN_VERB_INLAND = "inland";
 export const BIN_VERB_POTENTIALS = "potentials";
 export const BIN_VERB_ERROR = "error";
 
@@ -18,6 +19,7 @@ for (let level = 0; level < MAX_LEVEL; level++) {
    LEVEL_SCOPES[level][BIN_VERB_COMPLETED] = {};
    LEVEL_SCOPES[level][BIN_VERB_POTENTIALS] = {};
    LEVEL_SCOPES[level][BIN_VERB_READY] = {};
+   LEVEL_SCOPES[level][BIN_VERB_INLAND] = {};
    LEVEL_SCOPES[level][BIN_VERB_INDEXED] = {};
    LEVEL_SCOPES[level][BIN_VERB_ERROR] = {};
 }
@@ -56,6 +58,7 @@ export class FractoData extends Component {
       BIN_VERB_INDEXED: 0,
       BIN_VERB_COMPLETED: 0,
       BIN_VERB_READY: 0,
+      BIN_VERB_INLAND: 0,
       BIN_VERB_POTENTIALS: 0,
       BIN_VERB_ERROR: 0,
    }
