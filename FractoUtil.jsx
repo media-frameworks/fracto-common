@@ -86,18 +86,18 @@ export class FractoUtil {
          if (1 === relative_harmonic) {
             return short_form ? `r${root}` : `root ${root}`
          }
-         return short_form ? `r${root},h${relative_harmonic}` : `root ${root}, harmonic ${relative_harmonic}`;
+         return short_form ? `r${root},h${relative_harmonic}` : `root ${root} harmonic ${relative_harmonic}`;
       }
       for (let i = 0; i < pattern_octave; i++) {
          relative_harmonic = Math.round(relative_harmonic / 2);
       }
       if (relative_harmonic === 1) {
          if (1 === pattern_octave) {
-            return short_form ? `r${root},o1` : `root ${root} octave`
+            return short_form ? `r${root},o1` : `root ${root} octave 1`
          }
-         return short_form ? `r${root},o${pattern_octave}` : `root ${root}, octave ${pattern_octave}`;
+         return short_form ? `r${root},o${pattern_octave}` : `root ${root} octave ${pattern_octave}`;
       }
-      return short_form ? `r${root},h${relative_harmonic},o${pattern_octave}` : `root ${root}, harmonic ${relative_harmonic}, octave ${pattern_octave}`;
+      return short_form ? `r${root},h${relative_harmonic},o${pattern_octave}` : `root ${root} harmonic ${relative_harmonic} octave ${pattern_octave}`;
    }
 
    static color_cache = {};

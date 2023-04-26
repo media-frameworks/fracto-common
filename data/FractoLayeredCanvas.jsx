@@ -64,7 +64,10 @@ export class FractoLayeredCanvas extends Component {
 
    fill_tile = (canvas_bounds, tile_bounds, point_data, bg_factor, ctx) => {
       const {width_px, aspect_ratio, scope} = this.props;
-
+      if (!point_data) {
+         console.log("point_data error", point_data)
+         return;
+      }
       const height_px = width_px * aspect_ratio;
       const canvas_width = canvas_bounds.right - canvas_bounds.left;
       const canvas_height = canvas_width * aspect_ratio;
@@ -89,21 +92,17 @@ export class FractoLayeredCanvas extends Component {
                continue;
             }
             const canvas_y = HEIGHT_PX_BY_CANVAS_HEIGHT * (canvas_bounds.top - top);
-            if (!point_data) {
-               console.log("point_data error", tile_x, point_data)
-            } else {
-               if (Array.isArray(point_data[tile_x]) && Array.isArray(point_data[tile_x][tile_y])) {
-                  const [pattern, iterations] = point_data[tile_x][tile_y];
-                  const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(pattern, iterations)
-                  ctx.fillStyle = `hsla(${hue}, ${sat_pct}%, ${lum_pct}%, ${bg_factor}%)`
-                  ctx.fillRect(canvas_x, canvas_y, canvas_pixel_size, canvas_pixel_size);
-                  if (canvas_bounds.bottom < 0) {
-                     const neg_canvas_y = HEIGHT_PX_BY_CANVAS_HEIGHT * (canvas_bounds.top + top);
-                     ctx.fillRect(canvas_x, neg_canvas_y - 1, canvas_pixel_size, canvas_pixel_size);
-                  }
-               } else {
-                  console.error("point_data is broken (point_data, tile_x, tile_y)", point_data, tile_x, tile_y);
+            if (Array.isArray(point_data[tile_x]) && Array.isArray(point_data[tile_x][tile_y])) {
+               const [pattern, iterations] = point_data[tile_x][tile_y];
+               const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(pattern, iterations)
+               ctx.fillStyle = `hsla(${hue}, ${sat_pct}%, ${lum_pct}%, ${bg_factor}%)`
+               ctx.fillRect(canvas_x, canvas_y, canvas_pixel_size, canvas_pixel_size);
+               if (canvas_bounds.bottom < 0) {
+                  const neg_canvas_y = HEIGHT_PX_BY_CANVAS_HEIGHT * (canvas_bounds.top + top);
+                  ctx.fillRect(canvas_x, neg_canvas_y - 1, canvas_pixel_size, canvas_pixel_size);
                }
+            } else {
+               console.error("point_data is broken (point_data, tile_x, tile_y)", point_data, tile_x, tile_y);
             }
          }
       }
