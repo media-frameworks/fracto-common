@@ -83,12 +83,16 @@ export const render_short_code = (short_code) => {
 
 const NumberSpan = styled.span`
    ${CoolStyles.monospace}
+   ${CoolStyles.deep_blue_text}
+   font-size: 0.95rem;
 `;
 
 const ItalicSpan = styled.span`
    ${CoolStyles.bold}
    ${CoolStyles.italic}
+   ${CoolStyles.deep_blue_text}
    font-family: Arial;
+   font-size: 0.95rem;
 `;
 
 export const render_coordinates = (x, y) => {

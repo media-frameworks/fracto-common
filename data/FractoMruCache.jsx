@@ -1,6 +1,6 @@
 import StoreS3 from 'common/system/StoreS3';
 
-const MAX_TILE_CACHE = 750;
+const MAX_TILE_CACHE = 850;
 
 const URL_BASE = "http://dev.mikehallstudio.com/fracto/fracto-server";
 

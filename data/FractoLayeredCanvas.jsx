@@ -35,6 +35,7 @@ export class FractoLayeredCanvas extends Component {
       high_quality: PropTypes.bool,
       save_filename: PropTypes.string,
       on_plan_complete: PropTypes.func,
+      on_progress: PropTypes.func,
       highlight_points: PropTypes.array
    }
 
@@ -45,9 +46,18 @@ export class FractoLayeredCanvas extends Component {
 
    state = {
       canvas_ref: React.createRef(),
+      plan_step: -1,
+      progress_pct: -1
    };
 
    componentDidMount() {
+      setInterval(() => {
+         this.forceUpdate()
+         if (!this.props.on_progress) {
+            return;
+         }
+         this.props.on_progress(this.state.progress_pct)
+      }, 500)
       this.fill_canvas()
    }
 
@@ -110,14 +120,15 @@ export class FractoLayeredCanvas extends Component {
    }
 
    fill_layer = (level, canvas_bounds, bg_factor, ctx, cb) => {
-      const {focal_point, scope, aspect_ratio} = this.props;
+      const {plan_step} = this.state
+      const {focal_point, scope, aspect_ratio, on_progress} = this.props;
       if (level < 2) {
          console.log("invalid level", level)
          cb(true);
          return;
       }
       const tiles = FractoData.tiles_in_scope(level, focal_point, scope, aspect_ratio)
-      if (tiles.length > 800) {
+      if (tiles.length > 1000) {
          console.log("too many tiles", tiles.length)
          cb(true);
          return;
@@ -127,17 +138,19 @@ export class FractoLayeredCanvas extends Component {
          cb(true);
          return;
       }
-      // console.log("fill_layer level", level, tiles.length)
       for (let tile_index = 0; tile_index < tiles.length; tile_index++) {
          const tile = tiles[tile_index];
          const short_code = tile.short_code;
          const tile_data = FractoMruCache.tile_cache[short_code];
          this.fill_tile(canvas_bounds, tile.bounds, tile_data, bg_factor, ctx);
+         const progress_pct = plan_step * 25 + tile_index * 25 / tiles.length
+         this.setState({progress_pct: progress_pct})
       }
       cb(true)
    }
 
    run_plan = (plan, canvas_bounds, ctx) => {
+      const {plan_step} = this.state
       const {aspect_ratio, level, focal_point, scope, on_plan_complete} = this.props;
       const step = plan.shift();
       const adjusted_level = level + step.level_adjust;
@@ -146,6 +159,7 @@ export class FractoLayeredCanvas extends Component {
             this.run_plan(plan, canvas_bounds, ctx)
          } else {
             console.log("plan complete")
+            this.setState({progress_pct: -1})
             if (on_plan_complete) {
                on_plan_complete(true)
             }
@@ -161,9 +175,11 @@ export class FractoLayeredCanvas extends Component {
                return;
             }
             if (plan.length) {
+               this.setState({plan_step: plan_step + 1})
                this.run_plan(plan, canvas_bounds, ctx)
             } else {
                console.log("plan complete")
+               this.setState({progress_pct: -1})
                if (on_plan_complete) {
                   on_plan_complete(true)
                }
@@ -173,10 +189,13 @@ export class FractoLayeredCanvas extends Component {
    }
 
    fill_canvas = () => {
-      const {canvas_ref} = this.state;
+      const {canvas_ref, progress_pct} = this.state;
       const {width_px, aspect_ratio, focal_point, scope, high_quality} = this.props;
       const height_px = width_px * aspect_ratio;
-
+      if (progress_pct >= 0) {
+         console.log('in progress, must wait...');
+         return;
+      }
       const canvas = canvas_ref.current;
       if (!canvas) {
          console.log('no canvas');
@@ -197,6 +216,10 @@ export class FractoLayeredCanvas extends Component {
 
       const plan = !high_quality ? REGULAR_PLAN : HQ_PLAN
       const plan_copy = plan.map(step => Object.assign({}, step))
+      this.setState({
+         plan_step : 0,
+         progress_pct: 0
+      })
       this.run_plan(plan_copy, canvas_bounds, ctx)
    }
 
@@ -220,14 +243,15 @@ export class FractoLayeredCanvas extends Component {
    }
 
    render() {
-      const {canvas_ref} = this.state;
-      const {width_px, aspect_ratio, highlight_points, scope, focal_point} = this.props;
+      const {canvas_ref, progress_pct} = this.state;
+      const {width_px, aspect_ratio, highlight_points, scope, focal_point, on_progress} = this.props;
       const height_px = width_px * aspect_ratio;
       let highlights = ''
       if (highlight_points.length) {
          const fracto_values = {scope: scope, focal_point: focal_point}
          highlights = FractoUtil.highlight_points(canvas_ref, fracto_values, highlight_points)
       }
+      const pct = on_progress || progress_pct < 0 ? '' : `${Math.round(progress_pct * 100)/ 100}%`
       return [
          <FractoCanvas
             onClick={e => this.save_png()}
@@ -235,7 +259,8 @@ export class FractoLayeredCanvas extends Component {
             width={width_px}
             height={height_px}
          />,
-         highlights
+         highlights,
+         pct
       ]
    }
 }

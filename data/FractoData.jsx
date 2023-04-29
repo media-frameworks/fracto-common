@@ -118,7 +118,7 @@ export class FractoData extends Component {
       const level_keys = Object.keys(all_tiles)
       // console.log(`${level_keys.length} tiles for level ${level}`)
       const filtered_keys = level_keys.filter(key => {
-         const bounds = all_tiles[key];
+         const bounds = FractoUtil.bounds_from_short_code(key) //all_tiles[key];
          if (bounds.right < viewport.left) {
             return false;
          }
@@ -136,7 +136,7 @@ export class FractoData extends Component {
       return filtered_keys.map(key => {
          return {
             short_code: key,
-            bounds: all_tiles[key]
+            bounds: FractoUtil.bounds_from_short_code(key)
          }
       })
    }
