@@ -121,7 +121,7 @@ export class FractoLayeredCanvas extends Component {
 
    fill_layer = (level, canvas_bounds, bg_factor, ctx, cb) => {
       const {plan_step} = this.state
-      const {focal_point, scope, aspect_ratio, on_progress} = this.props;
+      const {focal_point, scope, aspect_ratio} = this.props;
       if (level < 2) {
          console.log("invalid level", level)
          cb(true);

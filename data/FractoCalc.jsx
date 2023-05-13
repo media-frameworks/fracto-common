@@ -1,5 +1,3 @@
-import React from 'react';
-
 export class FractoCalc {
 
    static calc = (x0, y0, max_iteration = 1000000, seed_x = 0, seed_y = 0, tell = false) => {
@@ -15,7 +13,7 @@ export class FractoCalc {
          y = 2 * x * y + y0;
          x = x_squared - y_squared + x0;
          position_slug = `${x},${y}`;
-         if (previously[position_slug] && iteration > 10) {
+         if (previously[position_slug] && iteration > 2) {
             pattern = iteration - previously[position_slug];
             break;
          } else {
@@ -26,7 +24,9 @@ export class FractoCalc {
          iteration++;
       }
       if (iteration >= max_iteration) {
-         console.log("max_iteration", x0, y0)
+         if (iteration > 1000000) {
+            console.log("max_iteration", x0, y0)
+         }
          pattern = -1;
       }
       if (pattern > 1 && tell) {
