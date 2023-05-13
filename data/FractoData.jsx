@@ -98,7 +98,7 @@ export class FractoData extends Component {
          })
    }
 
-   static tiles_in_scope = (level, focal_point, scope, aspect_ratio = 1.0) => {
+   static tiles_in_scope = (level, focal_point, scope, aspect_ratio = 1.0, verbs = [BIN_VERB_COMPLETED, BIN_VERB_INDEXED]) => {
       const width_by_two = scope / 2;
       const height_by_two = width_by_two * aspect_ratio;
       const viewport = {
@@ -107,14 +107,12 @@ export class FractoData extends Component {
          right: focal_point.x + width_by_two,
          bottom: focal_point.y - height_by_two,
       }
-      // console.log("tiles_in_scope", level, focal_point, scope, aspect_ratio)
-      FractoData.get_cached_tiles(level, BIN_VERB_COMPLETED)
-      FractoData.get_cached_tiles(level, BIN_VERB_INDEXED)
-      const completed_tiles = LEVEL_SCOPES[level][BIN_VERB_COMPLETED];
-      const indexed_tiles = LEVEL_SCOPES[level][BIN_VERB_INDEXED];
-      // console.log("completed_tiles",completed_tiles)
-      // console.log("indexed_tiles",indexed_tiles)
-      const all_tiles = Object.assign({}, completed_tiles, indexed_tiles)
+      let all_tiles = {}
+      verbs.forEach(verb => {
+         FractoData.get_cached_tiles(level, verb)
+         const tiles_to_add = LEVEL_SCOPES[level][verb];
+         all_tiles = Object.assign(all_tiles, tiles_to_add)
+      })
       const level_keys = Object.keys(all_tiles)
       // console.log(`${level_keys.length} tiles for level ${level}`)
       const filtered_keys = level_keys.filter(key => {

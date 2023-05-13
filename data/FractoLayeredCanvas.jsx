@@ -5,6 +5,7 @@ import styled from "styled-components";
 import FractoData from "../data/FractoData";
 import FractoUtil from "../FractoUtil";
 import FractoMruCache from "./FractoMruCache"
+import {CoolStyles} from "../../../common/ui/CoolImports";
 
 const FractoCanvas = styled.canvas`
    margin: 0;
@@ -260,7 +261,7 @@ export class FractoLayeredCanvas extends Component {
             height={height_px}
          />,
          highlights,
-         pct
+         <CoolStyles.Block>{pct}</CoolStyles.Block>
       ]
    }
 }
