@@ -37,6 +37,7 @@ export class FractoTileAutomate extends Component {
       tile_action: PropTypes.func.isRequired,
       on_tile_select: PropTypes.func.isRequired,
       no_tile_mode: PropTypes.bool,
+      on_render_tile: PropTypes.func,
    }
 
    static defaultProps = {
@@ -93,20 +94,19 @@ export class FractoTileAutomate extends Component {
 
    on_index_change = (new_index) => {
       const {on_tile_select} = this.props
-      console.log("on_index_change",new_index)
+      console.log("on_index_change", new_index)
       const tile = this.get_active_tile(new_index)
       if (tile) {
          on_tile_select(new_index)
-      }
-      else {
+      } else {
          this.setState({automate: false})
       }
    }
 
    render() {
       const {automate} = this.state;
-      const {tile_index} = this.props;
-      const {all_tiles, level,no_tile_mode} = this.props
+      const {tile_index, on_render_tile} = this.props;
+      const {all_tiles, level, no_tile_mode} = this.props
       if (!all_tiles.length) {
          return "no tiles"
       }
@@ -114,22 +114,23 @@ export class FractoTileAutomate extends Component {
       if (!tile) {
          return "no tile"
       }
+      const rendered_tile = on_render_tile ?
+         on_render_tile(tile, TILE_SIZE_PX) :
+         <FractoTileRender
+            tile={tile}
+            width_px={TILE_SIZE_PX}
+            no_tile_mode={no_tile_mode}/>
       return [
          <ContextWrapper
             key={`ContextWrapper_${tile.short_code}`}>
             <FractoTileContext
                tile={tile}
                level={level}
-               width_px={CONTEXT_SIZE_PX}
-            />
+               width_px={CONTEXT_SIZE_PX}/>
          </ContextWrapper>,
          <RenderWrapper
             key={`RenderWrapper_${tile.short_code}`}>
-            <FractoTileRender
-               tile={tile}
-               width_px={TILE_SIZE_PX}
-               no_tile_mode={no_tile_mode}
-            />
+            {rendered_tile}
          </RenderWrapper>,
          <NavigationArapper
             key={`NavigationArapper_${tile.short_code}`}>
