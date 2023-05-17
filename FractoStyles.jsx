@@ -97,7 +97,7 @@ const ItalicSpan = styled.span`
 
 export const render_coordinates = (x, y) => {
    return [
-      <NumberSpan>{`${x} + ${y}`}</NumberSpan>,
-      <ItalicSpan>i</ItalicSpan>
+      <NumberSpan key={'number-part'}>{`${x} + ${y}`}</NumberSpan>,
+      <ItalicSpan key={'just-i'}>i</ItalicSpan>
    ]
 }

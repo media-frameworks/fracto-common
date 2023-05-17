@@ -1,4 +1,4 @@
-
+import network from "common/config/network.json";
 import FractoData, {
    BIN_VERB_INDEXED,
    BIN_VERB_COMPLETED,
@@ -8,7 +8,7 @@ import FractoData, {
    BIN_VERB_ERROR,
 } from "./FractoData"
 
-const URL_BASE = "http://dev.mikehallstudio.com/am-chill-whale/src/data/fracto";
+const URL_BASE = network.dev_server_url;
 
 const COMPLETED_TILES_URL = `${URL_BASE}/directory/complete.csv`;
 const POTENTIALS_TILES_URL = `${URL_BASE}/directory/new.csv`;

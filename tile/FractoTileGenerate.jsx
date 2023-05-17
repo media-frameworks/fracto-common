@@ -1,6 +1,7 @@
 import StoreS3 from "common/system/StoreS3";
-import FractoUtil from "fracto/common/FractoUtil";
-import FractoCalc from "fracto/common/data/FractoCalc";
+import FractoUtil from "../FractoUtil";
+import FractoCalc from "../data/FractoCalc";
+import FractoMruCache from "../data/FractoMruCache";
 
 export class FractoTileGenerate {
 
@@ -75,24 +76,16 @@ export class FractoTileGenerate {
    static generate_tile = (tile, cb) => {
       const parent_short_code = tile.short_code.substr(0, tile.short_code.length - 1)
       const quad_code = tile.short_code[tile.short_code.length - 1];
-      const parent_index_url = `tiles/256/indexed/${parent_short_code}.json`;
-      StoreS3.get_file_async(parent_index_url, "fracto", json_str => {
-         console.log("StoreS3.get_file_async", parent_index_url);
-         if (!json_str) {
-            console.log("parent tile for generation", parent_index_url);
-            cb("parent tile is not indexed");
+      FractoMruCache.get_tile_data(parent_short_code, parent_tile_data => {
+         const tile_points = FractoTileGenerate.prepare_generator(parent_tile_data, quad_code)
+         if (!tile_points) {
+            cb("error preparing generator")
          } else {
-            const parent_tile_data = JSON.parse(json_str);
-            const tile_points = FractoTileGenerate.prepare_generator(parent_tile_data, quad_code)
-            if (!tile_points) {
-               cb("error preparing generator")
-            } else {
-               // setTimeout(() => FractoUtil.data_to_canvas(tile_points, ctx), 100);
-               FractoTileGenerate.calculate_tile(tile, tile_points, result => {
-                  // FractoUtil.data_to_canvas(tile_points, ctx)
-                  cb(result)
-               });
-            }
+            // setTimeout(() => FractoUtil.data_to_canvas(tile_points, ctx), 100);
+            FractoTileGenerate.calculate_tile(tile, tile_points, result => {
+               // FractoUtil.data_to_canvas(tile_points, ctx)
+               cb(result)
+            });
          }
       })
    }

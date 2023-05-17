@@ -91,6 +91,7 @@ export class FractoTileNavigate extends Component {
       const {level_tiles, tile_index} = this.props;
       const result_number = tile_index + number;
       return <CoolButton
+         key={`nav-button-${label}`}
          primary={result_number >= 0 && result_number < level_tiles.length}
          disabled={false}
          content={label}
@@ -103,7 +104,8 @@ export class FractoTileNavigate extends Component {
       const {level_tiles, tile_index, automate, on_automate} = this.props;
       const nav_buttons = [
          <CoolButton
-            primary={1}
+            key={`nav-button-${"first"}`}
+            primary={true}
             disabled={false}
             content={"first"}
             style={NAV_BUTTON_STYLE}
@@ -116,7 +118,8 @@ export class FractoTileNavigate extends Component {
          this.render_button(-10, "-10"),
          this.render_button(-1, "-1"),
          <CoolButton
-            primary={1}
+            key={`nav-button-${"go"}`}
+            primary={true}
             content={automate ? "pause" : "go"}
             style={{margin: "0 0.25rem"}}
             on_click={r => on_automate(!automate)}
@@ -128,7 +131,8 @@ export class FractoTileNavigate extends Component {
          this.render_button(10000, "+10k"),
          this.render_button(100000, "+100k"),
          <CoolButton
-            primary={1}
+            key={`nav-button-${"final"}`}
+            primary={true}
             disabled={false}
             content={"final"}
             style={NAV_BUTTON_STYLE}
@@ -137,15 +141,17 @@ export class FractoTileNavigate extends Component {
       ]
       const top_row_buttons = [
          <CoolButton
-            primary={1}
+            key={`nav-button-${"prev. top"}`}
+            primary={true}
             disabled={false}
             content={"prev. top"}
             style={NAV_BUTTON_STYLE}
             on_click={r => this.previous_top()}
          />,
-         <StatusText>{`${tile_index + 1} of ${level_tiles.length}`}</StatusText>,
+         <StatusText key={'just-status'}>{`${tile_index + 1} of ${level_tiles.length}`}</StatusText>,
          <CoolButton
-            primary={1}
+            key={`nav-button-${"next top"}`}
+            primary={true}
             disabled={false}
             content={"next top"}
             style={NAV_BUTTON_STYLE}
@@ -153,8 +159,8 @@ export class FractoTileNavigate extends Component {
          />,
       ]
       return [
-         <NavigateWrapper>{top_row_buttons}</NavigateWrapper>,
-         <NavigateWrapper>{nav_buttons}</NavigateWrapper>
+         <NavigateWrapper key={'top-row-buttons'}>{top_row_buttons}</NavigateWrapper>,
+         <NavigateWrapper key={'nav-buttons'}>{nav_buttons}</NavigateWrapper>
       ]
    }
 

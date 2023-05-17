@@ -41,6 +41,7 @@ export class FractoTileContext extends Component {
          ref={FractoTileContext.wrapper_ref}
          style={wrapper_style}>
          <FractoLayeredCanvas
+            key={'canvas'}
             width_px={width_px}
             level={level - 1}
             aspect_ratio={1.0}

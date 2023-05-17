@@ -1,11 +1,13 @@
 import styled from "styled-components";
+
+import network from "common/config/network.json";
 import ComplexQuarternary from "common/math/ComplexQuarternary";
 
 const EPSILON = 0.0000000001;
 const ONE_BY_LOG_TEN_THOUSAND = 1 / Math.log(10000);
 const ONE_BY_LOG_ONE_MILLION = 1 / Math.log(1000000);
 
-const FRACTO_PHP_URL_BASE = "http://dev.mikehallstudio.com/am-chill-whale/src/data/fracto";
+const FRACTO_PHP_URL_BASE = network.dev_server_url;
 
 export const DEFAULT_FRACTO_VALUES = {
    scope: 2.5,

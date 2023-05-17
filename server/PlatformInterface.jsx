@@ -1,4 +1,6 @@
-const FRACTO_PHP_URL_BASE = "http://dev.mikehallstudio.com/fracto/fracto-server";
+import network from "common/config/network.json";
+
+const FRACTO_PHP_URL_BASE = network.fracto_server_url;
 
 class PlatformInterface {
 

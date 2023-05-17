@@ -1,8 +1,8 @@
+import network from "common/config/network.json";
 import StoreS3 from 'common/system/StoreS3';
 
+const URL_BASE = network.fracto_server_url;
 const MAX_TILE_CACHE = 350;
-
-const URL_BASE = "http://dev.mikehallstudio.com/fracto/fracto-server";
 
 export class FractoMruCache {
 

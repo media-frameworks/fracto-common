@@ -1,6 +1,7 @@
 import {Component} from 'react';
 
 import FractoUtil from "../FractoUtil"
+import network from "../../../common/config/network.json";
 
 export const MAX_LEVEL = 35;
 
@@ -48,8 +49,7 @@ export const get_level_scope = (level) => {
    return LEVEL_SCOPES[level].scope;
 }
 
-const URL_BASE = "http://dev.mikehallstudio.com/am-chill-whale/src/data/fracto";
-
+const URL_BASE = network.dev_server_url;
 const BIN_COUNTS_URL = `${URL_BASE}/directory/bin_counts.json`;
 
 export class FractoData extends Component {
@@ -150,6 +150,10 @@ export class FractoData extends Component {
       const cache_key = `${verb}_${level}`;
       if (!FractoData.tiles_cache[cache_key]) {
          // console.log(`building cache for ${verb} tiles on level ${level}`)
+         if (!LEVEL_SCOPES[level]) {
+            console.log("get_cached_tiles error LEVEL_SCOPES, level", LEVEL_SCOPES, level)
+            return null;
+         }
          const level_keys = Object.keys(LEVEL_SCOPES[level][verb]);
          FractoData.tiles_cache[cache_key] = level_keys.map(key => {
             return {

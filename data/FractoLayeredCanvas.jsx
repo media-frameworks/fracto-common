@@ -255,13 +255,14 @@ export class FractoLayeredCanvas extends Component {
       const pct = on_progress || progress_pct < 0 ? '' : `${Math.round(progress_pct * 100)/ 100}%`
       return [
          <FractoCanvas
+            key={`canvas`}
             onClick={e => this.save_png()}
             ref={canvas_ref}
             width={width_px}
             height={height_px}
          />,
          highlights,
-         <CoolStyles.Block>{pct}</CoolStyles.Block>
+         <CoolStyles.Block key={"percent"}>{pct}</CoolStyles.Block>
       ]
    }
 }
