@@ -58,7 +58,9 @@ export class FractoTileAutomate extends Component {
       }
       on_tile_select(tile_index)
       tile_action(tile, result => {
-         if (automate) {
+         if (result === false) {
+            this.setState({automate: false})
+         } else if (automate) {
             setTimeout(() => {
                this.act_on_tile(tile_index + 1)
             }, AUTOMATE_TIMEOUT_MS)
