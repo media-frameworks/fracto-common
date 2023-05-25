@@ -117,6 +117,7 @@ export class FractoTileAutomate extends Component {
       const rendered_tile = on_render_tile ?
          on_render_tile(tile, TILE_SIZE_PX) :
          <FractoTileRender
+            key={`render-${tile.short_code}`}
             tile={tile}
             width_px={TILE_SIZE_PX}
             no_tile_mode={no_tile_mode}/>
@@ -124,6 +125,7 @@ export class FractoTileAutomate extends Component {
          <ContextWrapper
             key={`ContextWrapper_${tile.short_code}`}>
             <FractoTileContext
+               key={`context-${tile.short_code}`}
                tile={tile}
                level={level}
                width_px={CONTEXT_SIZE_PX}/>
