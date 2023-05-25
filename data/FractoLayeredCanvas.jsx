@@ -151,7 +151,7 @@ export class FractoLayeredCanvas extends Component {
    }
 
    run_plan = (plan, canvas_bounds, ctx) => {
-      const {plan_step} = this.state
+      const {plan_step, canvas_ref} = this.state
       const {aspect_ratio, level, focal_point, scope, on_plan_complete} = this.props;
       const step = plan.shift();
       const adjusted_level = level + step.level_adjust;
@@ -162,7 +162,7 @@ export class FractoLayeredCanvas extends Component {
             console.log("plan complete")
             this.setState({progress_pct: -1})
             if (on_plan_complete) {
-               on_plan_complete(true)
+               on_plan_complete(canvas_ref)
             }
          }
          return;
@@ -182,7 +182,7 @@ export class FractoLayeredCanvas extends Component {
                console.log("plan complete")
                this.setState({progress_pct: -1})
                if (on_plan_complete) {
-                  on_plan_complete(true)
+                  on_plan_complete(canvas_ref)
                }
             }
          })
@@ -218,7 +218,7 @@ export class FractoLayeredCanvas extends Component {
       const plan = !high_quality ? REGULAR_PLAN : HQ_PLAN
       const plan_copy = plan.map(step => Object.assign({}, step))
       this.setState({
-         plan_step : 0,
+         plan_step: 0,
          progress_pct: 0
       })
       this.run_plan(plan_copy, canvas_bounds, ctx)
@@ -252,7 +252,7 @@ export class FractoLayeredCanvas extends Component {
          const fracto_values = {scope: scope, focal_point: focal_point}
          highlights = FractoUtil.highlight_points(canvas_ref, fracto_values, highlight_points)
       }
-      const pct = on_progress || progress_pct < 0 ? '' : `${Math.round(progress_pct * 100)/ 100}%`
+      const pct = on_progress || progress_pct < 0 ? '' : `${Math.round(progress_pct * 100) / 100}%`
       return [
          <FractoCanvas
             key={`canvas`}
