@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 import styled from "styled-components";
 
 import {CoolStyles} from 'common/ui/CoolImports';
-import StoreS3 from 'common/system/StoreS3';
 
 import FractoUtil from '../FractoUtil';
 import FractoLayeredCanvas from "../data/FractoLayeredCanvas";
+import FractoMruCache from "../data/FractoMruCache";
 
 const RenderWrapper = styled(CoolStyles.InlineBlock)`
    background-color: #f8f8f8;
@@ -55,18 +55,11 @@ export class FractoTileRender extends Component {
 
    load_tile = (ctx) => {
       const {tile, width_px} = this.props;
-      const json_name = `tiles/256/indexed/${tile.short_code}.json`;
-      StoreS3.get_file_async(json_name, "fracto", json_str => {
-         // console.log("StoreS3.get_file_async", json_name);
-         if (!json_str) {
-            console.log("Error loading indexed tile", json_name);
-            this.setState({tile_loaded: false})
-         } else {
-            const tile_data = JSON.parse(json_str);
-            FractoUtil.data_to_canvas(tile_data, ctx, width_px);
-            this.setState({tile_loaded: true})
-         }
-      }, false)
+      console.log("load_tile", tile.short_code)
+      FractoMruCache.get_tile_data(tile.short_code, tile_data=> {
+         FractoUtil.data_to_canvas(tile_data, ctx, width_px);
+         this.setState({tile_loaded: true})
+      })
    }
 
    render() {

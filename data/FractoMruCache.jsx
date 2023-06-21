@@ -1,5 +1,4 @@
 import network from "common/config/network.json";
-import StoreS3 from 'common/system/StoreS3';
 
 const URL_BASE = network.fracto_server_url;
 const MAX_TILE_CACHE = 350;
@@ -13,22 +12,16 @@ export class FractoMruCache {
    static get_tile_data = (short_code, cb) => {
       FractoMruCache.cache_mru[short_code] = FractoMruCache.highest_mru++;
       if (!FractoMruCache.tile_cache[short_code]) {
-         const filepath = `tiles/256/indexed/${short_code}.json`
-         StoreS3.get_file_async(filepath, "fracto", data => {
-            console.log("StoreS3.get_file_async", filepath);
-            if (!data) {
-               console.log("data error");
-               cb(false);
-            } else {
-               const tile_data = JSON.parse(data);
-               FractoMruCache.tile_cache[short_code] = tile_data;
-               cb(tile_data)
-            }
-         }, false)
+         const url = `${URL_BASE}/get_tiles.php?short_codes=${short_code}`
+         fetch(url)
+            .then(response => response.json())
+            .then(json => {
+               FractoMruCache.tile_cache[short_code] = json["tiles"][short_code]
+               cb(json["tiles"][short_code])
+            })
       } else {
          cb(FractoMruCache.tile_cache[short_code])
       }
-
    }
 
    static fetch_chunk = (filtered_list, cb) => {
@@ -53,8 +46,7 @@ export class FractoMruCache {
             }
             if (filtered_list.length) {
                FractoMruCache.fetch_chunk(filtered_list, cb)
-            }
-            else {
+            } else {
                cb(true);
                FractoMruCache.cleanup_cache();
             }

@@ -355,6 +355,15 @@ export class FractoUtil {
          })
    }
 
+   static empty_tile = (short_code, cb) => {
+      const url = `${FRACTO_PHP_URL_BASE}/empty_tile.php?short_code=${short_code}&confirmed=CONFIRMED`;
+      fetch(url)
+         .then(response => response.json())
+         .then(result => {
+            cb(result)
+         })
+   }
+
    static CQ_code_from_point = (x, y) => {
       const CQ_str = new ComplexQuarternary(x, y).to_string()
       const cq_code = CQ_str.replace(/^0+/, '')
