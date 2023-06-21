@@ -6,7 +6,7 @@ import {CoolStyles} from 'common/ui/CoolImports';
 import StoreS3 from 'common/system/StoreS3';
 
 import FractoUtil from '../FractoUtil';
-import FractoLayeredCanvas from "../data/FractoLayeredCanvas";
+import FractoLayeredCanvas from "../render/FractoLayeredCanvas";
 
 const RenderWrapper = styled(CoolStyles.InlineBlock)`
    background-color: #f8f8f8;

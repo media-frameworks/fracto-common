@@ -88,6 +88,26 @@ const LogoImage = styled.img`
     padding: 0.5rem;
 `;
 
+const LevelBlockWrapper = styled(CoolStyles.Block)`
+   ${CoolStyles.align_center}   
+   ${CoolStyles.pointer}   
+   background-color: #cccccc;
+   width: 3rem;
+`;
+
+const ColorBox = styled(CoolStyles.InlineBlock)`
+   ${CoolStyles.narrow_border_radius}
+   ${CoolStyles.narrow_text_shadow}
+   ${CoolStyles.monospace}
+   ${CoolStyles.bold}
+   ${CoolStyles.noselect}
+   padding: 0.125rem 0.25rem 0;
+   border: 0.1rem solid #555555;
+   color: white;
+   margin: 0.125rem 0;
+   font-size: 0.85rem;
+`;
+
 export const ENTITY_STATUS_PREP = "PREP";
 export const ENTITY_STATUS_DRAFT = "DRAFT";
 export const ENTITY_STATUS_REVIEW = "REVIEW";
@@ -187,6 +207,34 @@ export class FractoCommon {
       />
    }
 
+   static level_button_stack = (selected_level, max_level, on_selected) => {
+      const button_style = {
+         backgroundColor: FractoUtil.fracto_pattern_color(0, 25)
+      }
+      const selected_style = {
+         backgroundColor: "white",
+         color: 'black',
+         fontWeight: "bold",
+         fontSize: "1.75rem"
+      }
+      const selected_block_style = {
+         backgroundColor: "white"
+      }
+      const all_levels = []
+      for (let i = 2; i < max_level; i++) {
+         all_levels.push(i)
+      }
+      return all_levels.map(level => {
+         return <LevelBlockWrapper
+            style={level === selected_level ? selected_block_style : {}}
+            onClick={e => on_selected(level)}>
+            <ColorBox
+               style={level === selected_level ? selected_style : button_style}>
+               {level}
+            </ColorBox>
+         </LevelBlockWrapper>
+      })
+   }
 }
 
 export default FractoCommon

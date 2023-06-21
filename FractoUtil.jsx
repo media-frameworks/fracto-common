@@ -303,7 +303,7 @@ export class FractoUtil {
       };
       return [
          <SelectedTileBoxOutline key={"outline-1"} style={black_border}/>,
-         <SelectedTileBox key={"outline-2"}  style={white_border}/>
+         <SelectedTileBox key={"outline-2"} style={white_border}/>
       ]
    }
 
@@ -367,6 +367,14 @@ export class FractoUtil {
    static bailiwick_name = (pattern, core_point, best_level) => {
       const cq_code = FractoUtil.CQ_code_from_point(core_point.x, core_point.y)
       return `B${pattern}-CP${cq_code.slice(0, best_level)}`
+   }
+
+   static parseFloatWithRadix = (s, r) => {
+      r = (r || 10) | 0;
+      const [b, a] = ((s || '0') + '.').split('.');
+      const l1 = parseInt('1' + (a || ''), r).toString(r).length;
+      return parseInt(b, r) +
+         parseInt(a || '0', r) / parseInt('1' + Array(l1).join('0'), r);
    }
 }
 

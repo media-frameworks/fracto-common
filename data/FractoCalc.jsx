@@ -14,7 +14,7 @@ export class FractoCalc {
       while (x_squared + y_squared < 100 && iteration < max_iteration) {
          y = 2 * x * y + y0;
          x = x_squared - y_squared + x0;
-         position_slug = `${x},${y}`;
+         position_slug = `{"x":${x},"y":${y}}`;
          if (FractoCalc.previously[position_slug] && iteration > 2) {
             pattern = iteration - FractoCalc.previously[position_slug];
             break;
@@ -31,19 +31,15 @@ export class FractoCalc {
          }
          pattern = -1;
       }
-      if (pattern > 1 && tell) {
+      let orbital = []
+      if (pattern > 0) {
          const previous_keys = Object.keys(FractoCalc.previously)
          const sorted_keys = previous_keys
             .sort((a, b) => FractoCalc.previously[b] - FractoCalc.previously[a])
             .slice(0, pattern + 1)
-         const backwards = previous_keys
-            .sort((a, b) => FractoCalc.previously[a] - FractoCalc.previously[b])
-            .slice(0, 10)
-         const previous_values = sorted_keys.map(key => {
-            return `${key}: ${FractoCalc.previously[key]}`
+         orbital = sorted_keys.map(key => {
+            return JSON.parse(key)
          })
-         console.log("previous_values, seed_x, seed_y", seed_x, seed_y, previous_values)
-         console.log("backwards", backwards)
       }
       delete FractoCalc.previously
       FractoCalc.previously = {}
@@ -51,7 +47,8 @@ export class FractoCalc {
          x: x0,
          y: y0,
          pattern: pattern,
-         iteration: iteration
+         iteration: iteration,
+         orbital: orbital
       };
    }
 
