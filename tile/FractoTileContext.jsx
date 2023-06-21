@@ -5,7 +5,7 @@ import styled from "styled-components";
 import {CoolStyles} from 'common/ui/CoolImports';
 
 import FractoUtil from "../FractoUtil";
-import FractoLayeredCanvas from "../data/FractoLayeredCanvas";
+import FractoLayeredCanvas from "../render/FractoLayeredCanvas";
 
 const ContextWrapper = styled(CoolStyles.InlineBlock)`
    background-color: #f8f8f8;
@@ -30,7 +30,7 @@ export class FractoTileContext extends Component {
          width: `${width_px}px`,
          height: `${width_px}px`,
       }
-      const context_scope = 4 * (tile.bounds.right - tile.bounds.left);
+      const context_scope = 6 * (tile.bounds.right - tile.bounds.left);
       const focal_point = {
          x: (tile.bounds.right + tile.bounds.left) / 2,
          y: (tile.bounds.top + tile.bounds.bottom) / 2

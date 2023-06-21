@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import styled from "styled-components";
-import FractoCalc from "./FractoCalc";
+import FractoCalc from "../data/FractoCalc";
 import FractoUtil from "../FractoUtil";
 
 const FractoCanvas = styled.canvas`

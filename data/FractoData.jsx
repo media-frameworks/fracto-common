@@ -169,6 +169,16 @@ export class FractoData extends Component {
       return FractoData.tiles_cache[cache_key]
    }
 
+   static fetch_tile_images = (cb) => {
+      const url = `${network.db_server_url}/tile_images`
+      fetch(url)
+         .then(response => response.text())
+         .then((str) => {
+            const tile_images = JSON.parse(str)
+            // console.log("tile_images", tile_images)
+            cb(tile_images)
+         })
+   }
 }
 
 export default FractoData;

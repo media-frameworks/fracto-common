@@ -5,7 +5,7 @@ import styled from "styled-components";
 import {CoolStyles} from 'common/ui/CoolImports';
 
 import FractoUtil from '../FractoUtil';
-import FractoLayeredCanvas from "../data/FractoLayeredCanvas";
+import FractoLayeredCanvas from "../render/FractoLayeredCanvas";
 import FractoMruCache from "../data/FractoMruCache";
 
 const RenderWrapper = styled(CoolStyles.InlineBlock)`

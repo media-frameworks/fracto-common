@@ -38,10 +38,12 @@ export class FractoTileAutomate extends Component {
       on_tile_select: PropTypes.func.isRequired,
       no_tile_mode: PropTypes.bool,
       on_render_tile: PropTypes.func,
+      tile_size_px: PropTypes.number,
    }
 
    static defaultProps = {
-      no_tile_mode: false
+      no_tile_mode: false,
+      tile_size_px: TILE_SIZE_PX
    }
 
    state = {
@@ -107,7 +109,7 @@ export class FractoTileAutomate extends Component {
 
    render() {
       const {automate} = this.state;
-      const {tile_index, on_render_tile} = this.props;
+      const {tile_index, on_render_tile, tile_size_px} = this.props;
       const {all_tiles, level, no_tile_mode} = this.props
       if (!all_tiles.length) {
          return "no tiles"
@@ -117,11 +119,11 @@ export class FractoTileAutomate extends Component {
          return "no tile"
       }
       const rendered_tile = on_render_tile ?
-         on_render_tile(tile, TILE_SIZE_PX) :
+         on_render_tile(tile, tile_size_px) :
          <FractoTileRender
             key={`render-${tile.short_code}`}
             tile={tile}
-            width_px={TILE_SIZE_PX}
+            width_px={tile_size_px}
             no_tile_mode={no_tile_mode}/>
       return [
          <ContextWrapper
