@@ -13,12 +13,18 @@ export class FractoMruCache {
       FractoMruCache.cache_mru[short_code] = FractoMruCache.highest_mru++;
       if (!FractoMruCache.tile_cache[short_code]) {
          const url = `${URL_BASE}/get_tiles.php?short_codes=${short_code}`
-         fetch(url)
-            .then(response => response.json())
-            .then(json => {
+         fetch(url).then(response => {
+            // console.log("response", response)
+            return response.json()
+         }).then(json => {
+            // console.log("json", json)
+            if (!json["tiles"]) {
+               cb(null)
+            } else {
                FractoMruCache.tile_cache[short_code] = json["tiles"][short_code]
                cb(json["tiles"][short_code])
-            })
+            }
+         })
       } else {
          cb(FractoMruCache.tile_cache[short_code])
       }
@@ -81,6 +87,7 @@ export class FractoMruCache {
          // console.log(`delete tile with mru ${FractoMruCache.cache_mru[short_code]}`)
          delete FractoMruCache.tile_cache[short_code]
       }
+      global.gc();
    }
 
 }

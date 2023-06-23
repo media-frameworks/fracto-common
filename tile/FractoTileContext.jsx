@@ -5,7 +5,7 @@ import styled from "styled-components";
 import {CoolStyles} from 'common/ui/CoolImports';
 
 import FractoUtil from "../FractoUtil";
-import FractoLayeredCanvas from "../render/FractoLayeredCanvas";
+import FractoLayeredCanvas, {QUALITY_LOW} from "../render/FractoLayeredCanvas";
 
 const ContextWrapper = styled(CoolStyles.InlineBlock)`
    background-color: #f8f8f8;
@@ -46,6 +46,7 @@ export class FractoTileContext extends Component {
             level={level - 1}
             aspect_ratio={1.0}
             scope={context_scope}
+            quality={QUALITY_LOW}
             focal_point={focal_point}/>
          {tile_outline}
       </ContextWrapper>

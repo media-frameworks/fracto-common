@@ -84,7 +84,7 @@ export class FractoData extends Component {
                }
                FractoData.loading_progress_pct[verb] = Math.round(1000 * line_index / lines.length) / 10;
             }
-            // console.log(`${verb} tiles parsed`)
+            console.log(`${verb} tiles parsed, ${lines.length} total`)
             cb(true);
          })
    }
@@ -107,16 +107,16 @@ export class FractoData extends Component {
          right: focal_point.x + width_by_two,
          bottom: focal_point.y - height_by_two,
       }
-      let all_tiles = {}
+      let level_keys = []
       verbs.forEach(verb => {
          FractoData.get_cached_tiles(level, verb)
          const tiles_to_add = LEVEL_SCOPES[level][verb];
-         all_tiles = Object.assign(all_tiles, tiles_to_add)
+         const keys_to_add = Object.keys(tiles_to_add)
+         level_keys = level_keys.concat(keys_to_add)
       })
-      const level_keys = Object.keys(all_tiles)
       // console.log(`${level_keys.length} tiles for level ${level}`)
       const filtered_keys = level_keys.filter(key => {
-         const bounds = FractoUtil.bounds_from_short_code(key) //all_tiles[key];
+         const bounds = FractoUtil.bounds_from_short_code(key)
          if (bounds.right < viewport.left) {
             return false;
          }
@@ -131,6 +131,7 @@ export class FractoData extends Component {
          }
          return true;
       })
+      level_keys = []
       return filtered_keys.map(key => {
          return {
             short_code: key,
@@ -146,9 +147,9 @@ export class FractoData extends Component {
       return LEVEL_SCOPES[level][bin][short_code]
    }
 
-   static get_cached_tiles = (level, verb) => {
+   static get_cached_tiles = (level, verb, force=false) => {
       const cache_key = `${verb}_${level}`;
-      if (!FractoData.tiles_cache[cache_key]) {
+      if (!FractoData.tiles_cache[cache_key] || force) {
          // console.log(`building cache for ${verb} tiles on level ${level}`)
          if (!LEVEL_SCOPES[level]) {
             console.log("get_cached_tiles error LEVEL_SCOPES, level", LEVEL_SCOPES, level)

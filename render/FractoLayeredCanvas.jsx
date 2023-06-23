@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import styled from "styled-components";
 
-import FractoData from "../data/FractoData";
+import FractoData, {HIGH_QUALITY} from "../data/FractoData";
 import FractoUtil from "../FractoUtil";
 import FractoMruCache from "../data/FractoMruCache"
 import {CoolStyles} from "../../../common/ui/CoolImports";
@@ -10,6 +10,11 @@ import {CoolStyles} from "../../../common/ui/CoolImports";
 const FractoCanvas = styled.canvas`
    margin: 0;
 `;
+
+const LQ_PLAN = [
+   {level_adjust: -2, layer_opacity: 80},
+   {level_adjust: -1, layer_opacity: 100},
+]
 
 const REGULAR_PLAN = [
    {level_adjust: -2, layer_opacity: 60},
@@ -25,6 +30,10 @@ const HQ_PLAN = [
    {level_adjust: 0, layer_opacity: 100},
 ]
 
+export const QUALITY_HIGH = "quality_high"
+export const QUALITY_MEDIUM = "quality_medium"
+export const QUALITY_LOW = "quality_low"
+
 export class FractoLayeredCanvas extends Component {
 
    static propTypes = {
@@ -33,7 +42,7 @@ export class FractoLayeredCanvas extends Component {
       focal_point: PropTypes.object.isRequired,
       scope: PropTypes.number.isRequired,
       level: PropTypes.number.isRequired,
-      high_quality: PropTypes.bool,
+      quality: PropTypes.string,
       save_filename: PropTypes.string,
       on_plan_complete: PropTypes.func,
       on_progress: PropTypes.func,
@@ -42,6 +51,7 @@ export class FractoLayeredCanvas extends Component {
 
    static defaultProps = {
       high_quality: false,
+      quality: QUALITY_MEDIUM,
       highlight_points: []
    }
 
@@ -191,7 +201,7 @@ export class FractoLayeredCanvas extends Component {
 
    fill_canvas = () => {
       const {canvas_ref, progress_pct} = this.state;
-      const {width_px, aspect_ratio, focal_point, scope, high_quality} = this.props;
+      const {width_px, aspect_ratio, focal_point, scope, quality} = this.props;
       const height_px = width_px * aspect_ratio;
       if (progress_pct >= 0) {
          console.log('in progress, must wait...');
@@ -215,7 +225,18 @@ export class FractoLayeredCanvas extends Component {
          bottom: focal_point.y - half_height,
       }
 
-      const plan = !high_quality ? REGULAR_PLAN : HQ_PLAN
+      let plan = REGULAR_PLAN
+      switch (quality) {
+         case QUALITY_HIGH:
+            plan = HQ_PLAN;
+            break;
+         case QUALITY_LOW:
+            plan = LQ_PLAN;
+            break;
+         case QUALITY_MEDIUM:
+         default:
+            break;
+      }
       const plan_copy = plan.map(step => Object.assign({}, step))
       this.setState({
          plan_step: 0,
