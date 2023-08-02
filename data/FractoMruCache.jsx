@@ -3,15 +3,16 @@ import network from "common/config/network.json";
 const URL_BASE = network.fracto_server_url;
 const MAX_TILE_CACHE = 350;
 
+export const TILE_CACHE = {};
+
 export class FractoMruCache {
 
-   static tile_cache = {};
    static cache_mru = {};
    static highest_mru = 0;
 
    static get_tile_data = (short_code, cb) => {
       FractoMruCache.cache_mru[short_code] = FractoMruCache.highest_mru++;
-      if (!FractoMruCache.tile_cache[short_code]) {
+      if (!TILE_CACHE[short_code]) {
          const url = `${URL_BASE}/get_tiles.php?short_codes=${short_code}`
          fetch(url).then(response => {
             // console.log("response", response)
@@ -21,12 +22,12 @@ export class FractoMruCache {
             if (!json["tiles"]) {
                cb(null)
             } else {
-               FractoMruCache.tile_cache[short_code] = json["tiles"][short_code]
+               TILE_CACHE[short_code] = json["tiles"][short_code]
                cb(json["tiles"][short_code])
             }
          })
       } else {
-         cb(FractoMruCache.tile_cache[short_code])
+         cb(TILE_CACHE[short_code])
       }
    }
 
@@ -48,7 +49,7 @@ export class FractoMruCache {
             const keys = Object.keys(json["tiles"])
             for (let i = 0; i < keys.length; i++) {
                const short_code = keys[i];
-               FractoMruCache.tile_cache[short_code] = json["tiles"][short_code];
+               TILE_CACHE[short_code] = json["tiles"][short_code];
             }
             if (filtered_list.length) {
                FractoMruCache.fetch_chunk(filtered_list, cb)
@@ -64,7 +65,7 @@ export class FractoMruCache {
       for (let i = 0; i < short_codes.length; i++) {
          FractoMruCache.cache_mru[short_codes[i]] = FractoMruCache.highest_mru++;
       }
-      const filtered_list = short_codes.filter(short_code => !FractoMruCache.tile_cache[short_code])
+      const filtered_list = short_codes.filter(short_code => !TILE_CACHE[short_code])
       if (!filtered_list.length) {
          cb(true)
          return;
@@ -74,7 +75,7 @@ export class FractoMruCache {
    }
 
    static cleanup_cache = () => {
-      const cache_keys = Object.keys(FractoMruCache.tile_cache).sort((a, b) =>
+      const cache_keys = Object.keys(TILE_CACHE).sort((a, b) =>
          FractoMruCache.cache_mru[a] - FractoMruCache.cache_mru[b])
       // console.log(`cleanup_cache ${cache_keys.length} tiles in cache`)
       const keys_to_delete = cache_keys.length - MAX_TILE_CACHE;
@@ -85,7 +86,8 @@ export class FractoMruCache {
       for (let key_index = 0; key_index < keys_to_delete; key_index++) {
          const short_code = cache_keys[key_index];
          // console.log(`delete tile with mru ${FractoMruCache.cache_mru[short_code]}`)
-         delete FractoMruCache.tile_cache[short_code]
+         delete FractoMruCache.cache_mru[short_code]
+         delete TILE_CACHE[short_code]
       }
       global.gc();
    }

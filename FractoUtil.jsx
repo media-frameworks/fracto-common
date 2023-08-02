@@ -32,6 +32,19 @@ const SelectedTileBoxOutline = styled.div`
    pointer-events: none;
 `;
 
+var COLOR_CACHE = {};
+var CACHE_HITS = 0;
+var CACHE_SIZE = 0;
+
+setInterval(() => {
+   console.log(`CACHE_HITS=${CACHE_HITS}, CACHE_SIZE=${CACHE_SIZE}`)
+   if (CACHE_SIZE > 10000) {
+      console.log("resetting COLOR_CACHE")
+      COLOR_CACHE = {}
+      CACHE_SIZE = 0
+   }
+}, 10000)
+
 export class FractoUtil {
 
    static get_short_code = (long_code) => {
@@ -102,15 +115,14 @@ export class FractoUtil {
       return short_form ? `r${root},h${relative_harmonic},o${pattern_octave}` : `root ${root} harmonic ${relative_harmonic} octave ${pattern_octave}`;
    }
 
-   static color_cache = {};
-
    static fracto_pattern_color_hsl = (pattern, iterations = 255) => {
       if (pattern === -1) {
          return [0, 0, 0]
       }
       const cache_key = `(${pattern},${iterations})`;
-      if (FractoUtil.color_cache[cache_key]) {
-         return FractoUtil.color_cache[cache_key];
+      if (COLOR_CACHE[cache_key]) {
+         CACHE_HITS++;
+         return COLOR_CACHE[cache_key];
       }
       if (pattern === 0) {
          let offset = Math.log(iterations) * ONE_BY_LOG_TEN_THOUSAND;
@@ -119,8 +131,9 @@ export class FractoUtil {
          }
          const lum = 1.0 - offset;
          const lum_pct = Math.round(100 * lum)
-         FractoUtil.color_cache[cache_key] = [0, 0, lum_pct];
-         return FractoUtil.color_cache[cache_key];
+         COLOR_CACHE[cache_key] = [0, 0, lum_pct];
+         CACHE_SIZE++;
+         return COLOR_CACHE[cache_key];
       }
 
       const log2 = Math.log2(pattern);
@@ -128,8 +141,9 @@ export class FractoUtil {
       const lum = 0.15 + 0.75 * Math.log(iterations) * ONE_BY_LOG_ONE_MILLION;
 
       const lum_pct = Math.round(100 * lum)
-      FractoUtil.color_cache[cache_key] = [Math.round(hue), 75, lum_pct];
-      return FractoUtil.color_cache[cache_key];
+      COLOR_CACHE[cache_key] = [Math.round(hue), 75, lum_pct];
+      CACHE_SIZE++;
+      return COLOR_CACHE[cache_key];
    }
 
    static fracto_pattern_color = (pattern, iterations = 255) => {
