@@ -4,7 +4,7 @@ import styled from "styled-components";
 
 import FractoData, {HIGH_QUALITY} from "../data/FractoData";
 import FractoUtil from "../FractoUtil";
-import FractoMruCache from "../data/FractoMruCache"
+import FractoMruCache, {TILE_CACHE} from "../data/FractoMruCache"
 import {CoolStyles} from "../../../common/ui/CoolImports";
 
 const FractoCanvas = styled.canvas`
@@ -153,7 +153,7 @@ export class FractoLayeredCanvas extends Component {
       for (let tile_index = 0; tile_index < tiles.length; tile_index++) {
          const tile = tiles[tile_index];
          const short_code = tile.short_code;
-         const tile_data = FractoMruCache.tile_cache[short_code];
+         const tile_data = TILE_CACHE[short_code];
          this.fill_tile(canvas_bounds, tile.bounds, tile_data, bg_factor, ctx);
          const progress_pct = plan_step * 25 + tile_index * 25 / tiles.length
          this.setState({progress_pct: progress_pct})
