@@ -6,6 +6,7 @@ import {PHI} from "common/math/constants";
 
 import FractoData from "../data/FractoData";
 import PropTypes from "prop-types";
+import {SLIDER_WIDTH_PX} from "../../../common/ui/CoolSlider";
 
 const BORDER_WIDTH_PX = 2
 const MAINFRAME_PADDING_PX = 0
@@ -13,7 +14,6 @@ const MAINFRAME_PADDING_PX = 0
 const ExplorerWrapper = styled(CoolStyles.Block)`
    width: 100%;
    height: 100%;
-   background-color: #cccccc;
    overflow: auto;
 `;
 
@@ -73,7 +73,7 @@ export class FractoExplorer extends Component {
       frame_ref: React.createRef(),
       main_ref: React.createRef(),
       slider_ref: React.createRef(),
-      zoom_factor: 2.0
+      zoom_factor: 4.0
    }
 
    static all_tiles = {}
@@ -94,7 +94,7 @@ export class FractoExplorer extends Component {
          FractoExplorer.all_tiles = all_tiles
          this.create_mainframe()
          setTimeout(() => {
-            this.on_zoom(2.0)
+            this.on_zoom(4.0)
          }, 1000)
          this.setState({
             loading_images: false,
@@ -104,13 +104,12 @@ export class FractoExplorer extends Component {
    }
 
    componentDidUpdate(prevProps: Readonly<P>, prevState: Readonly<S>, snapshot: SS) {
-      // const {zoom_factor} = this.state
-      // const {fracto_values} = this.props
-      // if (prevProps.fracto_values.focal_point.x !== fracto_values.focal_point.x ||
-      //    prevProps.fracto_values.focal_point.y !== fracto_values.focal_point.y ||
-      //    prevProps.fracto_values.scope !== fracto_values.focal_point.scope) {
-      //    this.on_zoom(zoom_factor)
-      // }
+      const {fracto_values} = this.props
+      if (prevProps.fracto_values.focal_point.x !== fracto_values.focal_point.x ||
+         prevProps.fracto_values.focal_point.y !== fracto_values.focal_point.y ||
+         prevProps.fracto_values.scope !== fracto_values.focal_point.scope) {
+         this.fix_images()
+      }
    }
 
    componentWillUnmount() {
@@ -119,6 +118,7 @@ export class FractoExplorer extends Component {
    }
 
    fill_frame = (short_code, is_inverse = false) => {
+      const {fracto_values} = this.props
       const level = short_code.length
       if (level > 7) {
          return ''
@@ -182,7 +182,6 @@ export class FractoExplorer extends Component {
       new_values.focal_point.y += diff_center_y * units_per_pixel
 
       on_values_changed(new_values)
-      this.on_zoom(zoom_factor)
    }
 
    resize_wrapper = () => {
@@ -211,27 +210,22 @@ export class FractoExplorer extends Component {
          frame.style.height = `${edge_length_px}px`
          frame.style.width = `${edge_length_px * PHI}px`
          this.setState({
-            frame_width_px: edge_length_px * PHI,
+            frame_width_px: edge_length_px * PHI + SLIDER_WIDTH_PX,
             frame_height_px: edge_length_px
          })
       }
    }
 
-   on_zoom = (value) => {
+   fix_images = () => {
       const {main_ref, frame_width_px, frame_height_px} = this.state
-      const {fracto_values, on_values_changed} = this.props
-      if (!on_values_changed) {
-         return;
-      }
+      const {fracto_values} = this.props
+
       const main_window = main_ref.current
       if (!main_window) {
          return;
       }
 
-      const power_of_2 = 4 - value;
-      const scope = Math.pow(2, power_of_2)
-
-      const pixels_width = frame_width_px * 2.5 / scope
+      const pixels_width = frame_width_px / fracto_values.scope
       const half_pixels_width = pixels_width / 2
       const offset_x = -half_pixels_width * fracto_values.focal_point.x / 2.0
       const offset_y = half_pixels_width * fracto_values.focal_point.y / 2.0
@@ -241,15 +235,19 @@ export class FractoExplorer extends Component {
       main_window.style.left = `${offset_x + (frame_width_px - pixels_width) * 0.5}px`
       main_window.style.top = `${offset_y + (0.5) * (frame_height_px - pixels_width)}px`
 
-      const frame_left = fracto_values.focal_point.x - scope
-      const frame_right = fracto_values.focal_point.x + scope
-      const frame_top = fracto_values.focal_point.y + scope
-      const frame_bottom = fracto_values.focal_point.y - scope
+      const frame_left = fracto_values.focal_point.x - 2 * fracto_values.scope
+      const frame_right = fracto_values.focal_point.x + 2 * fracto_values.scope
+      const frame_top = fracto_values.focal_point.y + 2 * fracto_values.scope
+      const frame_bottom = fracto_values.focal_point.y - 2 * fracto_values.scope
 
       const image_keys = Object.keys(FractoExplorer.all_tiles)
       for (let i = 0; i < image_keys.length; i++) {
-         const tile_image = FractoExplorer.all_tiles[image_keys[i]]
+         const short_code = `${image_keys[i]}`;
+         const tile_image = FractoExplorer.all_tiles[short_code]
          const tile = tile_image.tile_ref.current
+         if (!tile) {
+            continue
+         }
          if (tile_image.bounds_right < frame_left) {
             tile.style.backgroundImage = ''
             continue
@@ -267,11 +265,16 @@ export class FractoExplorer extends Component {
             continue
          }
          const tile_width = tile_image.bounds_right - tile_image.bounds_left
-         if (tile_width > scope * 3) {
+         if (tile_width > fracto_values.scope * 3) {
             tile.style.backgroundImage = ''
             continue
          }
-         if (tile_width < scope / 3 && scope < 1) {
+         if (fracto_values.scope > 1) {
+            if (short_code.length > 3) {
+               tile.style.backgroundImage = ''
+               continue
+            }
+         } else if (tile_width < fracto_values.scope / 3) {
             tile.style.backgroundImage = ''
             continue
          }
@@ -283,6 +286,18 @@ export class FractoExplorer extends Component {
             tile_inverse.style.transform = `scaleY(-1)`
          }
       }
+
+   }
+
+   on_zoom = (value) => {
+      const {fracto_values, on_values_changed} = this.props
+      if (!on_values_changed) {
+         return;
+      }
+
+      const power_of_2 = 4 - value;
+      const scope = Math.pow(2, power_of_2)
+      console.log("scope", scope)
 
       let new_values = Object.assign({}, fracto_values)
       new_values.scope = scope

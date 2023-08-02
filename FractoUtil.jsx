@@ -231,12 +231,11 @@ export class FractoUtil {
       }).sort((a, b) => a.family - b.family)
    }
 
-   static highlight_points = (image_ref, fracto_values, point_highlights) => {
+   static highlight_points = (image_ref, fracto_values, point_highlights, aspect_ratio = 1.0) => {
       if (!image_ref.current || !point_highlights.length) {
          return [];
       }
 
-      const aspect_ratio = 1.0
       const image_bounds = image_ref.current.getBoundingClientRect();
       const scope_x_by_2 = fracto_values.scope / 2;
       const scope_y_by_2 = aspect_ratio * scope_x_by_2;
@@ -252,7 +251,7 @@ export class FractoUtil {
             return [];
          }
          const img_x = image_bounds.width * (point_highlight.x - leftmost) / fracto_values.scope - 1
-         const img_y = image_bounds.width * (topmost - point_highlight.y) / (fracto_values.scope * aspect_ratio) - 1
+         const img_y = image_bounds.height * (topmost - point_highlight.y) / (fracto_values.scope * aspect_ratio) - 1
 
          const highlight_outline_1 = {
             left: image_bounds.left + img_x - 5,

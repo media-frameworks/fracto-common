@@ -43,7 +43,6 @@ export const get_ideal_level = (width_px, scope, quality_factor = 1.99) => {
 export const GET_COMPLETED_TILES_ONLY = 1;
 export const GET_EMPTY_TILES_ONLY = 2;
 export const GET_ALL_TILES = 3;
-export const HIGH_QUALITY = 4;
 
 export const get_level_scope = (level) => {
    return LEVEL_SCOPES[level].scope;

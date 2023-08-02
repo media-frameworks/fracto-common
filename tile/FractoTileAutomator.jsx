@@ -20,7 +20,7 @@ import FractoTileDetails from 'fracto/common/tile/FractoTileDetails';
 
 TimeAgo.locale(en)
 
-const WRAPPER_MARGIN_PX = 25
+const WRAPPER_MARGIN_PX = 10
 
 const FieldWrapper = styled(CoolStyles.Block)`
    margin: ${WRAPPER_MARGIN_PX}px;
@@ -58,23 +58,29 @@ export class FractoTileAutomator extends Component {
       width_px: PropTypes.number.isRequired,
       descriptor: PropTypes.string.isRequired,
       all_tiles: PropTypes.array.isRequired,
-      tile_action: PropTypes.func.isRequired,
+      tile_action: PropTypes.func,
       no_tile_mode: PropTypes.bool,
       on_render_tile: PropTypes.func,
       summary_text: PropTypes.string,
+      on_render_detail: PropTypes.func,
+      on_select_tile : PropTypes.func
    }
 
    static defaultProps = {
+      tile_action: null,
       no_tile_mode: false,
       on_render_tile: null,
-      summary_text: null
+      summary_text: null,
+      on_render_detail: null,
+      on_select_tile: null
    }
 
    state = {
       completed_loading: true,
       indexed_loading: true,
       tile_index: 0,
-      run_history: []
+      run_history: [],
+      tile_details: []
    };
 
    componentDidMount() {
@@ -90,15 +96,19 @@ export class FractoTileAutomator extends Component {
    }
 
    initalize_tile_sets = () => {
-      const {level, descriptor, all_tiles} = this.props;
+      const {level, descriptor, all_tiles, on_select_tile} = this.props;
       const level_key = `${descriptor}_tile_index_${level}`
       let tile_index_str = localStorage.getItem(level_key)
       if (!tile_index_str || parseInt(tile_index_str) > all_tiles.length) {
          tile_index_str = '0'
       }
+      const tile_index = parseInt(tile_index_str)
       this.setState({
-         tile_index: parseInt(tile_index_str)
+         tile_index: tile_index
       });
+      if (on_select_tile) {
+         on_select_tile(all_tiles[tile_index])
+      }
       FractoDataLoader.load_tile_set_async(BIN_VERB_COMPLETED, result => {
          console.log("FractoDataLoader.load_tile_set_async", BIN_VERB_COMPLETED, result)
          this.setState({completed_loading: false});
@@ -110,16 +120,20 @@ export class FractoTileAutomator extends Component {
    }
 
    on_tile_select = (tile_index) => {
-      const {level, descriptor, all_tiles} = this.props;
+      const {level, descriptor, all_tiles, on_select_tile} = this.props;
       this.setState({tile_index: tile_index < all_tiles.length ? tile_index : 0})
       const level_key = `${descriptor}_tile_index_${level}`
       localStorage.setItem(level_key, `${tile_index}`)
+      if (on_select_tile) {
+         on_select_tile(all_tiles[tile_index])
+      }
    }
 
    on_tile_action = (tile, cb) => {
       const {run_history, tile_index} = this.state
       const {tile_action} = this.props;
-      tile_action(tile, message => {
+      if (!tile_action) {
+         const message = "no action"
          run_history.push({
             tile_index: tile_index,
             response: message,
@@ -127,21 +141,26 @@ export class FractoTileAutomator extends Component {
          })
          this.setState({run_history: run_history})
          cb(message)
-      })
+      } else {
+         tile_action(tile, message => {
+            run_history.push({
+               tile_index: tile_index,
+               response: message,
+               timestamp: new Date()
+            })
+            this.setState({run_history: run_history})
+            cb(message)
+         })
+      }
    }
 
-   render() {
-      const {tile_index, indexed_loading, completed_loading, run_history} = this.state;
-      const {level, width_px, all_tiles, no_tile_mode, on_render_tile, summary_text} = this.props;
-      if (indexed_loading || completed_loading) {
-         return FractoCommon.loading_wait_notice()
-      }
-      if (!all_tiles.length) {
-         return "no tiles"
-      }
-      if (tile_index < 0 || tile_index > all_tiles.length) {
-         return `bad tile index: ${tile_index}`
-      }
+   render_tab_details = () => {
+      return []
+   }
+
+   render_run_history = () => {
+      const {run_history} = this.state;
+      const {summary_text} = this.props
       const recent_results = run_history.sort((a, b) => b.tile_index - a.tile_index)
          .map(result => {
             const result_line = [
@@ -154,6 +173,34 @@ export class FractoTileAutomator extends Component {
             </RecentResult>
          })
       const summary = !summary_text ? '' : `, ${summary_text}`
+      return [
+         <SummaryWrapper>{!recent_results.length ? '' : `${recent_results.length} results this run${summary}`}</SummaryWrapper>,
+         <ResultsWrapper>{recent_results}</ResultsWrapper>
+      ]
+   }
+
+   render() {
+      const {tile_index, indexed_loading, completed_loading, run_history} = this.state;
+      const {level, width_px, all_tiles, no_tile_mode, on_render_tile, on_render_detail} = this.props;
+      if (indexed_loading || completed_loading) {
+         return FractoCommon.loading_wait_notice()
+      }
+      if (!all_tiles.length) {
+         return "no tiles"
+      }
+      if (tile_index < 0 || tile_index > all_tiles.length) {
+         return `bad tile index: ${tile_index}`
+      }
+      const active_tile = all_tiles[tile_index]
+      const details_width_px = width_px - (CONTEXT_SIZE_PX + CONTEXT_SIZE_PX) - 60 - 2 * WRAPPER_MARGIN_PX
+      let all_details = []
+      if (run_history.length && on_render_detail) {
+         all_details = this.render_tab_details()
+      } else if (run_history.length) {
+         all_details = this.render_run_history()
+      } else if (on_render_detail) {
+         all_details = on_render_detail(active_tile, details_width_px)
+      }
       return <FieldWrapper>
          <AutomateWrapper>
             <FractoTileAutomate
@@ -169,11 +216,10 @@ export class FractoTileAutomator extends Component {
          </AutomateWrapper>
          <DetailsWrapper>
             <FractoTileDetails
-               active_tile={all_tiles[tile_index]}
-               width_px={width_px - (CONTEXT_SIZE_PX + CONTEXT_SIZE_PX) - 60 - 2 * WRAPPER_MARGIN_PX}
+               active_tile={active_tile}
+               width_px={details_width_px}
             />
-            <SummaryWrapper>{!recent_results.length ? '' : `${recent_results.length} results this run${summary}`}</SummaryWrapper>
-            <ResultsWrapper>{recent_results}</ResultsWrapper>
+            {all_details}
          </DetailsWrapper>
       </FieldWrapper>
    }

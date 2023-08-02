@@ -38,10 +38,10 @@ export class FractoLayeredCanvas extends Component {
 
    static propTypes = {
       width_px: PropTypes.number.isRequired,
-      aspect_ratio: PropTypes.number.isRequired,
       focal_point: PropTypes.object.isRequired,
       scope: PropTypes.number.isRequired,
       level: PropTypes.number.isRequired,
+      aspect_ratio: PropTypes.number,
       quality: PropTypes.string,
       save_filename: PropTypes.string,
       on_plan_complete: PropTypes.func,
@@ -52,7 +52,8 @@ export class FractoLayeredCanvas extends Component {
    static defaultProps = {
       high_quality: false,
       quality: QUALITY_MEDIUM,
-      highlight_points: []
+      highlight_points: [],
+      aspect_ratio: 1.0
    }
 
    state = {
