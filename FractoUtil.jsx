@@ -40,6 +40,10 @@ setInterval(() => {
    console.log(`CACHE_HITS=${CACHE_HITS}, CACHE_SIZE=${CACHE_SIZE}`)
    if (CACHE_SIZE > 10000) {
       console.log("resetting COLOR_CACHE")
+      const color_keys = Object.keys(COLOR_CACHE)
+      for (let i = 0; i < color_keys.length; i++) {
+         delete COLOR_CACHE[color_keys[i]]
+      }
       COLOR_CACHE = {}
       CACHE_SIZE = 0
    }
