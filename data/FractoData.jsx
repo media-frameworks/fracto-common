@@ -74,12 +74,13 @@ export class FractoData extends Component {
                const short_code = String(values[0]);
                const level = short_code.length;
                if (LEVEL_SCOPES[level]) {
-                  LEVEL_SCOPES[level][verb][short_code] = {
-                     left: parseFloat(values[1]),
-                     top: parseFloat(values[2]),
-                     right: parseFloat(values[3]),
-                     bottom: parseFloat(values[4]),
-                  }
+                  LEVEL_SCOPES[level][verb][short_code] = true
+                  //    LEVEL_SCOPES[level][verb][short_code] = {
+                  //    left: parseFloat(values[1]),
+                  //    top: parseFloat(values[2]),
+                  //    right: parseFloat(values[3]),
+                  //    bottom: parseFloat(values[4]),
+                  // }
                }
                FractoData.loading_progress_pct[verb] = Math.round(1000 * line_index / lines.length) / 10;
             }
