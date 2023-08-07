@@ -140,6 +140,41 @@ export class FractoData extends Component {
       })
    }
 
+   static short_codes_in_scope = (level, focal_point, scope, aspect_ratio = 1.0, verbs = [BIN_VERB_COMPLETED, BIN_VERB_INDEXED]) => {
+      const width_by_two = scope / 2;
+      const height_by_two = width_by_two * aspect_ratio;
+      const viewport = {
+         left: focal_point.x - width_by_two,
+         top: focal_point.y + height_by_two,
+         right: focal_point.x + width_by_two,
+         bottom: focal_point.y - height_by_two,
+      }
+      let level_keys = []
+      verbs.forEach(verb => {
+         FractoData.get_cached_tiles(level, verb)
+         const tiles_to_add = LEVEL_SCOPES[level][verb];
+         const keys_to_add = Object.keys(tiles_to_add)
+         level_keys = level_keys.concat(keys_to_add)
+      })
+      // console.log(`${level_keys.length} tiles for level ${level}`)
+      return level_keys.filter(key => {
+         const bounds = FractoUtil.bounds_from_short_code(key)
+         if (bounds.right < viewport.left) {
+            return false;
+         }
+         if (bounds.left > viewport.right) {
+            return false;
+         }
+         if (bounds.top < viewport.bottom) {
+            return false;
+         }
+         if (bounds.bottom > viewport.top) {
+            return false;
+         }
+         return true;
+      })
+   }
+
    static tiles_cache = {}
 
    static get_tile = (short_code, bin) => {

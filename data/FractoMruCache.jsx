@@ -102,6 +102,9 @@ export class FractoMruCache {
          delete CACHE_MRU[short_code]
          delete TILE_CACHE[short_code]
       }
+      const new_cache = Object.assign({}, TILE_CACHE)
+      TILE_CACHE = null
+      TILE_CACHE = new_cache
    }
 
 }
