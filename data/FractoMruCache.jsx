@@ -1,7 +1,7 @@
 import network from "common/config/network.json";
 
 const URL_BASE = network.fracto_server_url;
-const MAX_TILE_CACHE = 150;
+const MAX_TILE_CACHE = 500;
 
 export var TILE_CACHE = {};
 var CACHE_MRU = {};
@@ -82,7 +82,7 @@ export class FractoMruCache {
          cb(true)
          return;
       }
-      // console.log(`chunking ${filtered_list.length} tiles`)
+      console.log(`chunking ${filtered_list.length} tiles`)
       FractoMruCache.fetch_chunk(filtered_list, cb)
    }
 
@@ -90,7 +90,7 @@ export class FractoMruCache {
       const cache_keys = Object.keys(TILE_CACHE).sort((a, b) =>
          CACHE_MRU[a] - CACHE_MRU[b])
       if (cache_keys.length < MAX_TILE_CACHE) {
-         console.log("no cleanup required")
+         // console.log("no cleanup required")
          return;
       }
       console.log(`cleanup_cache ${cache_keys.length} tiles in cache`)

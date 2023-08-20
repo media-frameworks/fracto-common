@@ -49,7 +49,6 @@ export class FractoLayeredCanvas extends Component {
    }
 
    static defaultProps = {
-      high_quality: false,
       quality: QUALITY_MEDIUM,
       highlight_points: [],
       aspect_ratio: 1.0
@@ -70,7 +69,7 @@ export class FractoLayeredCanvas extends Component {
       }
       const ctx = canvas.getContext('2d');
       this.setState({ctx: ctx})
-      setTimeout(()=>{
+      setTimeout(() => {
          this.fill_canvas()
       }, 100)
    }
@@ -80,7 +79,8 @@ export class FractoLayeredCanvas extends Component {
       const focal_point_y_changed = prevProps.focal_point.y !== this.props.focal_point.y;
       const scope_changed = prevProps.scope !== this.props.scope;
       const level_changed = prevProps.level !== this.props.level;
-      if (!focal_point_x_changed && !focal_point_y_changed && !scope_changed && !level_changed) {
+      const width_changed = prevProps.width_px !== this.props.width_px;
+      if (!focal_point_x_changed && !focal_point_y_changed && !scope_changed && !level_changed && !width_changed) {
          return;
       }
       this.fill_canvas();
@@ -154,9 +154,11 @@ export class FractoLayeredCanvas extends Component {
       }
       for (let tile_index = 0; tile_index < short_codes.length; tile_index++) {
          const short_code = short_codes[tile_index];
-         const tile_data = JSON.parse (TILE_CACHE[short_code]);
-         const tile_bounds = FractoUtil.bounds_from_short_code(short_code)
-         this.fill_tile(canvas_bounds, tile_bounds, tile_data, bg_factor, ctx);
+         if (TILE_CACHE[short_code]) {
+            const tile_data = JSON.parse(TILE_CACHE[short_code]);
+            const tile_bounds = FractoUtil.bounds_from_short_code(short_code)
+            this.fill_tile(canvas_bounds, tile_bounds, tile_data, bg_factor, ctx);
+         }
       }
       cb(true)
    }

@@ -32,6 +32,9 @@ export const get_ideal_level = (width_px, scope, quality_factor = 1.99) => {
 
    let ideal_level = -1;
    for (let i = 0; i <= MAX_LEVEL; i++) {
+      if (!LEVEL_SCOPES[i]) {
+         continue;
+      }
       if (LEVEL_SCOPES[i].scope < ideal_tile_scope) {
          ideal_level = i;
          break;
@@ -185,7 +188,7 @@ export class FractoData extends Component {
    static get_cached_tiles = (level, verb, force=false) => {
       const cache_key = `${verb}_${level}`;
       if (!FractoData.tiles_cache[cache_key] || force) {
-         console.log(`building cache for ${verb} tiles on level ${level}`)
+         // console.log(`building cache for ${verb} tiles on level ${level}`)
          if (!LEVEL_SCOPES[level]) {
             console.log("get_cached_tiles error LEVEL_SCOPES, level", LEVEL_SCOPES, level)
             return null;

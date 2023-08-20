@@ -5,30 +5,36 @@ import styled from "styled-components";
 // import {AppStyles} from "app/AppImports";
 
 import FractoData from "../data/FractoData";
-import FractoMruCache from "../data/FractoMruCache";
+import FractoMruCache, {TILE_CACHE} from "../data/FractoMruCache";
 import FractoUtil from "../FractoUtil";
 
 const FractoCanvas = styled.canvas`
-   margin: 1rem;
+   margin: 0;
 `;
 
 export class FractoRasterCanvas extends Component {
 
    static propTypes = {
       width_px: PropTypes.number.isRequired,
-      aspect_ratio: PropTypes.number.isRequired,
       focal_point: PropTypes.object.isRequired,
       scope: PropTypes.number.isRequired,
       level: PropTypes.number.isRequired,
+      aspect_ratio: PropTypes.number,
+      on_plan_complete: PropTypes.func
    }
 
    static tile_cache = {};
    static cache_mru = {};
 
+   static defaultProps = {
+      aspect_ratio: 1.0
+   }
+
    state = {
       canvas_ref: React.createRef(),
       loading_tiles: true,
-      highest_mru: 0
+      highest_mru: 0,
+      local_cache: {}
    };
 
    componentDidMount() {
@@ -51,52 +57,67 @@ export class FractoRasterCanvas extends Component {
    }
 
    run_plan = (plan, all_tiles, ctx, cb) => {
+      const {local_cache} = this.state
+      const {width_px, aspect_ratio} = this.props;
       if (!plan.length) {
          cb(true);
          return;
       }
-      const {x, y, img_x, img_y} = plan.shift();
-      for (let i = 0; i < 4; i++) {
-         const tile = all_tiles[i].find(tile => {
-            if (tile.bounds.right < x) {
-               return false;
+      ctx.fillStyle = "white"
+      ctx.fillRect(0, 0, width_px, width_px * aspect_ratio);
+      for (let point_index = 0; point_index < plan.length; point_index++) {
+         const x = plan[point_index].x
+         const y = plan[point_index].y
+         const img_x = plan[point_index].img_x
+         const img_y = plan[point_index].img_y
+
+         // if (point_index % 10000 === 0) {
+         //    console.log(`${point_index} of ${plan.length}`)
+         // }
+         let completed = false
+         for (let i = 0; i < all_tiles.length && !completed; i++) {
+            if (!all_tiles[i].length) {
+               continue;
             }
-            if (tile.bounds.left > x) {
-               return false;
+            const tile_width = all_tiles[i][0].bounds.right - all_tiles[i][0].bounds.left
+            const one_by_tile_width = 1 / tile_width
+            const tile = all_tiles[i].find(tile => {
+               if (tile.bounds.right < x) {
+                  return false;
+               }
+               if (tile.bounds.left > x) {
+                  return false;
+               }
+               if (tile.bounds.top < y) {
+                  return false;
+               }
+               if (tile.bounds.bottom > y) {
+                  return false;
+               }
+               return true;
+            });
+            if (!tile) {
+               continue;
             }
-            if (tile.bounds.top < y) {
-               return false;
+            if (!local_cache[tile.short_code]) {
+               local_cache[tile.short_code] = JSON.parse(TILE_CACHE[tile.short_code])
+               // console.log("local_cache[tile.short_code]", tile.short_code, local_cache[tile.short_code])
             }
-            if (tile.bounds.bottom > y) {
-               return false;
-            }
-            return true;
-         });
-         if (!tile) {
-            continue;
-         }`
-         FractoMruCache.get_tile_data(tile.short_code, point_data => {`
-            const tile_width = tile.bounds.right - tile.bounds.left
-            const tile_x = Math.floor(255 * (x - tile.bounds.left) / tile_width);
-            const tile_y = Math.floor(255 * (tile.bounds.top - y) / tile_width);
+            const point_data = local_cache[tile.short_code]
+            const tile_x = Math.floor(255 * (x - tile.bounds.left) * one_by_tile_width);
+            const tile_y = Math.floor(255 * (tile.bounds.top - y) * one_by_tile_width);
             const [pattern, iterations] = point_data[tile_x][tile_y];
             const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(pattern, iterations)
             ctx.fillStyle = `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`
             ctx.fillRect(img_x, img_y, 1, 1);
-            if (!img_y) {
-               setTimeout(() => {
-                  this.run_plan(plan, all_tiles, ctx, cb)
-               }, 0)
-            } else {
-               this.run_plan(plan, all_tiles, ctx, cb)
-            }
-         })
-         return;
+            completed = true;
+         }
       }
+      cb(true)
    }
 
    raster_canvas = (ctx) => {
-      const {width_px, aspect_ratio, level, focal_point, scope} = this.props;
+      const {width_px, aspect_ratio, level, focal_point, scope, on_plan_complete} = this.props;
 
       const all_tiles = new Array(4).fill([])
       all_tiles[0] = FractoData.tiles_in_scope(level, focal_point, scope, aspect_ratio);
@@ -115,22 +136,24 @@ export class FractoRasterCanvas extends Component {
       const increment = scope / width_px;
       const height_px = width_px * aspect_ratio;
 
+      console.log("width_px, height_px", width_px, height_px)
       let plan = new Array(width_px * height_px);
       let index = 0;
       for (let img_x = 0; img_x < width_px; img_x++) {
          const x = left_edge + img_x * increment;
          for (let img_y = 0; img_y < height_px; img_y++) {
             const y = top_edge - img_y * increment;
-            plan[index++] = {x: x, y: y, img_x: img_x, img_y: img_y}
+            plan[index++] = {x: x, y: Math.abs(y), img_x: img_x, img_y: img_y}
          }
       }
 
-      console.log("all_shortcodes",all_shortcodes)
+      console.log("all_shortcodes", all_shortcodes)
       FractoMruCache.get_tiles_async(all_shortcodes, result => {
          console.log("raster operation begins")
          this.run_plan(plan, all_tiles, ctx, on_complete => {
             console.log("raster operation complete")
             this.setState({loading_tiles: false})
+            on_plan_complete(on_complete)
          })
       })
 
@@ -138,7 +161,6 @@ export class FractoRasterCanvas extends Component {
 
    fill_canvas = () => {
       const {canvas_ref} = this.state;
-      const {width_px, aspect_ratio} = this.props;
 
       const canvas = canvas_ref.current;
       if (!canvas) {
@@ -146,8 +168,6 @@ export class FractoRasterCanvas extends Component {
          return;
       }
       const ctx = canvas.getContext('2d');
-      ctx.fillStyle = "white"
-      ctx.fillRect(0, 0, width_px, width_px * aspect_ratio);
       this.raster_canvas(ctx)
    }
 

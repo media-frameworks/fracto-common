@@ -17,19 +17,16 @@ export const DEFAULT_FRACTO_VALUES = {
 const HighlightBox = styled.div`
    position: fixed;
    border: 1px solid white;
-   pointer-events: none;
 `;
 
 const SelectedTileBox = styled.div`
    position: fixed;
    border: 2px dashed white;
-   pointer-events: none;
 `;
 
 const SelectedTileBoxOutline = styled.div`
    position: fixed;
    border: 2px dashed #888888;
-   pointer-events: none;
 `;
 
 var COLOR_CACHE = {};
@@ -37,8 +34,8 @@ var CACHE_HITS = 0;
 var CACHE_SIZE = 0;
 
 setInterval(() => {
-   console.log(`CACHE_HITS=${CACHE_HITS}, CACHE_SIZE=${CACHE_SIZE}`)
-   if (CACHE_SIZE > 10000) {
+   // console.log(`CACHE_HITS=${CACHE_HITS}, CACHE_SIZE=${CACHE_SIZE}`)
+   if (CACHE_SIZE > 500000) {
       console.log("resetting COLOR_CACHE")
       const color_keys = Object.keys(COLOR_CACHE)
       for (let i = 0; i < color_keys.length; i++) {
@@ -46,6 +43,7 @@ setInterval(() => {
       }
       COLOR_CACHE = {}
       CACHE_SIZE = 0
+      CACHE_HITS = 0
    }
 }, 10000)
 
@@ -297,7 +295,7 @@ export class FractoUtil {
       })
    }
 
-   static render_tile_outline = (wrapper_ref, bounds, focal_point, scope, width_px) => {
+   static render_tile_outline = (wrapper_ref, bounds, focal_point, scope, width_px, color = 'white') => {
       const pixel_width = scope / width_px;
       const half_width_px = width_px / 2;
       const half_height_px = width_px / 2;
@@ -307,12 +305,14 @@ export class FractoUtil {
       const box_bottom = half_height_px - (bounds.bottom - focal_point.y) / pixel_width;
       const wrapper_bounds = wrapper_ref.current.getBoundingClientRect();
       const white_border = {
+         border: `2px dashed ${color}`,
          left: `${box_left + wrapper_bounds.left}px`,
          top: `${box_top + wrapper_bounds.top}px`,
          width: `${box_right - box_left}px`,
          height: `${box_bottom - box_top}px`
       };
       const black_border = {
+         border: `2px dashed ${color === 'white' ? '#888888' : '#444444'}`,
          left: `${box_left + wrapper_bounds.left - 2}px`,
          top: `${box_top + wrapper_bounds.top - 2}px`,
          width: `${box_right - box_left + 4}px`,
