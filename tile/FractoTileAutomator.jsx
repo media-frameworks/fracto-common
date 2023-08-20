@@ -193,14 +193,10 @@ export class FractoTileAutomator extends Component {
       }
       const active_tile = all_tiles[tile_index]
       const details_width_px = width_px - (CONTEXT_SIZE_PX + CONTEXT_SIZE_PX) - 60 - 2 * WRAPPER_MARGIN_PX
-      let all_details = []
-      if (run_history.length && on_render_detail) {
-         all_details = this.render_tab_details()
-      } else if (run_history.length) {
-         all_details = this.render_run_history()
-      } else if (on_render_detail) {
-         all_details = on_render_detail(active_tile, details_width_px)
-      }
+      const all_details = [
+         on_render_detail ? on_render_detail(active_tile, details_width_px) : '',
+         run_history.length ? this.render_run_history() : ''
+      ]
       return <FieldWrapper>
          <AutomateWrapper>
             <FractoTileAutomate
