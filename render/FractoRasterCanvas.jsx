@@ -47,9 +47,10 @@ export class FractoRasterCanvas extends Component {
       const scope_changed = prevProps.scope !== this.props.scope;
       const level_changed = prevProps.level !== this.props.level;
       if (!focal_point_x_changed && !focal_point_y_changed && !scope_changed && !level_changed) {
+         console.log("no update")
          return;
       }
-      if (prevState.loading_tiles || this.state.loading_tiles) {
+      if (this.state.loading_tiles) {
          return;
       }
       this.setState({loading_tiles: true})
@@ -118,6 +119,7 @@ export class FractoRasterCanvas extends Component {
 
    raster_canvas = (ctx) => {
       const {width_px, aspect_ratio, level, focal_point, scope, on_plan_complete} = this.props;
+      console.log("raster_canvas")
 
       const all_tiles = new Array(4).fill([])
       all_tiles[0] = FractoData.tiles_in_scope(level, focal_point, scope, aspect_ratio);

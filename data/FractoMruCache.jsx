@@ -1,12 +1,13 @@
 import network from "common/config/network.json";
 
 const URL_BASE = network.fracto_server_url;
-const MAX_TILE_CACHE = 500;
+const TILE_SERVER_BASE = network.tile_server_url;
+const MAX_TILE_CACHE = 350;
 
 export var TILE_CACHE = {};
 var CACHE_MRU = {};
 
-setInterval(()=>{
+setInterval(() => {
    FractoMruCache.cleanup_cache();
 }, 10000)
 
@@ -45,7 +46,7 @@ export class FractoMruCache {
    }
 
    static fetch_chunk = (filtered_list, cb) => {
-      const chunkSize = 25;
+      const chunkSize = 100;
       const chunk = []
       for (let i = 0; i < chunkSize; i++) {
          if (!filtered_list.length) {
@@ -55,8 +56,23 @@ export class FractoMruCache {
       }
       // console.log(`chunk size: ${chunk.length}`)
       const short_code_list = chunk.join(',')
-      const url = `${URL_BASE}/get_tiles.php?short_codes=${short_code_list}`
-      fetch(url)
+      // const url = `${URL_BASE}/get_tiles.php?short_codes=${short_code_list}`
+      // fetch(url)
+      //    .then(response => response.json())
+      //    .then(json => {
+      //       const keys = Object.keys(json["tiles"])
+      //       for (let i = 0; i < keys.length; i++) {
+      //          const short_code = keys[i];
+      //          TILE_CACHE[short_code] = FractoMruCache.serialize_tile(json["tiles"][short_code]);
+      //       }
+      //       if (filtered_list.length) {
+      //          FractoMruCache.fetch_chunk(filtered_list, cb)
+      //       } else {
+      //          cb(true);
+      //       }
+      //    })
+      const local_url = `${TILE_SERVER_BASE}/get_tiles?short_codes=${short_code_list}`
+      fetch(local_url)
          .then(response => response.json())
          .then(json => {
             const keys = Object.keys(json["tiles"])

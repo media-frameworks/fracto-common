@@ -35,8 +35,9 @@ export class FractoAlterableOutline extends Component {
    }
 
    start_drag = (e) => {
+      const {in_drag} = this.state
       const {focal_point, disabled} = this.props
-      if (disabled) {
+      if (disabled || in_drag) {
          return
       }
       console.log("start_drag")
@@ -51,8 +52,11 @@ export class FractoAlterableOutline extends Component {
    }
 
    end_drag = (e) => {
-      const {dragging_focal_point} = this.state
+      const {dragging_focal_point, in_drag} = this.state
       const {on_focal_point_change} = this.props
+      if (!in_drag) {
+         return
+      }
       this.setState({in_drag: false})
       window.removeEventListener("mouseup", this.end_drag);
       window.removeEventListener("mousemove", this.on_mouse_move);

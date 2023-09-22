@@ -102,6 +102,9 @@ export class FractoData extends Component {
    }
 
    static tiles_in_scope = (level, focal_point, scope, aspect_ratio = 1.0, verbs = [BIN_VERB_COMPLETED, BIN_VERB_INDEXED]) => {
+      if (level < 3) {
+         return []
+      }
       const width_by_two = scope / 2;
       const height_by_two = width_by_two * aspect_ratio;
       const viewport = {
@@ -188,7 +191,7 @@ export class FractoData extends Component {
    static get_cached_tiles = (level, verb, force=false) => {
       const cache_key = `${verb}_${level}`;
       if (!FractoData.tiles_cache[cache_key] || force) {
-         // console.log(`building cache for ${verb} tiles on level ${level}`)
+         console.log(`building cache for ${verb} tiles on level ${level}`)
          if (!LEVEL_SCOPES[level]) {
             console.log("get_cached_tiles error LEVEL_SCOPES, level", LEVEL_SCOPES, level)
             return null;
