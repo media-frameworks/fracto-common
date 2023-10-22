@@ -2,6 +2,7 @@ import styled from "styled-components";
 
 import network from "common/config/network.json";
 import ComplexQuarternary from "common/math/ComplexQuarternary";
+import CoolStyles from "../../common/ui/CoolStyles";
 
 const EPSILON = 0.0000000001;
 const ONE_BY_LOG_TEN_THOUSAND = 1 / Math.log(10000);
@@ -15,8 +16,22 @@ export const DEFAULT_FRACTO_VALUES = {
 };
 
 const HighlightBox = styled.div`
+   ${CoolStyles.pointer}
    position: fixed;
    border: 1px solid white;
+`;
+
+const HighlightLabel = styled.div`
+   ${CoolStyles.monospace}
+   ${CoolStyles.narrow_text_shadow}
+   ${CoolStyles.pointer}
+   position: fixed;
+   color: white;
+   font-size: 0.85rem;
+   opacity: 0.75;
+   &: hover {
+      opacity: 1.0;
+   }
 `;
 
 const SelectedTileBox = styled.div`
@@ -30,11 +45,9 @@ const SelectedTileBoxOutline = styled.div`
 `;
 
 var COLOR_CACHE = {};
-var CACHE_HITS = 0;
 var CACHE_SIZE = 0;
 
 setInterval(() => {
-   // console.log(`CACHE_HITS=${CACHE_HITS}, CACHE_SIZE=${CACHE_SIZE}`)
    if (CACHE_SIZE > 500000) {
       console.log("resetting COLOR_CACHE")
       const color_keys = Object.keys(COLOR_CACHE)
@@ -43,7 +56,6 @@ setInterval(() => {
       }
       COLOR_CACHE = {}
       CACHE_SIZE = 0
-      CACHE_HITS = 0
    }
 }, 10000)
 
@@ -123,7 +135,6 @@ export class FractoUtil {
       }
       const cache_key = `(${pattern},${iterations})`;
       if (COLOR_CACHE[cache_key]) {
-         CACHE_HITS++;
          return COLOR_CACHE[cache_key];
       }
       if (pattern === 0) {
@@ -258,7 +269,7 @@ export class FractoUtil {
       const leftmost = fracto_values.focal_point.x - scope_x_by_2;
       const topmost = fracto_values.focal_point.y + scope_y_by_2;
 
-      return point_highlights.map(point_highlight => {
+      return point_highlights.map((point_highlight, i) => {
 
          if (point_highlight.x < leftmost || point_highlight.x > leftmost + fracto_values.scope) {
             return [];
@@ -270,27 +281,46 @@ export class FractoUtil {
          const img_y = image_bounds.height * (topmost - point_highlight.y) / (fracto_values.scope * aspect_ratio) - 1
 
          const highlight_outline_1 = {
-            left: image_bounds.left + img_x - 5,
-            top: image_bounds.top + img_y - 5,
-            width: 10,
-            height: 10,
+            left: image_bounds.left + img_x - 4,
+            top: image_bounds.top + img_y - 4,
+            width: 8,
+            height: 8,
          }
          const highlight_outline_2 = {
-            left: image_bounds.left + img_x - 10,
-            top: image_bounds.top + img_y - 10,
-            width: 20,
-            height: 20,
+            left: image_bounds.left + img_x - 8,
+            top: image_bounds.top + img_y - 8,
+            width: 16,
+            height: 16,
          }
          const highlight_outline_3 = {
-            left: image_bounds.left + img_x - 15,
-            top: image_bounds.top + img_y - 15,
-            width: 30,
-            height: 30,
+            left: image_bounds.left + img_x - 12,
+            top: image_bounds.top + img_y - 12,
+            width: 24,
+            height: 24,
          }
+         const highlight_label = {
+            left: image_bounds.left + img_x + point_highlight.box_count * 8,
+            top: image_bounds.top + img_y - point_highlight.box_count * 4,
+         }
+         let box_count = point_highlight.box_count ? point_highlight.box_count : 3
          return [
-            <HighlightBox style={highlight_outline_1}/>,
-            <HighlightBox style={highlight_outline_2}/>,
-            <HighlightBox style={highlight_outline_3}/>,
+            <HighlightBox
+               style={highlight_outline_1}
+               key={"box_1"}
+               title={point_highlight.label ? point_highlight.label : "highlight"}
+            />,
+            box_count > 1 ? <HighlightBox
+               style={highlight_outline_2}
+               key={"box_2"}
+               title={point_highlight.label ? point_highlight.label : "highlight"}
+            /> : '',
+            box_count > 2 ? <HighlightBox
+               style={highlight_outline_3}
+               key={"box_3"}
+               title={point_highlight.label ? point_highlight.label : "highlight"}
+            /> : '',
+            point_highlight.label && i < 6 ?
+               <HighlightLabel style={highlight_label}>{point_highlight.label}</HighlightLabel> : ''
          ]
       })
    }

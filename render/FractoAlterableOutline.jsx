@@ -2,8 +2,6 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import styled from "styled-components";
 
-import {CoolColors} from 'common/ui/CoolImports';
-
 import FractoUtil from "../FractoUtil";
 
 const OutlineWrapper = styled.div`

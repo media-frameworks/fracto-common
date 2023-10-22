@@ -2,10 +2,9 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import styled from "styled-components";
 
-import FractoData, {HIGH_QUALITY} from "../data/FractoData";
+import FractoData from "../data/FractoData";
 import FractoUtil from "../FractoUtil";
 import FractoMruCache, {TILE_CACHE} from "../data/FractoMruCache"
-import {CoolStyles} from "../../../common/ui/CoolImports";
 
 const FractoCanvas = styled.canvas`
    margin: 0;
@@ -134,7 +133,6 @@ export class FractoLayeredCanvas extends Component {
    }
 
    fill_layer = (level, canvas_bounds, bg_factor, ctx, cb) => {
-      const {plan_step} = this.state
       const {focal_point, scope, aspect_ratio} = this.props;
       if (level < 2) {
          console.log("invalid level", level)

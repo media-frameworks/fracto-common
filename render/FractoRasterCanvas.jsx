@@ -2,13 +2,14 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import styled from "styled-components";
 
-// import {AppStyles} from "app/AppImports";
+import {CoolStyles} from "common/ui/CoolImports";
 
 import FractoData from "../data/FractoData";
 import FractoMruCache, {TILE_CACHE} from "../data/FractoMruCache";
 import FractoUtil from "../FractoUtil";
 
-const FractoCanvas = styled.canvas`
+const FractoCanvas = styled.canvas`   
+   ${CoolStyles.narrow_box_shadow}
    margin: 0;
 `;
 
@@ -20,13 +21,15 @@ export class FractoRasterCanvas extends Component {
       scope: PropTypes.number.isRequired,
       level: PropTypes.number.isRequired,
       aspect_ratio: PropTypes.number,
-      on_plan_complete: PropTypes.func
+      on_plan_complete: PropTypes.func,
+      highlight_points: PropTypes.array
    }
 
    static tile_cache = {};
    static cache_mru = {};
 
    static defaultProps = {
+      highlight_points: [],
       aspect_ratio: 1.0
    }
 
@@ -47,7 +50,7 @@ export class FractoRasterCanvas extends Component {
       const scope_changed = prevProps.scope !== this.props.scope;
       const level_changed = prevProps.level !== this.props.level;
       if (!focal_point_x_changed && !focal_point_y_changed && !scope_changed && !level_changed) {
-         console.log("no update")
+         // console.log("no update")
          return;
       }
       if (this.state.loading_tiles) {
@@ -175,15 +178,23 @@ export class FractoRasterCanvas extends Component {
 
    render() {
       const {canvas_ref, loading_tiles} = this.state;
-      const {width_px, aspect_ratio} = this.props;
+      const {width_px, aspect_ratio, highlight_points, scope, focal_point} = this.props;
       const height_px = width_px * aspect_ratio;
       const canvas_style = {cursor: loading_tiles ? "wait" : "crosshair"}
-      return <FractoCanvas
-         ref={canvas_ref}
-         style={canvas_style}
-         width={width_px}
-         height={height_px}
-      />
+      let highlights = ''
+      if (highlight_points.length && !loading_tiles) {
+         const fracto_values = {scope: scope, focal_point: focal_point}
+         highlights = FractoUtil.highlight_points(canvas_ref, fracto_values, highlight_points)
+      }
+      return [
+         <FractoCanvas
+            ref={canvas_ref}
+            style={canvas_style}
+            width={width_px}
+            height={height_px}
+         />,
+         highlights
+      ]
    }
 }
 
