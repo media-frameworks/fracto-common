@@ -57,13 +57,27 @@ export class RasterCanvas3D extends Component {
       const {width_px, grid_vectors, controls, on_render_pixel, on_plan_complete} = this.props
       const x_increment = 2 / width_px
       const y_increment = 2 / height_px
+      const max_angle = (Math.PI * controls.field_span_deg) / (2 * 100)
+      let half_width_px = Math.round(width_px / 2)
+      if (half_width_px % 1 === 0) {
+         half_width_px += 1
+      }
+      const angle_increment = max_angle / half_width_px
+      const all_scalars = new Array(width_px)
+         .fill(0)
+         .map((naught, i) => {
+         return Math.tan(max_angle - i * angle_increment)
+      })
+
       ctx.fillStyle = "white"
       ctx.fillRect(0, 0, width_px, height_px);
       for (let img_x = 0; img_x < width_px; img_x++) {
-         const x_scalar = 1.0 - img_x * x_increment
+         // const x_scalar = 1.0 - img_x * x_increment
+         const x_scalar = all_scalars[img_x]
          const x_component = Vector3d.scale(grid_vectors.h_grid_vector, x_scalar)
          for (let img_y = 0; img_y < height_px; img_y++) {
-            const y_scalar = 1.0 - img_y * y_increment
+            // const y_scalar = 1.0 - img_y * y_increment
+            const y_scalar = all_scalars[img_y]
             const y_component = Vector3d.scale(grid_vectors.v_grid_vector, y_scalar)
             const pixel_vector = Vector3d.sum(x_component, y_component)
             const z_factor = (-grid_vectors.pov_vector.direction.z) / (pixel_vector.direction.z - grid_vectors.pov_vector.direction.z)

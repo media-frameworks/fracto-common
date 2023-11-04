@@ -7,7 +7,6 @@ import {CoolStyles} from "common/ui/CoolImports";
 import FractoData from "../data/FractoData";
 import FractoMruCache, {TILE_CACHE} from "../data/FractoMruCache";
 import FractoUtil from "../FractoUtil";
-import FractoCalc from "../data/FractoCalc";
 
 const FractoCanvas = styled.canvas`   
    ${CoolStyles.narrow_box_shadow}
@@ -46,13 +45,11 @@ export class FractoRasterCanvas extends Component {
    }
 
    componentDidUpdate(prevProps, prevState, snapshot) {
-      const width_px_changed = prevProps.width_px !== this.props.width_px;
-      const aspect_ratio_changed = prevProps.aspect_ratio !== this.props.aspect_ratio;
       const focal_point_x_changed = prevProps.focal_point.x !== this.props.focal_point.x;
       const focal_point_y_changed = prevProps.focal_point.y !== this.props.focal_point.y;
       const scope_changed = prevProps.scope !== this.props.scope;
       const level_changed = prevProps.level !== this.props.level;
-      if (!focal_point_x_changed && !focal_point_y_changed && !scope_changed && !level_changed && !width_px_changed && !aspect_ratio_changed) {
+      if (!focal_point_x_changed && !focal_point_y_changed && !scope_changed && !level_changed) {
          // console.log("no update")
          return;
       }
@@ -70,23 +67,13 @@ export class FractoRasterCanvas extends Component {
          cb(true);
          return;
       }
-      ctx.fillStyle = FractoUtil.fracto_pattern_color(0, 4)
+      ctx.fillStyle = "white"
       ctx.fillRect(0, 0, width_px, width_px * aspect_ratio);
       for (let point_index = 0; point_index < plan.length; point_index++) {
          const x = plan[point_index].x
          const y = plan[point_index].y
          const img_x = plan[point_index].img_x
          const img_y = plan[point_index].img_y
-
-         const magnitude = Math.sqrt(x * x + y * y)
-         if (magnitude > 2 && magnitude < 2.25) {
-            const calc_values = FractoCalc.calc(x, y)
-            const iteration = calc_values.iteration - 1 < 4 ? 4 : calc_values.iteration - 1
-            const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(calc_values.pattern, iteration)
-            ctx.fillStyle = `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`
-            ctx.fillRect(img_x, img_y, 1, 1);
-            continue;
-         }
 
          // if (point_index % 10000 === 0) {
          //    console.log(`${point_index} of ${plan.length}`)
@@ -117,7 +104,7 @@ export class FractoRasterCanvas extends Component {
                continue;
             }
             if (!local_cache[tile.short_code]) {
-               local_cache[tile.short_code] = JSON.parse(TILE_CACHE[tile.short_code])
+               local_cache[tile.short_code] = TILE_CACHE[tile.short_code]
                // console.log("local_cache[tile.short_code]", tile.short_code, local_cache[tile.short_code])
             }
             const point_data = local_cache[tile.short_code]
