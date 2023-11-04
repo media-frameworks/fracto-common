@@ -31,7 +31,7 @@ export const get_ideal_level = (width_px, scope, quality_factor = 1.99) => {
    const ideal_tile_scope = scope / ideal_tiles_across;
 
    let ideal_level = -1;
-   for (let i = 3; i <= MAX_LEVEL; i++) {
+   for (let i = 2; i <= MAX_LEVEL; i++) {
       if (!LEVEL_SCOPES[i]) {
          continue;
       }
@@ -40,8 +40,8 @@ export const get_ideal_level = (width_px, scope, quality_factor = 1.99) => {
          break;
       }
    }
-   if (ideal_level < 3) {
-      ideal_level = 3;
+   if (ideal_level < 2) {
+      ideal_level = 2;
    }
    return ideal_level;
 }
@@ -79,14 +79,9 @@ export class FractoData extends Component {
                const values = lines[line_index].split(',');
                const short_code = String(values[0]);
                const level = short_code.length;
+               const bounds = FractoUtil.bounds_from_short_code(short_code)
                if (LEVEL_SCOPES[level]) {
-                  LEVEL_SCOPES[level][verb][short_code] = true
-                  //    LEVEL_SCOPES[level][verb][short_code] = {
-                  //    left: parseFloat(values[1]),
-                  //    top: parseFloat(values[2]),
-                  //    right: parseFloat(values[3]),
-                  //    bottom: parseFloat(values[4]),
-                  // }
+                  LEVEL_SCOPES[level][verb][short_code] = bounds
                }
                FractoData.loading_progress_pct[verb] = Math.round(1000 * line_index / lines.length) / 10;
             }
@@ -105,7 +100,7 @@ export class FractoData extends Component {
    }
 
    static tiles_in_scope = (level, focal_point, scope, aspect_ratio = 1.0, verbs = [BIN_VERB_COMPLETED, BIN_VERB_INDEXED]) => {
-      if (level < 3 || level > 34) {
+      if (level < 2 || level > 34) {
          return []
       }
       const width_by_two = scope / 2;

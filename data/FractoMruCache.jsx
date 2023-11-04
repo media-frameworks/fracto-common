@@ -2,7 +2,7 @@ import network from "common/config/network.json";
 
 const URL_BASE = network.fracto_server_url;
 const TILE_SERVER_BASE = network.tile_server_url;
-const MAX_TILE_CACHE = 350;
+const MAX_TILE_CACHE = 500;
 
 export var TILE_CACHE = {};
 var CACHE_MRU = {};
@@ -16,16 +16,19 @@ export class FractoMruCache {
    static highest_mru = 0;
 
    static serialize_tile = (data) => {
-      return JSON.stringify(data)
+      // return JSON.stringify(data)
+      return data
    }
 
    static deserialize_tile = (data) => {
-      return JSON.parse(data)
+      return data
+      // return JSON.parse(data)
    }
 
    static get_tile_data = (short_code, cb) => {
       CACHE_MRU[short_code] = FractoMruCache.highest_mru++;
-      if (!TILE_CACHE[short_code]) {
+      if (!(short_code in TILE_CACHE)) {
+         // console.log(`loading tile ${short_code}`)
          const url = `${URL_BASE}/get_tiles.php?short_codes=${short_code}`
          fetch(url).then(response => {
             // console.log("response", response)
@@ -40,6 +43,7 @@ export class FractoMruCache {
             }
          })
       } else {
+         // console.log(`cached tile ${short_code}`)
          const tile_data = FractoMruCache.deserialize_tile(TILE_CACHE[short_code])
          cb(tile_data)
       }
