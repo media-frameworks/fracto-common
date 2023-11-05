@@ -39,22 +39,43 @@ export class FractoIncrementalRender extends Component {
       ctx: null,
       canvas_buffer: null,
       canvas_ref: React.createRef(),
-      update_ready: false,
-      lowest_iteration: 1000000
+      loading_tiles: true,
+      lowest_iteration: 1000000,
+      height_px: 0
    }
 
    componentDidMount() {
       const {canvas_ref} = this.state;
+      const {width_px, aspect_ratio} = this.props;
       const canvas = canvas_ref.current;
       if (!canvas) {
          console.log('no canvas');
          return;
       }
       const ctx = canvas.getContext('2d');
-      this.setState({ctx: ctx})
+      let height_px = Math.round(width_px * aspect_ratio);
+      if (height_px & 1) {
+         height_px -= 1
+      }
+      this.setState({
+         height_px: height_px,
+         ctx: ctx
+      })
+      this.load_all_levels(2, () => {
+         const canvas_buffer = this.init_canvas_buffer()
+         this.fill_canvas_buffer(canvas_buffer, ctx)
+      })
+   }
 
-      const canvas_buffer = this.init_canvas_buffer()
-      this.fill_canvas_buffer(canvas_buffer, ctx)
+   load_all_levels = (start_at, when_complete) => {
+      if (start_at > 35) {
+         when_complete()
+         return;
+      }
+      FractoIndexedTiles.get_level_tiles(start_at, result => {
+         // console.log(`loaded level ${start_at}`)
+         this.load_all_levels(start_at + 1, when_complete)
+      })
    }
 
    componentDidUpdate(prevProps, prevState, snapshot) {
@@ -86,17 +107,16 @@ export class FractoIncrementalRender extends Component {
          height_px -= 1
       }
       const canvas_buffer = new Array(width_px).fill(0).map(() => new Array(height_px).fill([0, 4]));
-      this.setState({canvas_buffer: canvas_buffer,})
+      this.setState({
+         canvas_buffer: canvas_buffer,
+         height_px: height_px
+      })
       return canvas_buffer
    }
 
    fill_canvas_buffer = (canvas_buffer, ctx) => {
-      const {level, width_px, aspect_ratio, video_id} = this.props
-      let height_px = Math.round(width_px * aspect_ratio);
-      if (height_px & 1) {
-         height_px -= 1
-      }
-      let initial_level = level - 2
+      const {level, width_px, video_id} = this.props
+      let initial_level = level - 3
       if (initial_level < 2) {
          initial_level = 2
       }
@@ -104,36 +124,43 @@ export class FractoIncrementalRender extends Component {
          this.add_video_frame(() => {
             const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(0, 4)
             ctx.fillStyle = `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`
-            ctx.fillRect(0, 0, width_px, height_px);
-            this.raster_canvas(canvas_buffer, level, ctx)
+            ctx.fillRect(0, 0, width_px, this.state.height_px);
+            this.raster_canvas(canvas_buffer, initial_level, ctx)
          })
       } else {
          setTimeout(() => {
-            this.raster_canvas(canvas_buffer, level, ctx)
+            for (let img_x = 0; img_x < width_px; img_x++) {
+               for (let img_y = 0; img_y < this.state.height_px; img_y++) {
+                  canvas_buffer[img_x][img_y] = [0, 0]
+               }
+            }
+            this.raster_canvas(canvas_buffer, initial_level, ctx)
          }, 500)
       }
    }
 
    raster_canvas = (canvas_buffer, render_level, ctx) => {
+      const {height_px} = this.state
       const {aspect_ratio, level, focal_point, scope, on_plan_complete, width_px} = this.props;
       const level_tiles = FractoIndexedTiles.tiles_in_scope(render_level, focal_point, scope, aspect_ratio);
-      this.tiles_to_canvas(level_tiles, canvas_buffer, result => {
-         console.log(`level ${render_level} complete: ${result}`)
+      this.tiles_to_canvas(level_tiles, canvas_buffer, 1000000, lower_iteration => {
+         console.log(`level ${render_level} complete: lower_iteration=${lower_iteration}`)
          if (level > render_level) {
             this.raster_canvas(canvas_buffer, render_level + 1, ctx)
          } else {
-            this.setState({loading_tiles: false})
-            let height_px = Math.round(width_px * aspect_ratio);
-            const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(0, this.state.lowest_iteration)
+            const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(0, lower_iteration)
             const default_fillStyle = `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`
             for (let img_x = 0; img_x < width_px; img_x++) {
                for (let img_y = 0; img_y < height_px; img_y++) {
-                  if (canvas_buffer[img_x][img_y][1] < this.state.lowest_iteration) {
+                  const pattern = canvas_buffer[img_x][img_y][0]
+                  const iteration = canvas_buffer[img_x][img_y][1]
+                  if (pattern === 0 && iteration === 0) {
                      ctx.fillStyle = default_fillStyle
                      ctx.fillRect(img_x, img_y, 1, 1);
                   }
                }
             }
+            this.setState({loading_tiles: false})
             on_plan_complete(canvas_buffer)
          }
       })
@@ -162,11 +189,11 @@ export class FractoIncrementalRender extends Component {
       })
    }
 
-   tiles_to_canvas = (level_tiles, canvas_buffer, cb) => {
-      const {ctx, lowest_iteration} = this.state
+   tiles_to_canvas = (level_tiles, canvas_buffer, lowest_iteration, cb) => {
+      const {ctx, height_px} = this.state
       const {width_px, aspect_ratio, scope, focal_point} = this.props;
       if (!level_tiles.length) {
-         cb(true);
+         cb(lowest_iteration);
          return;
       }
       const tile = level_tiles.pop()
@@ -175,12 +202,8 @@ export class FractoIncrementalRender extends Component {
       const left_edge = focal_point.x - scope / 2;
       const top_edge = focal_point.y + aspect_ratio * scope / 2;
       const increment = scope / width_px;
-      let height_px = Math.round(width_px * aspect_ratio);
-      if (height_px & 1) {
-         height_px -= 1
-      }
+      let lower_iteration = lowest_iteration
       FractoMruCache.get_tile_data(tile.short_code, tile_data => {
-         this.tiles_to_canvas(level_tiles, canvas_buffer, cb)
          for (let img_x = 0; img_x < width_px; img_x++) {
             const x = left_edge + img_x * increment;
             if (x < tile.bounds.left) {
@@ -199,28 +222,26 @@ export class FractoIncrementalRender extends Component {
                }
                const tile_x = Math.floor(255 * (x - tile.bounds.left) * one_by_tile_width);
                const tile_y = Math.floor(255 * (tile.bounds.top - Math.abs(y)) * one_by_tile_width);
-               canvas_buffer[img_x][img_y] = tile_data[tile_x][tile_y];
-               const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(
-                  tile_data[tile_x][tile_y][0],
-                  tile_data[tile_x][tile_y][1])
-               ctx.fillStyle = `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`
-               ctx.fillRect(img_x, img_y, 1, 1);
-               if (tile_data[tile_x][tile_y][0] === 0 && tile_data[tile_x][tile_y][1] < lowest_iteration) {
-                  this.setState({lowest_iteration: tile_data[tile_x][tile_y][1]})
+               if (tile_data[tile_x][tile_y]) {
+                  const pattern = tile_data[tile_x][tile_y][0]
+                  const iteration = tile_data[tile_x][tile_y][1]
+                  canvas_buffer[img_x][img_y] = [pattern, iteration];
+                  const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(pattern, iteration)
+                  ctx.fillStyle = `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`
+                  ctx.fillRect(img_x, img_y, 1, 1);
+                  if (pattern === 0 && iteration < lower_iteration) {
+                     lower_iteration = iteration
+                  }
                }
             }
          }
-         this.setState({update_ready: true})
+         this.tiles_to_canvas(level_tiles, canvas_buffer, lower_iteration, cb)
       })
    }
 
    render() {
-      const {canvas_ref, loading_tiles} = this.state;
-      const {width_px, aspect_ratio, highlight_points, scope, focal_point} = this.props;
-      let height_px = Math.round(width_px * aspect_ratio);
-      if (height_px & 1) {
-         height_px -= 1
-      }
+      const {canvas_ref, loading_tiles, height_px} = this.state;
+      const {width_px, highlight_points, scope, focal_point} = this.props;
       const canvas_style = {cursor: loading_tiles ? "wait" : "crosshair"}
       let highlights = ''
       if (highlight_points.length && !loading_tiles) {
