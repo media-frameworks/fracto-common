@@ -135,7 +135,7 @@ export class FractoIncrementalRender extends Component {
                }
             }
             this.raster_canvas(canvas_buffer, initial_level, ctx)
-         }, 500)
+         }, 350)
       }
    }
 
