@@ -117,7 +117,7 @@ export class FractoRasterCanvas extends Component {
                continue;
             }
             if (!local_cache[tile.short_code]) {
-               local_cache[tile.short_code] = JSON.parse(TILE_CACHE[tile.short_code])
+               local_cache[tile.short_code] = TILE_CACHE[tile.short_code]
                // console.log("local_cache[tile.short_code]", tile.short_code, local_cache[tile.short_code])
             }
             const point_data = local_cache[tile.short_code]
