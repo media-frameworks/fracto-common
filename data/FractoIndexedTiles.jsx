@@ -10,7 +10,7 @@ var LEVELS_CACHE = {}
 export class FractoIndexedTiles extends Component {
 
    static get_level_tiles = (level, cb) => {
-      console.log(`loading tiles for level ${level}`)
+      // console.log(`loading tiles for level ${level}`)
       const cache_key = `LEVEL_${level}_tiles`
       if (LEVELS_CACHE[cache_key]) {
          cb(LEVELS_CACHE[cache_key])
@@ -27,7 +27,7 @@ export class FractoIndexedTiles extends Component {
                   bounds: FractoUtil.bounds_from_short_code(short_code)
                }
             })
-            console.log(`indexed tiles loaded for level ${level}`, with_bounds.length)
+            // console.log(`indexed tiles loaded for level ${level}`, with_bounds.length)
             LEVELS_CACHE[cache_key] = with_bounds
             cb(with_bounds);
          })
@@ -36,7 +36,7 @@ export class FractoIndexedTiles extends Component {
    static tiles_in_scope = (level, focal_point, scope, aspect_ratio = 1.0) => {
       const cache_key = `LEVEL_${level}_tiles`
       if (!LEVELS_CACHE[cache_key]) {
-         console.log('tiles not cached for level', level)
+         // console.log('tiles not cached for level', level)
          return [];
       }
       const width_by_two = scope / 2;
