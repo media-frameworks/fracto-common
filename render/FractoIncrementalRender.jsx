@@ -144,7 +144,7 @@ export class FractoIncrementalRender extends Component {
       const {aspect_ratio, level, focal_point, scope, on_plan_complete, width_px} = this.props;
       const level_tiles = FractoIndexedTiles.tiles_in_scope(render_level, focal_point, scope, aspect_ratio);
       this.tiles_to_canvas(level_tiles, canvas_buffer, 1000000, lower_iteration => {
-         console.log(`level ${render_level} complete: lower_iteration=${lower_iteration}`)
+         // console.log(`level ${render_level} complete: lower_iteration=${lower_iteration}`)
          if (level > render_level) {
             this.raster_canvas(canvas_buffer, render_level + 1, ctx)
          } else {

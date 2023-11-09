@@ -7,25 +7,25 @@ import {
    CELL_ALIGN_CENTER,
    CELL_ALIGN_LEFT,
    CELL_TYPE_CALLBACK,
-   CELL_TYPE_NUMBER,
    CELL_TYPE_TEXT
 } from "common/ui/CoolTable";
 import FractoUtil from "fracto/common/FractoUtil";
+import {render_pattern_block} from "fracto/common/FractoStyles";
 
 const COLOR_BAR_WIDTH_PX = 350;
-const ROW_HEIGHT_PX = 18;
+const ROW_HEIGHT_PX = 15;
 
 const ORBITALS_HEADERS = [
    {
       id: "orbital",
       label: "orbital",
-      type: CELL_TYPE_NUMBER,
+      type: CELL_TYPE_CALLBACK,
       width_px: 60,
       align: CELL_ALIGN_CENTER
    },
    {
       id: "count_pct",
-      label: "count (%)",
+      label: "pixels (%)",
       type: CELL_TYPE_TEXT,
       width_px: 100,
       align: CELL_ALIGN_LEFT,
@@ -50,7 +50,31 @@ const TableWrapper = styled(CoolStyles.Block)`
 
 const ColorBarSegment = styled(CoolStyles.InlineBlock)`
    height: ${ROW_HEIGHT_PX}px;
+   margin-bottom: 0.5rem;
 `;
+
+const OthersWrapper = styled(CoolStyles.Block)`
+   background-color: white;
+   margin: 0.5rem;
+`
+
+const OthersLabel = styled(CoolStyles.InlineBlock)`
+   ${CoolStyles.align_right}
+   ${CoolStyles.italic}
+   ${CoolStyles.bold}
+   ${CoolStyles.align_top}
+   margin-right: 0.5rem;
+   color: #aaaaaa;
+   line-height: 1rem;
+   margin-top: 0.25rem;
+`;
+
+const ColorBlockWrapper = styled(CoolStyles.InlineBlock)`
+   ${CoolStyles.noselect}
+   margin-right: 0.5rem;
+   margin-bottom: 0.25rem;
+`;
+
 
 export class FractoOrbitalsList extends Component {
 
@@ -112,7 +136,7 @@ export class FractoOrbitalsList extends Component {
 
    color_bar = (bin) => {
       const {orbital_bins} = this.state
-      const bar_width_px = COLOR_BAR_WIDTH_PX * Math.sqrt(bin.bin_count / orbital_bins.max_bin)
+      const bar_width_px = COLOR_BAR_WIDTH_PX * (bin.bin_count / orbital_bins.max_bin)
       let lowest_iteration = 1000000
       let highest_iteration = 1
       const iteration_keys = Object.keys(bin.iterations)
@@ -151,24 +175,40 @@ export class FractoOrbitalsList extends Component {
          .map(key => orbital_bins[key])
          .sort((a, b) => a.orbital > b.orbital ? 1 : -1)
       const prominent_orbitals = JSON.parse(JSON.stringify(sorted_bins))
+         .filter(bin => bin.bin_count > 500)
          .sort((a, b) => a.bin_count > b.bin_count ? -1 : 1)
          .slice(0, 20)
          .map(bin => bin.orbital)
+      const lesser_orbitals = JSON.parse(JSON.stringify(sorted_bins))
+         .filter(bin => bin.bin_count <= 500)
       const data = prominent_orbitals.sort((a, b) => a - b)
          .map(orbital => {
             const orbital_bin = sorted_bins.find(bin => bin.orbital === orbital)
             const pct = Math.round(orbital_bin.bin_count * 10000 / orbital_bins.total_count) / 100
             return {
-               orbital: orbital_bin.orbital,
+               orbital: [render_pattern_block, orbital_bin.orbital],
                count_pct: `${orbital_bin.bin_count} (${pct}%)`,
                color_bar: [this.color_bar, orbital_bin]
             }
          })
+      const and_the_rest = lesser_orbitals
+         .filter(bin => bin.bin_count > 100)
+         .map(bin => {
+            const pct = Math.round(bin.bin_count * 10000 / orbital_bins.total_count) / 100
+            return <ColorBlockWrapper
+               title={`${bin.bin_count} (${pct}%)`}>
+               {render_pattern_block(bin.orbital)}
+            </ColorBlockWrapper>
+         })
+      const others_block = <OthersWrapper>
+         <OthersLabel>and the rest: </OthersLabel>{and_the_rest}
+      </OthersWrapper>
       return <TableWrapper>
          <CoolTable
             data={data}
             columns={ORBITALS_HEADERS}
          />
+         {lesser_orbitals.length ? others_block : ''}
       </TableWrapper>
    }
 
