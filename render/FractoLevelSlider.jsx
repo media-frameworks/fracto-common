@@ -7,7 +7,7 @@ import {CoolSlider, CoolStyles} from 'common/ui/CoolImports';
 const MIN_SCOPE = 2
 const MAX_SCOPE = 32
 
-const ScopeButton = styled(CoolStyles.InlineBlock)`
+const ScopeButton = styled(CoolStyles.Block)`
    ${CoolStyles.monospace}
    ${CoolStyles.bold}
    ${CoolStyles.align_center}
@@ -22,12 +22,8 @@ const ScopeButton = styled(CoolStyles.InlineBlock)`
    font-size: 0.85rem:
 `;
 
-const ScopeButtons = styled(CoolStyles.Block)`
-   margin: 0;
-`;
-
-const LevelsWrapper = styled(CoolStyles.InlineBlock)`
-   padding: 0.25rem;
+const LevelsWrapper = styled(CoolStyles.Block)`
+   padding: 0.5rem 0;
 `;
 
 export class FractoLevelSlider extends Component {
@@ -52,34 +48,33 @@ export class FractoLevelSlider extends Component {
       on_change(new_level)
    }
 
-
    on_change = (e) => {
-      const {on_change} = this.props
+      const {on_change, in_wait} = this.props
+      if (in_wait) {
+         return;
+      }
       on_change(e.target.value)
    }
 
    render() {
-      const {selected_level, in_wait, width_px, height_px} = this.props
+      const {selected_level, in_wait, height_px} = this.props
       const cursor_style = {cursor: in_wait ? "wait" : "pointer"}
       let slider_style = Object.assign({}, cursor_style)
-      slider_style.width = `${width_px}px`
-      slider_style.height = `${height_px - 20}px`
+      slider_style.height = `${height_px - 40}px`
       const plus_button = <ScopeButton
+         title={in_wait ? "zoom disabled while update in progress" : "press shift for small changes"}
          style={cursor_style}
          onClick={e => this.alter_scope(e, 0.1)}>
          {"+"}
       </ScopeButton>
       const minus_button = <ScopeButton
+         title={in_wait ? "zoom disabled while update in progress" : "press shift for small changes"}
          style={cursor_style}
          onClick={e => this.alter_scope(e, -0.1)}>
          {"-"}
       </ScopeButton>
       return [
-         <ScopeButtons
-            key={'scope-buttons'}>
-            {minus_button}
-            {plus_button}
-         </ScopeButtons>,
+         plus_button,
          <LevelsWrapper
             style={slider_style}
             key={'level-buttons'}>
@@ -91,7 +86,8 @@ export class FractoLevelSlider extends Component {
                on_change={value => this.on_change(value)}
                is_vertical={true}
             />
-         </LevelsWrapper>
+         </LevelsWrapper>,
+         minus_button
       ]
    }
 }
