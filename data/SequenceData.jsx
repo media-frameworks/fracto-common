@@ -49,7 +49,13 @@ export class SequenceData {
 
    static save_sequence_step = (sequence_step, cb) => {
       const url = sequence_step.id ? `${FRACTO_DB_URL}/update_sequence_step` : `${FRACTO_DB_URL}/add_sequence_step`;
-      fetch(url, {
+      const data_keys = Object.keys(sequence_step)
+      const encoded_params = data_keys.map(key => {
+         return `${key}=${sequence_step[key]}`
+      })
+      const data_url = `${url}?${encoded_params.join('&')}`
+      console.log("save_sequence_step data_url", data_url)
+      fetch(data_url, {
          body: JSON.stringify(sequence_step), // data you send.
          headers: {'Content-Type': 'application/json'},
          method: 'POST',
