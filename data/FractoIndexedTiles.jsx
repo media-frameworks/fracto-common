@@ -61,11 +61,15 @@ export class FractoIndexedTiles extends Component {
             return false;
          }
          return true;
-      }).sort((a, b) => {
-         return a.bounds.left === b.bounds.left ?
-            (a.bounds.top > b.bounds.top ? 1 : -1) :
-            (a.bounds.left > b.bounds.left ? -1 : 1)
-      })
+      }).map(tile => {
+         let new_tile = JSON.parse(JSON.stringify(tile))
+         const center_x = (new_tile.bounds.left + new_tile.bounds.right) / 2
+         const center_y = (new_tile.bounds.top + new_tile.bounds.bottom) / 2
+         const diff_x = center_x - focal_point.x
+         const diff_y = center_y - focal_point.y
+         new_tile.distance = Math.sqrt(diff_x * diff_x + diff_y * diff_y)
+         return new_tile
+      }).sort((a, b) => b.distance - a.distance)
    }
 
 }

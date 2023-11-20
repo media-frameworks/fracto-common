@@ -26,13 +26,15 @@ export class FractoIncrementalRender extends Component {
       highlight_points: PropTypes.array,
       video_id: PropTypes.number,
       frame_index: PropTypes.number,
+      incremental_depth: PropTypes.number,
    }
 
    static defaultProps = {
       highlight_points: [],
       aspect_ratio: 1.0,
       video_id: 0,
-      frame_index: 0
+      frame_index: 0,
+      incremental_depth: 3
    }
 
    state = {
@@ -116,8 +118,8 @@ export class FractoIncrementalRender extends Component {
    }
 
    fill_canvas_buffer = (canvas_buffer, ctx) => {
-      const {level, width_px, video_id} = this.props
-      let initial_level = level - 3
+      const {level, width_px, video_id,incremental_depth} = this.props
+      let initial_level = level - incremental_depth
       if (initial_level < 2) {
          initial_level = 2
       }
