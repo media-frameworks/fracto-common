@@ -113,21 +113,21 @@ export class FractoOrbitalsList extends Component {
    color_bar = (bin) => {
       const {orbital_bins} = this.state
       const bar_width_px = COLOR_BAR_WIDTH_PX * Math.sqrt(bin.bin_count / orbital_bins.max_bin)
-      let lowest_iteration = 1000000
-      let highest_iteration = 1
       const iteration_keys = Object.keys(bin.iterations)
+      let all_iterations = []
       for (let bin_index = 0; bin_index < iteration_keys.length; bin_index++) {
          const iteration_block = bin.iterations[iteration_keys[bin_index]]
-         if (iteration_block.iteration < lowest_iteration) {
-            lowest_iteration = iteration_block.iteration
-         }
-         if (iteration_block.iteration > highest_iteration) {
-            highest_iteration = iteration_block.iteration
+         for (let i = 0; i < iteration_block.count; i++) {
+            all_iterations.push(iteration_block.iteration)
          }
       }
+      console.log("all_iterations.length", all_iterations.length)
+      const sorted_iterations = all_iterations.sort()
+      const highest_iteration = sorted_iterations[0]
+      const lowest_iteration = sorted_iterations[sorted_iterations.length - 1]
       const color_lowest = FractoUtil.fracto_pattern_color(bin.orbital, lowest_iteration)
       const color_highest = FractoUtil.fracto_pattern_color(bin.orbital, highest_iteration)
-      const direction = bin.orbital ? "to right" : "to left"
+      const direction = bin.orbital === 0 ? "to right" : "to left"
       const style = {
          backgroundImage: `linear-gradient(${direction}, ${color_lowest}, ${color_highest})`,
          width: `${bar_width_px}px`
