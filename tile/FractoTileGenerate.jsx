@@ -32,8 +32,8 @@ export class FractoTileGenerate {
       })
    }
 
-   static prepare_generator = (parent_tile_data, quad_code) => {
-      console.log("prepare_generator", parent_tile_data.length, quad_code)
+   static prepare_generator = (tile_points, parent_tile_data, quad_code) => {
+      // console.log("prepare_generator", parent_tile_data.length, quad_code)
       let col_start, col_end, row_start, row_end;
       switch (quad_code) {
          case '0':
@@ -64,30 +64,26 @@ export class FractoTileGenerate {
             console.log('bad quad_code');
             return null;
       }
-      const tile_points = new Array(256).fill(0).map(() => new Array(256).fill([0, 0]));
       for (let img_x = col_start, result_col = 0; img_x < col_end; img_x++, result_col += 2) {
          for (let img_y = row_start, result_row = 0; img_y < row_end; img_y++, result_row += 2) {
             tile_points[result_col][result_row] = parent_tile_data[img_x][img_y]
          }
       }
-      return tile_points;
    }
 
-   static generate_tile = (tile, cb) => {
+   static generate_tile = (tile, tile_points, cb) => {
       const parent_short_code = tile.short_code.substr(0, tile.short_code.length - 1)
       const quad_code = tile.short_code[tile.short_code.length - 1];
       FractoMruCache.get_tile_data(parent_short_code, parent_tile_data => {
-         const tile_points = FractoTileGenerate.prepare_generator(parent_tile_data, quad_code)
-         if (!tile_points) {
-            cb("error preparing generator")
-         } else {
-            // setTimeout(() => FractoUtil.data_to_canvas(tile_points, ctx), 100);
-            FractoTileGenerate.calculate_tile(tile, tile_points, result => {
-               // FractoUtil.data_to_canvas(tile_points, ctx)
-               cb(result)
-            });
-         }
+         FractoTileGenerate.prepare_generator(tile_points, parent_tile_data, quad_code)
+         FractoTileGenerate.calculate_tile(tile, tile_points, result => {
+            cb(result)
+         })
       })
+   }
+
+   static prepare_tile = () => {
+      return new Array(256).fill(0).map(() => new Array(256).fill([0, 0]));
    }
 
 }

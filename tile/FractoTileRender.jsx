@@ -17,10 +17,12 @@ export class FractoTileRender extends Component {
    static propTypes = {
       tile: PropTypes.object.isRequired,
       width_px: PropTypes.number.isRequired,
+      tile_data: PropTypes.array,
       no_tile_mode: PropTypes.bool,
    }
 
    static defaultProps = {
+      tile_data: null,
       no_tile_mode: false
    }
 
@@ -54,12 +56,17 @@ export class FractoTileRender extends Component {
    }
 
    load_tile = (ctx) => {
-      const {tile, width_px} = this.props;
+      const {tile, width_px, tile_data} = this.props;
       console.log("load_tile", tile.short_code)
-      FractoMruCache.get_tile_data(tile.short_code, tile_data=> {
+      if (tile_data) {
          FractoUtil.data_to_canvas(tile_data, ctx, width_px);
          this.setState({tile_loaded: true})
-      })
+      } else {
+         FractoMruCache.get_tile_data(tile.short_code, tile_data => {
+            FractoUtil.data_to_canvas(tile_data, ctx, width_px);
+            this.setState({tile_loaded: true})
+         })
+      }
    }
 
    render() {
@@ -83,8 +90,7 @@ export class FractoTileRender extends Component {
                width_px={width_px}
             />
          </RenderWrapper>
-      }
-      else {
+      } else {
          return <RenderWrapper style={canvas_style}>
             <canvas
                key={"just-one-thanks"}

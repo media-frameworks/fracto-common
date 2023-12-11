@@ -11,8 +11,9 @@ import FractoUtil from "../FractoUtil";
 
 export const CONTEXT_SIZE_PX = 350;
 export const TILE_SIZE_PX = 550;
+const AUTO_REFRESH_FLAG  = "auto_refresh_flag"
 
-const AUTOMATE_TIMEOUT_MS = 2500;
+const AUTOMATE_TIMEOUT_MS = 500;
 
 const ContextWrapper = styled(CoolStyles.InlineBlock)`
    margin-right: 10px;
@@ -39,20 +40,38 @@ export class FractoTileAutomate extends Component {
       no_tile_mode: PropTypes.bool,
       on_render_tile: PropTypes.func,
       tile_size_px: PropTypes.number,
+      auto_refresh: PropTypes.number,
    }
 
    static defaultProps = {
       no_tile_mode: false,
-      tile_size_px: TILE_SIZE_PX
+      tile_size_px: TILE_SIZE_PX,
+      auto_refresh: 0
    }
 
    state = {
       automate: false,
+      run_count: 0
    };
 
+   componentDidMount() {
+      const is_auto_refresh_str = localStorage.getItem(AUTO_REFRESH_FLAG)
+      if (is_auto_refresh_str) {
+         const is_auto_refresh = parseInt(is_auto_refresh_str)
+         if (is_auto_refresh !== 0) {
+            localStorage.setItem(AUTO_REFRESH_FLAG, "0")
+            this.on_automate(true)
+         }
+      }
+   }
+
    act_on_tile = (tile_index) => {
-      const {automate} = this.state;
-      const {tile_action, on_tile_select} = this.props;
+      const {automate, run_count} = this.state;
+      const {tile_action, on_tile_select, auto_refresh} = this.props;
+      if (auto_refresh && run_count > auto_refresh) {
+         localStorage.setItem(AUTO_REFRESH_FLAG, "1")
+         window.location = "/"
+      }
       const tile = this.get_active_tile(tile_index)
       if (!tile) {
          this.setState({automate: false});
@@ -63,6 +82,7 @@ export class FractoTileAutomate extends Component {
          if (result === false) {
             this.setState({automate: false})
          } else if (automate) {
+            this.setState({run_count: run_count + 1})
             setTimeout(() => {
                this.act_on_tile(tile_index + 1)
             }, AUTOMATE_TIMEOUT_MS)
