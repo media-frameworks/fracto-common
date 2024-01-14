@@ -1,6 +1,7 @@
 import StoreS3 from "common/system/StoreS3";
 import FractoUtil from "../FractoUtil";
 import FractoCalc from "../data/FractoCalc";
+import FractoFastCalc from "../data/FractoFastCalc";
 import FractoMruCache from "../data/FractoMruCache";
 
 export class FractoTileGenerate {
@@ -8,17 +9,39 @@ export class FractoTileGenerate {
    static calculate_tile = (tile, tile_points, cb) => {
       console.log("calculate_tile", tile)
       const increment = (tile.bounds.right - tile.bounds.left) / 256.0;
+      const start = performance.now()
       for (let img_x = 0; img_x < 256; img_x++) {
          const x = tile.bounds.left + img_x * increment;
+         let recent_iteration = 1000
+         let ran_slow_calc = 0
+         let ran_fast_calc = 0
+         let replaced_points = 0
          for (let img_y = 0; img_y < 256; img_y++) {
+            const y = tile.bounds.top - img_y * increment;
+            const point_in_main_cardioid = FractoFastCalc.point_in_main_cardioid(x, y)
             if (img_x % 2 === 0 && img_y % 2 === 0) {
+               recent_iteration = tile_points[img_x][img_y][1]
+               if (recent_iteration > 500000 && !point_in_main_cardioid) {
+                  replaced_points++
+                  const values = FractoFastCalc.calc(x, y)
+                  tile_points[img_x][img_y] = [values.pattern, recent_iteration];
+               }
                continue;
             }
-            const y = tile.bounds.top - img_y * increment;
-            const values = FractoCalc.calc(x, y);
-            tile_points[img_x][img_y] = [values.pattern, values.iteration];
+            if (point_in_main_cardioid) {
+               const values = FractoCalc.calc(x, y)
+               tile_points[img_x][img_y] = [values.pattern, values.iteration];
+               ran_slow_calc++
+            } else {
+               const values = FractoFastCalc.calc(x, y)
+               tile_points[img_x][img_y] = [values.pattern, recent_iteration];
+               ran_fast_calc++
+            }
          }
       }
+      const end = performance.now()
+      console.log(`generated ${tile.short_code} in ${end - start}ms, slow=${ran_slow_calc}, fast=${ran_fast_calc}, replaced=${replaced_points}`)
+
       const index_url = `tiles/256/indexed/${tile.short_code}.json`;
       StoreS3.put_file_async(index_url, JSON.stringify(tile_points), "fracto", result => {
          console.log("StoreS3.put_file_async", index_url, result);
@@ -27,9 +50,10 @@ export class FractoTileGenerate {
          })
          FractoUtil.tile_to_bin(tile.short_code, "inland", "complete", result => {
             console.log("ToolUtils.tile_to_bin", tile.short_code, result);
-            cb("generated tile")
          })
       })
+
+      cb("generated tile")
    }
 
    static prepare_generator = (tile_points, parent_tile_data, quad_code) => {

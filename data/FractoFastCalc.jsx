@@ -1,57 +1,28 @@
 import Complex from "common/math/Complex";
 
-const MAX_ITERATION = 10000
-const MIN_ITERATION = 5000
-const MIN_DELTA = 0.0000001
-const MAX_ACCEPTED = 0.01
+const MAX_ORBITAL_SIZE = 25000
+const MIN_ITERATION = 1000000
+const MAX_ITERATION = MIN_ITERATION + MAX_ORBITAL_SIZE
 
 export class FractoFastCalc {
 
-   static confirm_pattern = (pattern, P_x, P_y, Q_x0, Q_y0, countdown = 3) => {
-      let Q_x = Q_x0
-      let Q_y = Q_y0
-      let Q_x_squared = Q_x * Q_x
-      let Q_y_squared = Q_y * Q_y
-      const Q = new Complex(Q_x, Q_y)
-      const Q0_mag = Q.magnitude()
-      let negative_Q0 = Q.scale(-1)
-      let double_M = new Complex(Q_x * 2, Q_y * 2)
-      let product = double_M
-      for (let iterations = 0; iterations < pattern; iterations++) {
-         Q_y = 2 * Q_x * Q_y + P_y;
-         Q_x = Q_x_squared - Q_y_squared + P_x;
-         if (iterations < pattern - 1) {
-            double_M = new Complex(Q_x * 2, Q_y * 2)
-            product = product.mul(double_M)
-         }
-         Q_x_squared = Q_x * Q_x
-         Q_y_squared = Q_y * Q_y
-         if (Q_x_squared + Q_y_squared > 10) {
-            // console.log(`${pattern} bailed in ${iterations}`)
-            return 100;
-         }
+   static point_in_main_cardioid = (x0, y0) => {
+      const P = new Complex(x0, y0)
+      const negative_four_P = P.scale(-4)
+      const one_minus_four_p = negative_four_P.offset(1, 0)
+      const sqrt_one_minus_four_p = one_minus_four_p.sqrt()
+      const negative_sqrt_one_minus_four_p = sqrt_one_minus_four_p.scale(-1)
+      const one_minus_sqrt_one_minus_four_p = negative_sqrt_one_minus_four_p.offset(1, 0)
+      const magnitude = one_minus_sqrt_one_minus_four_p.magnitude()
+      if (magnitude < 0) {
+         return false
       }
-      const M = new Complex(Q_x, Q_y)
-      const numerator = M.add(negative_Q0)
-      const denominator = product.offset(-1, 0)
-      const delta = numerator.divide(denominator)
-      const delta_mag = delta.magnitude() / Q0_mag
-      // console.log("confirming pattern=", pattern)
-      if (delta_mag === 0) {
-         // console.log("confirmed! countdown=", countdown)
-         // console.log(`${pattern} confirmed! countdown=${countdown}`)
-         return delta_mag
-      }
-      if (countdown === 0) {
-         // console.log(`${pattern} not the one delta_mag=${delta_mag}`)
-         return delta_mag
-      }
-      // console.log("try again", delta_mag)
-      return FractoFastCalc.confirm_pattern(pattern, P_x, P_y, Q_x0 - delta.re, Q_y0 - delta.im, countdown - 1)
+
+      return magnitude <= 1;
    }
 
    static calc = (x0, y0) => {
-      // const P = new Complex(x, y)
+
       const P_x = x0
       const P_y = y0
       let Q_x_squared = 0
@@ -59,16 +30,13 @@ export class FractoFastCalc {
       let Q_x = 0
       let Q_y = 0
 
-      // let Q = new Complex(0, 0)
-      let product = new Complex(0, 0)
-      let Q0 = new Complex(0, 0)
-      let negative_Q0 = new Complex(0, 0)
-      let iterations = 0
-      let test_pattern = 0
-      let Q_mag = 0
-      const best_patterns = []
-      for (; iterations < MAX_ITERATION; iterations++) {
-
+      let product = null
+      let sum = null
+      let least_magnitude = 1
+      let orbital = -1
+      let iteration = 0
+      let min_iteration = MIN_ITERATION
+      for (; iteration < MAX_ITERATION; iteration++) {
          Q_y = 2 * Q_x * Q_y + P_y;
          Q_x = Q_x_squared - Q_y_squared + P_x;
          Q_x_squared = Q_x * Q_x
@@ -76,57 +44,35 @@ export class FractoFastCalc {
          if (Q_x_squared + Q_y_squared > 100) {
             return {
                pattern: 0,
-               iteration: iterations,
+               iteration: iteration,
             };
          }
-         if (iterations < MIN_ITERATION) {
-            continue;
+
+         if (iteration < min_iteration) {
+            continue
+         }
+         if (iteration === min_iteration) {
+            sum = new Complex(Q_x, Q_y)
+            product = new Complex(1, 0)
+            continue
          }
 
-         const M = new Complex(Q_x, Q_y)
-         const double_M = new Complex(Q_x * 2, Q_y * 2)
-         if (test_pattern === 0) {
-            product = double_M
-            Q0 = new Complex(Q_x, Q_y)
-            negative_Q0 = Q0.scale(-1)
-            Q_mag = M.magnitude()
-         } else {
-            const numerator = M.add(negative_Q0)
-            const denominator = product.offset(-1, 0)
-            const delta = numerator.divide(denominator)
-            const delta_mag = delta.magnitude()
-            if (delta_mag === 0) {
-               return {
-                  pattern: test_pattern,
-                  iteration: 1000,
-               };
-            } else if (delta_mag !== -1 && delta_mag < 0.001) {
-               const delta_portion = delta_mag / Q_mag
-               best_patterns.push({
-                  pattern: test_pattern,
-                  test_Q: new Complex(Q0.re - delta.re, Q0.im - delta.im),
-                  delta: delta_portion
-               })
-            }
-            product = product.mul(double_M)
+         sum = sum.offset(Q_x, Q_y)
+         product = product.mul(sum)
+         const product_minus_one = product.offset(-1, 0)
+         const magnitude = product_minus_one.magnitude()
+         if (magnitude < least_magnitude) {
+            least_magnitude = magnitude
+            orbital = iteration - min_iteration
          }
-         test_pattern++
+         sum = new Complex(Q_x, Q_y)
+
       }
-      const sorted_tests = best_patterns.sort((a, b) => {
-         return a.delta > b.delta ? 1 : -1
-      }).slice(0, 20)
-      for (let i = 0; i < sorted_tests.length; i++) {
-         const test = sorted_tests[i]
-         test.confirmation = FractoFastCalc.confirm_pattern(test.pattern, P_x, P_y, test.test_Q.re, test.test_Q.im)
-      }
-      const best_results = best_patterns.sort((a, b) => {
-         return a.confirmation < b.confirmation ? -1 : 1
-      })
-      // console.log("best_results", best_results)
 
       return {
-         pattern: best_results.length ? best_results[0].pattern : 0,
-         iteration: best_results.length ? 1000 : iterations,
+         pattern: orbital,
+         iteration: iteration,
+         Q_s: []
       };
    }
 }
