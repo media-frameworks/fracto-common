@@ -163,7 +163,7 @@ export class FractoIncrementalRender extends Component {
                }
             }
             this.setState({loading_tiles: false})
-            on_plan_complete(canvas_buffer)
+            on_plan_complete(canvas_buffer, ctx)
          }
       })
    }
