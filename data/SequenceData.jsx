@@ -68,6 +68,7 @@ export class SequenceData {
          cb(json_data)
       });
    }
+
 }
 
 export default SequenceData
