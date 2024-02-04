@@ -2,9 +2,6 @@ import network from "common/config/network.json";
 import {Buffer} from 'buffer';
 import {decompressSync} from 'fflate';
 
-var zlib = require('browserify-zlib');
-// const zlib = require("zlib");
-
 const URL_BASE = network.fracto_server_url;
 const TILE_SERVER_BASE = network.tile_server_url;
 const MAX_TILE_CACHE = 500;

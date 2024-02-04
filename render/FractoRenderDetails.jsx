@@ -68,6 +68,9 @@ export class FractoRenderDetails extends Component {
 
    render_dimensions = () => {
       const {canvas_buffer} = this.props
+      if (!canvas_buffer) {
+         return []
+      }
       const canvas_width_px = canvas_buffer.length
       const canvas_height_px = canvas_width_px ? canvas_buffer[0].length : 0
       return <NumberValue>
