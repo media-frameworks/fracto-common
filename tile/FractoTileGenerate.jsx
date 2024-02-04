@@ -10,12 +10,12 @@ export class FractoTileGenerate {
       console.log("calculate_tile", tile)
       const increment = (tile.bounds.right - tile.bounds.left) / 256.0;
       const start = performance.now()
+      let ran_slow_calc = 0
+      let ran_fast_calc = 0
+      let replaced_points = 0
       for (let img_x = 0; img_x < 256; img_x++) {
          const x = tile.bounds.left + img_x * increment;
          let recent_iteration = 1000
-         let ran_slow_calc = 0
-         let ran_fast_calc = 0
-         let replaced_points = 0
          for (let img_y = 0; img_y < 256; img_y++) {
             const y = tile.bounds.top - img_y * increment;
             const point_in_main_cardioid = FractoFastCalc.point_in_main_cardioid(x, y)
