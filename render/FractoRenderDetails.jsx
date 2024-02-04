@@ -42,6 +42,7 @@ export class FractoRenderDetails extends Component {
 
    static propTypes = {
       width_px: PropTypes.number.isRequired,
+      canvas_buffer: PropTypes.array.isRequired,
       focal_point: PropTypes.object.isRequired,
       scope: PropTypes.number.isRequired,
       cursor_point: PropTypes.object.isRequired,
@@ -65,6 +66,15 @@ export class FractoRenderDetails extends Component {
       return <NumberValue>{scope}</NumberValue>
    }
 
+   render_dimensions = () => {
+      const {canvas_buffer} = this.props
+      const canvas_width_px = canvas_buffer.length
+      const canvas_height_px = canvas_width_px ? canvas_buffer[0].length : 0
+      return <NumberValue>
+         {`${canvas_width_px}x${canvas_height_px}px (AR: ${canvas_height_px / canvas_width_px} : 1)`}
+      </NumberValue>
+   }
+
    render_tiles = () => {
       const {width_px, scope, focal_point} = this.props
       const ideal_level = get_ideal_level(width_px, scope)
@@ -76,7 +86,7 @@ export class FractoRenderDetails extends Component {
          }
          tile_counts[i] = tiles_in_level.length
       }
-      const count_list = tile_counts.filter((count, i) => count && i < 8)
+      const count_list = tile_counts.filter((count, i) => count && i < 6)
          .map((count, index) => {
             return `${ideal_level + index}:${count}`
          }).join(', ')
@@ -87,6 +97,7 @@ export class FractoRenderDetails extends Component {
       const {width_px} = this.props
       return [
          {label: "scope", render: this.render_scope},
+         {label: "dimensions", render: this.render_dimensions},
          {label: "centered at", render: this.render_focal_point},
          {label: "coverage", render: this.render_tiles},
          {label: "cursor", render: this.render_cursor},

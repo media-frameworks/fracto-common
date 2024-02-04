@@ -108,9 +108,9 @@ export class FractoMruCache {
          // console.log("no cleanup required")
          return;
       }
-      console.log(`cleanup_cache ${cache_keys.length} tiles in cache`)
+      // console.log(`cleanup_cache ${cache_keys.length} tiles in cache`)
       const keys_to_delete = cache_keys.length - 100;
-      console.log(`deleting ${keys_to_delete} tiles from cache`)
+      // console.log(`deleting ${keys_to_delete} tiles from cache`)
       for (let key_index = 0; key_index < keys_to_delete; key_index++) {
          const short_code = cache_keys[key_index];
          // console.log(`delete tile with mru ${CACHE_MRU[short_code]}`)

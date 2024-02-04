@@ -108,6 +108,7 @@ export class FractoIncrementalRender extends Component {
       if (height_px & 1) {
          height_px -= 1
       }
+      console.log("init_canvas_buffer", width_px, height_px)
       const canvas_buffer = new Array(width_px).fill(0).map(() => new Array(height_px).fill([0, 4]));
       this.setState({
          canvas_buffer: canvas_buffer,
