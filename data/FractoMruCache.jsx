@@ -2,9 +2,6 @@ import network from "common/config/network.json";
 import {Buffer} from 'buffer';
 import {decompressSync} from 'fflate';
 
-var zlib = require('browserify-zlib');
-// const zlib = require("zlib");
-
 const URL_BASE = network.fracto_server_url;
 const TILE_SERVER_BASE = network.tile_server_url;
 const MAX_TILE_CACHE = 500;
@@ -29,6 +26,30 @@ export class FractoMruCache {
       return data
    }
 
+   static get_tile_data_raw = (short_code, cb) => {
+      CACHE_MRU[short_code] = FractoMruCache.highest_mru++;
+      if (!(short_code in TILE_CACHE)) {
+         // console.log(`loading tile ${short_code}`)
+         const url = `${URL_BASE}/get_tiles.php?short_codes=${short_code}`
+         fetch(url).then(response => {
+            // console.log("response", response)
+            return response.json()
+         }).then(json => {
+            // console.log("json", json)
+            if (!json["tiles"]) {
+               cb(null)
+            } else {
+               TILE_CACHE[short_code] = FractoMruCache.serialize_tile(json["tiles"][short_code])
+               cb(json["tiles"][short_code])
+            }
+         })
+      } else {
+         // console.log(`cached tile ${short_code}`)
+         const tile_data = FractoMruCache.deserialize_tile(TILE_CACHE[short_code])
+         cb(tile_data)
+      }
+   }
+
    static get_tile_data = (short_code, cb) => {
       CACHE_MRU[short_code] = FractoMruCache.highest_mru++;
       if (!(short_code in TILE_CACHE)) {
@@ -36,16 +57,19 @@ export class FractoMruCache {
          fetch(packages_url)
             .then(response => response.json())
             .then(json => {
-               // console.log('json["packages"]', json["packages"])
                const keys = Object.keys(json["packages"])
-               const short_code = keys[0];
-               const buffer = Buffer.from(json["packages"][short_code], 'base64');
-               const decompressed = decompressSync(buffer);
-               const buf = Buffer.from(decompressed, 'ascii');
-               const tile_data = JSON.parse(buf.toString())
-               // console.log("tile_data", tile_data)
-               TILE_CACHE[short_code] = tile_data
-               cb(tile_data)
+               if (!keys.length) {
+                  console.log('error in package', short_code)
+                  FractoMruCache.get_tile_data_raw(short_code, cb)
+               } else {
+                  const buffer = Buffer.from(json["packages"][short_code], 'base64');
+                  const decompressed = decompressSync(buffer);
+                  const buf = Buffer.from(decompressed, 'ascii');
+                  const tile_data = JSON.parse(buf.toString())
+                  // console.log("tile_data", tile_data)
+                  TILE_CACHE[short_code] = tile_data
+                  cb(tile_data)
+               }
             })
 
       } else {

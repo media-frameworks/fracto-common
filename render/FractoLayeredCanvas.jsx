@@ -87,8 +87,8 @@ export class FractoLayeredCanvas extends Component {
 
    fill_tile = (canvas_bounds, tile_bounds, point_data, bg_factor, ctx) => {
       const {width_px, aspect_ratio, scope} = this.props;
-      if (!point_data) {
-         console.log("point_data error", point_data)
+      if (!point_data || !ctx) {
+         console.log("point_data or ctx error", point_data)
          return;
       }
       const height_px = width_px * aspect_ratio;
@@ -201,6 +201,9 @@ export class FractoLayeredCanvas extends Component {
       const {ctx} = this.state;
       const {width_px, aspect_ratio, focal_point, scope, quality} = this.props;
       const height_px = width_px * aspect_ratio;
+      if (!ctx) {
+         return
+      }
       ctx.fillStyle = `white`
       ctx.fillRect(0, 0, width_px, height_px);
 
