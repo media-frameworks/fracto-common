@@ -132,7 +132,7 @@ export class FractoTileAutomate extends Component {
       const {tile_index, on_render_tile, tile_size_px} = this.props;
       const {all_tiles, level, no_tile_mode} = this.props
       if (!all_tiles.length) {
-         return "no tiles"
+         return "no tiles 1"
       }
       const tile = this.get_active_tile(tile_index)
       if (!tile) {
@@ -149,7 +149,7 @@ export class FractoTileAutomate extends Component {
          <ContextWrapper
             key={`ContextWrapper_${tile.short_code}`}>
             <FractoTileContext
-               key={`context-${tile.short_code}`}
+               key={`tile-context`}
                tile={tile}
                level={level}
                width_px={CONTEXT_SIZE_PX}/>

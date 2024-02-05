@@ -188,7 +188,7 @@ export class FractoTileAutomator extends Component {
          return FractoCommon.loading_wait_notice()
       }
       if (!all_tiles.length) {
-         return "no tiles"
+         return "no tiles 2"
       }
       if (tile_index < 0 || tile_index > all_tiles.length) {
          return `bad tile index: ${tile_index}`
