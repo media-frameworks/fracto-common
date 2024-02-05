@@ -154,7 +154,13 @@ export class FractoIncrementalRender extends Component {
             const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(0, lower_iteration)
             const default_fillStyle = `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`
             for (let img_x = 0; img_x < width_px; img_x++) {
+               if (!canvas_buffer[img_x]) {
+                  break
+               }
                for (let img_y = 0; img_y < height_px; img_y++) {
+                  if (!canvas_buffer[img_x][img_y]) {
+                     break
+                  }
                   const pattern = canvas_buffer[img_x][img_y][0]
                   const iteration = canvas_buffer[img_x][img_y][1]
                   if (pattern === 0 && iteration === 0) {
@@ -164,7 +170,7 @@ export class FractoIncrementalRender extends Component {
                }
             }
             this.setState({loading_tiles: false})
-            on_plan_complete(canvas_buffer)
+            on_plan_complete(canvas_buffer, ctx)
          }
       })
    }

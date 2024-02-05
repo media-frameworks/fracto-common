@@ -16,6 +16,7 @@ export class FractoTileGenerate {
       for (let img_x = 0; img_x < 256; img_x++) {
          const x = tile.bounds.left + img_x * increment;
          const x_naught = img_x % 2 === 0
+         let recent_iteration = 1000
          for (let img_y = 0; img_y < 256; img_y++) {
             const y_naught = img_y % 2 === 0
             if (x_naught && y_naught) {

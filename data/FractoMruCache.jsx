@@ -1,10 +1,13 @@
 import network from "common/config/network.json";
+import {Buffer} from 'buffer';
+import {decompressSync} from 'fflate';
 
 const URL_BASE = network.fracto_server_url;
 const TILE_SERVER_BASE = network.tile_server_url;
 const MAX_TILE_CACHE = 500;
 
 export var TILE_CACHE = {};
+export var PACKAGE_CACHE = {};
 var CACHE_MRU = {};
 
 setInterval(() => {
@@ -16,16 +19,14 @@ export class FractoMruCache {
    static highest_mru = 0;
 
    static serialize_tile = (data) => {
-      // return JSON.stringify(data)
       return data
    }
 
    static deserialize_tile = (data) => {
       return data
-      // return JSON.parse(data)
    }
 
-   static get_tile_data = (short_code, cb) => {
+   static get_tile_data_raw = (short_code, cb) => {
       CACHE_MRU[short_code] = FractoMruCache.highest_mru++;
       if (!(short_code in TILE_CACHE)) {
          // console.log(`loading tile ${short_code}`)
@@ -49,6 +50,35 @@ export class FractoMruCache {
       }
    }
 
+   static get_tile_data = (short_code, cb) => {
+      CACHE_MRU[short_code] = FractoMruCache.highest_mru++;
+      if (!(short_code in TILE_CACHE)) {
+         const packages_url = `${TILE_SERVER_BASE}/get_packages?short_codes=${short_code}`
+         fetch(packages_url)
+            .then(response => response.json())
+            .then(json => {
+               const keys = Object.keys(json["packages"])
+               if (!keys.length) {
+                  console.log('error in package', short_code)
+                  FractoMruCache.get_tile_data_raw(short_code, cb)
+               } else {
+                  const buffer = Buffer.from(json["packages"][short_code], 'base64');
+                  const decompressed = decompressSync(buffer);
+                  const buf = Buffer.from(decompressed, 'ascii');
+                  const tile_data = JSON.parse(buf.toString())
+                  // console.log("tile_data", tile_data)
+                  TILE_CACHE[short_code] = tile_data
+                  cb(tile_data)
+               }
+            })
+
+      } else {
+         // console.log(`cached tile ${short_code}`)
+         const tile_data = FractoMruCache.deserialize_tile(TILE_CACHE[short_code])
+         cb(tile_data)
+      }
+   }
+
    static fetch_chunk = (filtered_list, cb) => {
       const chunkSize = 100;
       const chunk = []
@@ -60,29 +90,18 @@ export class FractoMruCache {
       }
       // console.log(`chunk size: ${chunk.length}`)
       const short_code_list = chunk.join(',')
-      // const url = `${URL_BASE}/get_tiles.php?short_codes=${short_code_list}`
-      // fetch(url)
-      //    .then(response => response.json())
-      //    .then(json => {
-      //       const keys = Object.keys(json["tiles"])
-      //       for (let i = 0; i < keys.length; i++) {
-      //          const short_code = keys[i];
-      //          TILE_CACHE[short_code] = FractoMruCache.serialize_tile(json["tiles"][short_code]);
-      //       }
-      //       if (filtered_list.length) {
-      //          FractoMruCache.fetch_chunk(filtered_list, cb)
-      //       } else {
-      //          cb(true);
-      //       }
-      //    })
-      const local_url = `${TILE_SERVER_BASE}/get_tiles?short_codes=${short_code_list}`
-      fetch(local_url)
+      const packages_url = `${TILE_SERVER_BASE}/get_packages?short_codes=${short_code_list}`
+      fetch(packages_url)
          .then(response => response.json())
          .then(json => {
-            const keys = Object.keys(json["tiles"])
+            const keys = Object.keys(json["packages"])
             for (let i = 0; i < keys.length; i++) {
                const short_code = keys[i];
-               TILE_CACHE[short_code] = FractoMruCache.serialize_tile(json["tiles"][short_code]);
+               const buffer = Buffer.from(json["packages"][short_code], 'base64');
+               const decompressed = decompressSync(buffer);
+               const buf = Buffer.from(decompressed, 'ascii');
+               const tile_data = JSON.parse(buf.toString())
+               TILE_CACHE[short_code] = FractoMruCache.serialize_tile(tile_data);
             }
             if (filtered_list.length) {
                FractoMruCache.fetch_chunk(filtered_list, cb)

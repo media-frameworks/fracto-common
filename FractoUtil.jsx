@@ -139,9 +139,9 @@ export class FractoUtil {
       }
       if (pattern === 0) {
          let offset = Math.log(iterations) * ONE_BY_LOG_TEN_THOUSAND;
-         if (iterations < 21) {
-            offset *= 0.9;
-         }
+         // if (iterations < 21) {
+         //    offset *= 0.9;
+         // }
          const lum = 1.0 - offset;
          const lum_pct = Math.round(100 * lum)
          COLOR_CACHE[cache_key] = [0, 0, lum_pct];
