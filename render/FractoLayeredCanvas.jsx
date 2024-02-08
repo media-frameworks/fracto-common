@@ -61,6 +61,7 @@ export class FractoLayeredCanvas extends Component {
 
    componentDidMount() {
       const {canvas_ref} = this.state
+      // const {width_px, aspect_ratio} = this.props;
       const canvas = canvas_ref.current;
       if (!canvas) {
          console.log('no canvas');
@@ -68,6 +69,9 @@ export class FractoLayeredCanvas extends Component {
       }
       const ctx = canvas.getContext('2d');
       this.setState({ctx: ctx})
+      // ctx.fillStyle = `lavenderblush`
+      // const height_px = width_px * aspect_ratio;
+      // ctx.fillRect(0, 0, width_px, height_px);
       setTimeout(() => {
          this.fill_canvas()
       }, 100)

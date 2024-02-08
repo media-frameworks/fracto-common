@@ -15,26 +15,29 @@ export class FractoTileGenerate {
       let replaced_points = 0
       for (let img_x = 0; img_x < 256; img_x++) {
          const x = tile.bounds.left + img_x * increment;
+         const x_naught = img_x % 2 === 0
          let recent_iteration = 1000
          for (let img_y = 0; img_y < 256; img_y++) {
-            const y = tile.bounds.top - img_y * increment;
-            const point_in_main_cardioid = FractoFastCalc.point_in_main_cardioid(x, y)
-            if (img_x % 2 === 0 && img_y % 2 === 0) {
-               recent_iteration = tile_points[img_x][img_y][1]
-               if (recent_iteration > 500000 && !point_in_main_cardioid) {
-                  replaced_points++
-                  const values = FractoFastCalc.calc(x, y)
-                  tile_points[img_x][img_y] = [values.pattern, recent_iteration];
-               }
+            const y_naught = img_y % 2 === 0
+            if (x_naught && y_naught) {
                continue;
             }
+            const y = tile.bounds.top - img_y * increment;
+            const point_in_main_cardioid = FractoFastCalc.point_in_main_cardioid(x, y)
             if (point_in_main_cardioid) {
                const values = FractoCalc.calc(x, y)
                tile_points[img_x][img_y] = [values.pattern, values.iteration];
                ran_slow_calc++
             } else {
                const values = FractoFastCalc.calc(x, y)
-               tile_points[img_x][img_y] = [values.pattern, recent_iteration];
+               let iteration = values.iteration
+               if (values.pattern > 0) {
+                  const closest_x_naught = x_naught ? img_x : img_x - 1
+                  const closest_y_naught = y_naught ? img_y : img_y - 1
+                  const naught_point = tile_points[closest_x_naught][closest_y_naught]
+                  iteration = values.pattern === 0 ? values.iteration : naught_point[1]
+               }
+               tile_points[img_x][img_y] = [values.pattern, iteration];
                ran_fast_calc++
             }
          }
