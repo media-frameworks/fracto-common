@@ -41,6 +41,7 @@ export class FractoTileAutomate extends Component {
       on_render_tile: PropTypes.func,
       tile_size_px: PropTypes.number,
       auto_refresh: PropTypes.number,
+      on_automate: PropTypes.func,
    }
 
    static defaultProps = {
@@ -67,7 +68,7 @@ export class FractoTileAutomate extends Component {
 
    act_on_tile = (tile_index) => {
       const {automate, run_count} = this.state;
-      const {tile_action, on_tile_select, auto_refresh} = this.props;
+      const {tile_action, on_tile_select, auto_refresh,on_automate} = this.props;
       if (auto_refresh && run_count > auto_refresh) {
          localStorage.setItem(AUTO_REFRESH_FLAG, "1")
          window.location = "/"
@@ -75,12 +76,14 @@ export class FractoTileAutomate extends Component {
       const tile = this.get_active_tile(tile_index)
       if (!tile) {
          this.setState({automate: false});
+         on_automate(false)
          return;
       }
       on_tile_select(tile_index)
       tile_action(tile, result => {
          if (result === false) {
             this.setState({automate: false})
+            on_automate(false)
          } else if (automate) {
             this.setState({run_count: run_count + 1})
             setTimeout(() => {
@@ -91,8 +94,9 @@ export class FractoTileAutomate extends Component {
    }
 
    on_automate = (automate) => {
-      const {tile_index} = this.props;
+      const {tile_index,on_automate} = this.props;
       this.setState({automate: automate});
+      on_automate(automate)
       if (automate) {
          setTimeout(() => this.act_on_tile(tile_index), AUTOMATE_TIMEOUT_MS)
       }
@@ -117,13 +121,14 @@ export class FractoTileAutomate extends Component {
    }
 
    on_index_change = (new_index) => {
-      const {on_tile_select} = this.props
+      const {on_tile_select,on_automate} = this.props
       console.log("on_index_change", new_index)
       const tile = this.get_active_tile(new_index)
       if (tile) {
          on_tile_select(new_index)
       } else {
          this.setState({automate: false})
+         on_automate(false)
       }
    }
 

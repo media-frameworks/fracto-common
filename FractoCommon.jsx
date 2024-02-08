@@ -83,9 +83,16 @@ const MessageText = styled(CoolStyles.Block)`
    font-size: 1.125rem;
 `;
 
+const ExtraText = styled(CoolStyles.Block)`
+   ${CoolStyles.align_center}
+   ${CoolStyles.italic}
+   padding-bottom: 0.5rem;
+   font-size: 1.125rem;
+`;
+
 const LogoImage = styled.img`
     width: 120px;
-    padding: 0.5rem;
+    padding-top: 0.5rem;
 `;
 
 const LevelBlockWrapper = styled(CoolStyles.Block)`
@@ -190,7 +197,10 @@ export class FractoCommon {
       />
    }
 
-   static loading_wait_notice = () => {
+   static loading_wait_notice = (extra = null) => {
+      const extra_block = !extra ? '' : <CenteredBlock>
+         <ExtraText>{extra}</ExtraText>
+      </CenteredBlock>
       const modal_contents = <LoadingWaitWrapper>
          <CenteredBlock><MessageText>{"Loading tile data, please look busy..."}</MessageText></CenteredBlock>
          <CenteredBlock><LogoImage
@@ -199,6 +209,7 @@ export class FractoCommon {
             alt={"am-chill-whale"}
          />
          </CenteredBlock>
+         {extra_block}
       </LoadingWaitWrapper>
       return <CoolModal
          width={"24rem"}
