@@ -174,7 +174,7 @@ export class FractoLayeredCanvas extends Component {
          if (plan.length) {
             this.run_plan(plan, canvas_bounds, ctx)
          } else {
-            console.log("plan complete")
+            // console.log("plan complete")
             if (on_plan_complete) {
                on_plan_complete(canvas_ref)
             }
@@ -192,7 +192,7 @@ export class FractoLayeredCanvas extends Component {
                this.setState({plan_step: plan_step + 1})
                this.run_plan(plan, canvas_bounds, ctx)
             } else {
-               console.log("plan complete")
+               // console.log("plan complete")
                if (on_plan_complete) {
                   on_plan_complete(canvas_ref)
                }

@@ -4,7 +4,7 @@ import {decompressSync} from 'fflate';
 
 const URL_BASE = network.fracto_server_url;
 const TILE_SERVER_BASE = network.tile_server_url;
-const MAX_TILE_CACHE = 500;
+const MAX_TILE_CACHE = 150;
 
 export var TILE_CACHE = {};
 export var PACKAGE_CACHE = {};
@@ -12,7 +12,7 @@ var CACHE_MRU = {};
 
 setInterval(() => {
    FractoMruCache.cleanup_cache();
-}, 10000)
+}, 5000)
 
 export class FractoMruCache {
 
@@ -121,7 +121,7 @@ export class FractoMruCache {
          cb(true)
          return;
       }
-      console.log(`chunking ${filtered_list.length} tiles`)
+      // console.log(`chunking ${filtered_list.length} tiles`)
       FractoMruCache.fetch_chunk(filtered_list, cb)
    }
 
@@ -132,6 +132,7 @@ export class FractoMruCache {
          // console.log("no cleanup required")
          return;
       }
+      console.log("cleanup_cache: performance.memory", performance.memory)
       // console.log(`cleanup_cache ${cache_keys.length} tiles in cache`)
       const keys_to_delete = cache_keys.length - 100;
       // console.log(`deleting ${keys_to_delete} tiles from cache`)
@@ -141,9 +142,10 @@ export class FractoMruCache {
          delete CACHE_MRU[short_code]
          delete TILE_CACHE[short_code]
       }
-      const new_cache = Object.assign({}, TILE_CACHE)
-      TILE_CACHE = null
-      TILE_CACHE = new_cache
+      console.log("cleanup_cache complete")
+      // const new_cache = Object.assign({}, TILE_CACHE)
+      // TILE_CACHE = null
+      // TILE_CACHE = new_cache
    }
 
 }

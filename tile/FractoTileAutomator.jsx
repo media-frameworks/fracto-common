@@ -8,14 +8,14 @@ import en from 'javascript-time-ago/locale/en'
 
 import {CoolStyles} from 'common/ui/CoolImports';
 
-import FractoData, {
+import {
    BIN_VERB_INDEXED,
    BIN_VERB_COMPLETED,
 } from 'fracto/common/data/FractoData';
 import FractoDataLoader from 'fracto/common/data/FractoDataLoader';
 import FractoCommon from 'fracto/common/FractoCommon';
 
-import FractoTileAutomate, {CONTEXT_SIZE_PX, TILE_SIZE_PX} from 'fracto/common/tile/FractoTileAutomate';
+import FractoTileAutomate, {CONTEXT_SIZE_PX} from 'fracto/common/tile/FractoTileAutomate';
 import FractoTileDetails from 'fracto/common/tile/FractoTileDetails';
 
 TimeAgo.locale(en)
@@ -64,7 +64,7 @@ export class FractoTileAutomator extends Component {
       summary_text: PropTypes.string,
       on_render_detail: PropTypes.func,
       on_select_tile: PropTypes.func,
-      auto_refresh: PropTypes.number
+      auto_refresh: PropTypes.number,
    }
 
    static defaultProps = {
@@ -74,7 +74,7 @@ export class FractoTileAutomator extends Component {
       summary_text: null,
       on_render_detail: null,
       on_select_tile: null,
-      auto_refresh: 0
+      auto_refresh: 0,
    }
 
    state = {
@@ -187,9 +187,9 @@ export class FractoTileAutomator extends Component {
       if (indexed_loading || completed_loading) {
          return FractoCommon.loading_wait_notice()
       }
-      if (!all_tiles.length) {
-         return "no tiles 2"
-      }
+      // if (!all_tiles.length) {
+      //    return "no tiles 2"
+      // }
       if (tile_index < 0 || tile_index > all_tiles.length) {
          return `bad tile index: ${tile_index}`
       }

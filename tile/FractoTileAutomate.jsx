@@ -46,7 +46,8 @@ export class FractoTileAutomate extends Component {
    static defaultProps = {
       no_tile_mode: false,
       tile_size_px: TILE_SIZE_PX,
-      auto_refresh: 0
+      auto_refresh: 0,
+      inland_tiles_only: false
    }
 
    state = {
@@ -131,9 +132,9 @@ export class FractoTileAutomate extends Component {
       const {automate} = this.state;
       const {tile_index, on_render_tile, tile_size_px} = this.props;
       const {all_tiles, level, no_tile_mode} = this.props
-      if (!all_tiles.length) {
-         return "no tiles 1"
-      }
+      // if (!all_tiles.length) {
+      //    return "no tiles 1"
+      // }
       const tile = this.get_active_tile(tile_index)
       if (!tile) {
          return "no tile"

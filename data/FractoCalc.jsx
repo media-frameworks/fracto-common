@@ -21,6 +21,9 @@ export class FractoCalc {
          } else {
             FractoCalc.previously[position_slug] = iteration;
          }
+         if (iteration % 25000 === 0) {
+            FractoCalc.previously = {}
+         }
          x_squared = x * x;
          y_squared = y * y;
          iteration++;

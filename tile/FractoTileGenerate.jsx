@@ -24,7 +24,7 @@ export class FractoTileGenerate {
             }
             const y = tile.bounds.top - img_y * increment;
             const point_in_main_cardioid = FractoFastCalc.point_in_main_cardioid(x, y)
-            if (point_in_main_cardioid) {
+            if (point_in_main_cardioid || tile.inland_tile) {
                const values = FractoCalc.calc(x, y)
                tile_points[img_x][img_y] = [values.pattern, values.iteration];
                ran_slow_calc++
