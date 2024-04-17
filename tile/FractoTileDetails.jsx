@@ -10,16 +10,14 @@ const DetailsWrapper = styled(CoolStyles.InlineBlock)`
    margin-bottom: 1rem;
 `;
 
-const ShortCodeWrapper = styled(CoolStyles.InlineBlock)`
+const ShortCodeWrapper = styled(CoolStyles.Block)`
    margin-bottom: 0.5rem;
 `;
 
-const CoordinatesWrapper = styled(CoolStyles.InlineBlock)`
+const CoordinatesWrapper = styled(CoolStyles.Block)`
    ${CoolStyles.align_middle}
-   margin-left: 1rem;
    color: #777777;
    font-size: 1.125rem;
-   padding-top: 0.125rem;
 `;
 
 export class FractoTileDetails extends Component {
