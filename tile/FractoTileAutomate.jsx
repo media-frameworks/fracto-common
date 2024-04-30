@@ -97,7 +97,9 @@ export class FractoTileAutomate extends Component {
    on_automate = (automate) => {
       const {tile_index,on_automate} = this.props;
       this.setState({automate: automate});
-      on_automate(automate)
+      if (on_automate) {
+         on_automate(automate)
+      }
       if (automate) {
          setTimeout(() => this.act_on_tile(tile_index), AUTOMATE_TIMEOUT_MS)
       }
