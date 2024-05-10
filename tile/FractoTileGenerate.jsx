@@ -23,12 +23,12 @@ export class FractoTileGenerate {
                continue;
             }
             const y = tile.bounds.top - img_y * increment;
-            const point_in_main_cardioid = FractoFastCalc.point_in_main_cardioid(x, y)
-            if (point_in_main_cardioid || tile.inland_tile) {
-               const values = FractoCalc.calc(x, y)
-               tile_points[img_x][img_y] = [values.pattern, values.iteration];
-               ran_slow_calc++
-            } else {
+            // const point_in_main_cardioid = FractoFastCalc.point_in_main_cardioid(x, y)
+            // if (point_in_main_cardioid || tile.inland_tile) {
+            //    const values = FractoCalc.calc(x, y)
+            //    tile_points[img_x][img_y] = [values.pattern, values.iteration];
+            //    ran_slow_calc++
+            // } else {
                const values = FractoFastCalc.calc(x, y)
                let iteration = values.iteration
                if (values.pattern > 0) {
@@ -39,7 +39,7 @@ export class FractoTileGenerate {
                }
                tile_points[img_x][img_y] = [values.pattern, iteration];
                ran_fast_calc++
-            }
+            // }
          }
       }
       const end = performance.now()
