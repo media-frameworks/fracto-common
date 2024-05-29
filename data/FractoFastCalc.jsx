@@ -54,7 +54,7 @@ export class FractoFastCalc {
             if (Q_x === first_pos.x && Q_y === first_pos.y) {
                return {
                   pattern: orbital,
-                  iteration: iteration,
+                  iteration: iteration - MAX_ORBITAL_SIZE / 2,
                };
             }
          }
