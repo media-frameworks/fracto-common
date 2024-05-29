@@ -1,7 +1,7 @@
 import Complex from "common/math/Complex";
 
 const MAX_ORBITAL_SIZE = 25000
-const MIN_ITERATION = 1000000
+const MIN_ITERATION = 1200000
 const MAX_ITERATION = MIN_ITERATION + MAX_ORBITAL_SIZE
 
 export class FractoFastCalc {
@@ -21,7 +21,7 @@ export class FractoFastCalc {
       return magnitude <= 1;
    }
 
-   static calc = (x0, y0) => {
+   static calc = (x0, y0, level = 10) => {
       const P_x = x0
       const P_y = y0
       let Q_x_squared = 0
@@ -33,8 +33,9 @@ export class FractoFastCalc {
       let least_magnitude = 1
       let best_orbital = 0
       let iteration = 1
-
-      for (; iteration < MAX_ITERATION; iteration++) {
+      const iteration_factor = (MIN_ITERATION * level / 10) + MAX_ORBITAL_SIZE
+      const max_iteration = Math.round(iteration_factor / MAX_ORBITAL_SIZE) * MAX_ORBITAL_SIZE
+      for (; iteration < max_iteration; iteration++) {
          Q_y = 2 * Q_x * Q_y + P_y;
          Q_x = Q_x_squared - Q_y_squared + P_x;
          Q_x_squared = Q_x * Q_x
@@ -58,7 +59,7 @@ export class FractoFastCalc {
             }
          }
 
-         if (iteration > MAX_ITERATION - MAX_ORBITAL_SIZE) {
+         if (iteration > max_iteration - MAX_ORBITAL_SIZE) {
             const difference = new Complex(Q_x - first_pos.x, Q_y - first_pos.y)
             const mag_difference = difference.magnitude()
             if (mag_difference < least_magnitude) {
