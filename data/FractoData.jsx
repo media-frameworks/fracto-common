@@ -1,7 +1,7 @@
 import {Component} from 'react';
 
 import FractoUtil from "../FractoUtil"
-import network from "../../../common/config/network.json";
+import network from "common/config/network.json";
 
 export const MAX_LEVEL = 35;
 

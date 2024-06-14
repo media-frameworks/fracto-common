@@ -68,6 +68,7 @@ const ImageWrapper = styled(CoolStyles.InlineBlock)`
 
 const LoadingWaitWrapper = styled(CoolStyles.Block)`
    ${CoolStyles.align_center}
+   font-family: Arial;
    border: 0.5rem double ${CoolColors.cool_blue};
    margin: 0;
 `;
@@ -85,7 +86,6 @@ const MessageText = styled(CoolStyles.Block)`
 
 const ExtraText = styled(CoolStyles.Block)`
    ${CoolStyles.align_center}
-   ${CoolStyles.italic}
    padding-bottom: 0.5rem;
    font-size: 1.125rem;
 `;
@@ -202,7 +202,7 @@ export class FractoCommon {
          <ExtraText>{extra}</ExtraText>
       </CenteredBlock>
       const modal_contents = <LoadingWaitWrapper>
-         <CenteredBlock><MessageText>{"Loading tile data, please look busy..."}</MessageText></CenteredBlock>
+         <CenteredBlock><MessageText>{"please look busy"}</MessageText></CenteredBlock>
          <CenteredBlock><LogoImage
             width={100}
             src={Logo}
