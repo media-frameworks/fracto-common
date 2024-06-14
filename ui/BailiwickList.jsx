@@ -4,7 +4,7 @@ import styled from "styled-components";
 
 import {CoolColors, CoolStyles} from "common/ui/CoolImports";
 
-import BailiwickData from "fracto/common/data/BailiwickData";
+import BailiwickData from "fracto/common/feature/BailiwickData";
 import {render_pattern_block} from "fracto/common/FractoStyles";
 
 const RowWrapper = styled(CoolStyles.Block)`

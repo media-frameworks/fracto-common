@@ -62,12 +62,14 @@ export class FractoLevelSlider extends Component {
       let slider_style = Object.assign({}, cursor_style)
       slider_style.height = `${height_px - 40}px`
       const plus_button = <ScopeButton
+         key={'plus-button'}
          title={in_wait ? "zoom disabled while update in progress" : "press shift for small changes"}
          style={cursor_style}
          onClick={e => this.alter_scope(e, 0.1)}>
          {"+"}
       </ScopeButton>
       const minus_button = <ScopeButton
+         key={'minus-button'}
          title={in_wait ? "zoom disabled while update in progress" : "press shift for small changes"}
          style={cursor_style}
          onClick={e => this.alter_scope(e, -0.1)}>

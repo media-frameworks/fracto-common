@@ -1,6 +1,6 @@
 import network from "common/config/network.json";
 import FractoUtil from "../FractoUtil";
-import {get_ideal_level} from "./FractoData";
+import {get_ideal_level} from "../data/FractoData";
 
 const FRACTO_DB_URL = network.db_server_url;
 
@@ -19,6 +19,9 @@ export class BailiwickData {
             console.log("all_bailiwicks", all_bailiwicks)
             cb(all_bailiwicks)
          })
+         .catch(e => {
+            cb([])
+         })
    }
 
    static fetch_node_points = (cb) => {
@@ -29,6 +32,9 @@ export class BailiwickData {
             const node_points = JSON.parse(str)
             console.log("node_points", node_points)
             cb(node_points)
+         })
+         .catch(e => {
+            cb([])
          })
    }
 

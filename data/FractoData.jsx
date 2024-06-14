@@ -54,6 +54,20 @@ export const get_level_scope = (level) => {
    return LEVEL_SCOPES[level].scope;
 }
 
+export const get_indexed_bounds = (level, short_code) => {
+   return LEVEL_SCOPES[level][BIN_VERB_INDEXED][short_code]
+}
+
+export const get_indexed_short_codes = (level) => {
+   if (!LEVEL_SCOPES[level]) {
+      return []
+   }
+   if (!LEVEL_SCOPES[level][BIN_VERB_INDEXED]) {
+      return []
+   }
+   return Object.keys(LEVEL_SCOPES[level][BIN_VERB_INDEXED]);
+}
+
 const URL_BASE = network.dev_server_url;
 const BIN_COUNTS_URL = `${URL_BASE}/directory/bin_counts.json`;
 
@@ -83,7 +97,7 @@ export class FractoData extends Component {
                if (LEVEL_SCOPES[level]) {
                   LEVEL_SCOPES[level][verb][short_code] = bounds
                }
-               FractoData.loading_progress_pct[verb] = Math.round(1000 * line_index / lines.length) / 10;
+               // FractoData.loading_progress_pct[verb] = Math.round(1000 * line_index / lines.length) / 10;
             }
             console.log(`${verb} tiles parsed, ${lines.length} total`)
             cb(true);
@@ -186,7 +200,7 @@ export class FractoData extends Component {
       return LEVEL_SCOPES[level][bin][short_code]
    }
 
-   static get_cached_tiles = (level, verb, force=false) => {
+   static get_cached_tiles = (level, verb, force = false) => {
       const cache_key = `${verb}_${level}`;
       if (!FractoData.tiles_cache[cache_key] || force) {
          // console.log(`building cache for ${verb} tiles on level ${level}`)

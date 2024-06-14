@@ -1,36 +1,30 @@
 import {Component} from 'react';
 
-import network from "common/config/network.json"
-import FractoUtil from "../FractoUtil"
-
-const LEVEL_TILES_URL_BASE = `${network.dev_server_url}/directory/levels`;
+import {
+   get_indexed_bounds,
+   get_indexed_short_codes
+} from "./FractoData"
 
 var LEVELS_CACHE = {}
 
 export class FractoIndexedTiles extends Component {
 
    static get_level_tiles = (level, cb) => {
-      // console.log(`loading tiles for level ${level}`)
       const cache_key = `LEVEL_${level}_tiles`
       if (LEVELS_CACHE[cache_key]) {
          cb(LEVELS_CACHE[cache_key])
          return;
       }
-      const prefix = level < 10 ? '0' : ''
-      const url = `${LEVEL_TILES_URL_BASE}/indexed_L${prefix}${level}.json`
-      fetch(url)
-         .then(response => response.json())
-         .then(json => {
-            const with_bounds = json.map(short_code => {
-               return {
-                  short_code: short_code,
-                  bounds: FractoUtil.bounds_from_short_code(short_code)
-               }
-            })
-            // console.log(`indexed tiles loaded for level ${level}`, with_bounds.length)
-            LEVELS_CACHE[cache_key] = with_bounds
-            cb(with_bounds);
-         })
+      const short_codes = get_indexed_short_codes(level)
+      console.log(`${short_codes.length} tiles for level ${level}`)
+      const with_bounds = short_codes.map(short_code => {
+         return {
+            short_code: short_code,
+            bounds: get_indexed_bounds(level, short_code)
+         }
+      })
+      LEVELS_CACHE[cache_key] = with_bounds
+      cb(with_bounds);
    }
 
    static tiles_in_scope = (level, focal_point, scope, aspect_ratio = 1.0) => {

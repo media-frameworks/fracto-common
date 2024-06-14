@@ -14,6 +14,9 @@ export class BurrowsData {
             console.log("all_burrows", all_burrows)
             cb(all_burrows)
          })
+         .catch(e => {
+            cb([])
+         })
    }
 }
 

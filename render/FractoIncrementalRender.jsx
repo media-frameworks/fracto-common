@@ -7,7 +7,7 @@ import {CoolStyles} from "common/ui/CoolImports";
 import FractoUtil from "../FractoUtil";
 import FractoMruCache from "../data/FractoMruCache";
 import FractoIndexedTiles from "../data/FractoIndexedTiles";
-import TransitData from "../data/TransitData";
+import TransitData from "../feature/TransitData";
 
 const FractoCanvas = styled.canvas`   
    ${CoolStyles.narrow_box_shadow}
@@ -27,6 +27,7 @@ export class FractoIncrementalRender extends Component {
       video_id: PropTypes.number,
       frame_index: PropTypes.number,
       incremental_depth: PropTypes.number,
+      disabled: PropTypes.bool.isRequired,
    }
 
    static defaultProps = {
@@ -63,21 +64,8 @@ export class FractoIncrementalRender extends Component {
          height_px: height_px,
          ctx: ctx
       })
-      this.load_all_levels(2, () => {
-         const canvas_buffer = this.init_canvas_buffer()
-         this.fill_canvas_buffer(canvas_buffer, ctx)
-      })
-   }
-
-   load_all_levels = (start_at, when_complete) => {
-      if (start_at > 35) {
-         when_complete()
-         return;
-      }
-      FractoIndexedTiles.get_level_tiles(start_at, result => {
-         // console.log(`loaded level ${start_at}`)
-         this.load_all_levels(start_at + 1, when_complete)
-      })
+      const canvas_buffer = this.init_canvas_buffer()
+      this.fill_canvas_buffer(canvas_buffer, ctx)
    }
 
    componentDidUpdate(prevProps, prevState, snapshot) {
@@ -87,19 +75,21 @@ export class FractoIncrementalRender extends Component {
       const focal_point_y_changed = prevProps.focal_point.y !== this.props.focal_point.y;
       const scope_changed = prevProps.scope !== this.props.scope;
       const level_changed = prevProps.level !== this.props.level;
-      if (!focal_point_x_changed && !focal_point_y_changed && !scope_changed && !level_changed && !width_px_changed && !aspect_ratio_changed) {
-         // console.log("no update")
-         return;
-      }
+      let canvas_buffer = this.state.canvas_buffer
+      // if (!focal_point_x_changed && !focal_point_y_changed && !scope_changed && !level_changed && !width_px_changed && !aspect_ratio_changed && canvas_buffer) {
+      //    // console.log("no update")
+      //    return;
+      // }
       if (this.state.loading_tiles) {
          return;
       }
-      this.setState({loading_tiles: true})
-      let canvas_buffer = this.state.canvas_buffer
-      if (width_px_changed || aspect_ratio_changed) {
+      if (width_px_changed || aspect_ratio_changed || !canvas_buffer) {
          canvas_buffer = this.init_canvas_buffer()
+         this.fill_canvas_buffer(canvas_buffer, this.state.ctx);
       }
-      this.fill_canvas_buffer(canvas_buffer, this.state.ctx);
+      else if (focal_point_x_changed || focal_point_y_changed || scope_changed || level_changed) {
+         this.fill_canvas_buffer(canvas_buffer, this.state.ctx);
+      }
    }
 
    init_canvas_buffer = () => {
@@ -118,7 +108,7 @@ export class FractoIncrementalRender extends Component {
    }
 
    fill_canvas_buffer = (canvas_buffer, ctx) => {
-      const {level, width_px, video_id,incremental_depth} = this.props
+      const {level, width_px, video_id, incremental_depth} = this.props
       let initial_level = level - incremental_depth
       if (initial_level < 2) {
          initial_level = 2
@@ -138,7 +128,7 @@ export class FractoIncrementalRender extends Component {
                }
             }
             this.raster_canvas(canvas_buffer, initial_level, ctx)
-         }, 350)
+         }, 150)
       }
    }
 
@@ -250,8 +240,8 @@ export class FractoIncrementalRender extends Component {
 
    render() {
       const {canvas_ref, loading_tiles, height_px} = this.state;
-      const {width_px, highlight_points, scope, focal_point} = this.props;
-      const canvas_style = {cursor: loading_tiles ? "wait" : "crosshair"}
+      const {width_px, highlight_points, scope, focal_point, disabled} = this.props;
+      const canvas_style = {cursor: loading_tiles || disabled ? "wait" : "crosshair"}
       let highlights = ''
       if (highlight_points.length && !loading_tiles) {
          const fracto_values = {scope: scope, focal_point: focal_point}
@@ -259,6 +249,7 @@ export class FractoIncrementalRender extends Component {
       }
       return [
          <FractoCanvas
+            key={'fracto-canvas'}
             ref={canvas_ref}
             style={canvas_style}
             width={width_px}

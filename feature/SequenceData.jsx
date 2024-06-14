@@ -14,6 +14,9 @@ export class SequenceData {
             console.log("all_sequences", all_sequences)
             cb(all_sequences)
          })
+         .catch(e => {
+            cb([])
+         })
    }
 
    static save_sequence = (sequence = {}, cb) => {
@@ -44,6 +47,9 @@ export class SequenceData {
             const sequence_steps = JSON.parse(str)
             console.log("sequence_steps", sequence_steps)
             cb(sequence_steps)
+         })
+         .catch(e => {
+            cb([])
          })
    }
 

@@ -4,8 +4,7 @@ import styled from "styled-components";
 
 import {CoolStyles} from "common/ui/CoolImports";
 import {render_coordinates} from "fracto/common/FractoStyles";
-import {get_ideal_level} from "fracto/common/data/FractoData";
-import FractoIndexedTiles from "fracto/common/data/FractoIndexedTiles"
+import FractoData, {get_ideal_level} from "fracto/common/data/FractoData";
 
 const LABEL_WIDTH_PX = 100
 
@@ -45,7 +44,7 @@ export class FractoRenderDetails extends Component {
       canvas_buffer: PropTypes.array.isRequired,
       focal_point: PropTypes.object.isRequired,
       scope: PropTypes.number.isRequired,
-      cursor_point: PropTypes.object.isRequired,
+      cursor_point: PropTypes.object,
    }
 
    render_focal_point = () => {
@@ -83,7 +82,7 @@ export class FractoRenderDetails extends Component {
       const ideal_level = get_ideal_level(width_px, scope)
       const tile_counts = []
       for (let i = 0; i < 35; i++) {
-         const tiles_in_level = FractoIndexedTiles.tiles_in_scope(ideal_level + i - 1, focal_point, scope);
+         const tiles_in_level = FractoData.tiles_in_scope(ideal_level + i - 1, focal_point, scope);
          if (!tiles_in_level.length) {
             break;
          }
@@ -104,9 +103,9 @@ export class FractoRenderDetails extends Component {
          {label: "centered at", render: this.render_focal_point},
          {label: "coverage", render: this.render_tiles},
          {label: "cursor", render: this.render_cursor},
-      ].map(detail => {
+      ].map((detail, i) => {
          const data_width_px = width_px - LABEL_WIDTH_PX - 100
-         return <DetailRow>
+         return <DetailRow key={`detail-${i}`}>
             <DetailLabel>{detail.label}</DetailLabel>
             <DetailData style={{width: `${data_width_px}px`}}>{detail.render()}</DetailData>
          </DetailRow>
