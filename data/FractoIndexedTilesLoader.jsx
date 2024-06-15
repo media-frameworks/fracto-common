@@ -7,7 +7,8 @@ import LinearProgress from '@mui/material/LinearProgress';
 import FractoCommon from "../FractoCommon";
 import FractoIndexedTiles from "./FractoIndexedTiles";
 import {BIN_VERB_INDEXED} from "./FractoData";
-import CoolStyles from "../../common/ui/CoolStyles";
+import CoolStyles from "common/ui/CoolStyles";
+import CoolColors from "common/ui/CoolColors";
 
 const BATCH_SIZE = 50000
 const TIMEOUT_MS = 10
@@ -17,6 +18,17 @@ const ProgressWrapper = styled(CoolStyles.Block)`
    width: 20rem;
    margin: 0.5rem auto;
 `
+const IndexingSpan = styled.span`
+   ${CoolStyles.monospace}
+   color: ${CoolColors.light_cool_blue}
+   font-size: 0.75rem;
+`;
+
+const ReadingManifestSpan = styled.span`
+   ${CoolStyles.monospace}
+   color: #888888;
+   font-size: 1rem;
+`;
 
 const TitleBar = styled(CoolStyles.Block)`
    ${CoolStyles.uppercase}
@@ -26,7 +38,8 @@ const TitleBar = styled(CoolStyles.Block)`
    margin: 1rem auto;
    letter-spacing: 1.5rem;
    color: #999999;
-   padding-left: 1rem;
+   padding-left: 2rem;
+   padding-right: 1rem;
    text-shadow: 0.125rem 0.125rem 0.5rem rgba(0,0,0,0.25);
 `;
 
@@ -71,9 +84,10 @@ export class FractoIndexedTilesLoader extends Component {
       const {app_page, app_name} = this.props
       const title_bar = <TitleBar>{app_name}</TitleBar>
       const percent = Math.round(100 * load_index / (short_codes.length + 1))
+      const indexing_message = `indexing ${short_codes.length} tiles, ${percent}% complete`
       const prompt = short_codes.length
-         ? `indexing ${short_codes.length} tiles, ${percent}% complete`
-         : `reading tile manifest...`
+         ? <IndexingSpan>{indexing_message}</IndexingSpan>
+         : <ReadingManifestSpan>{`loading tile list...`}</ReadingManifestSpan>
       const progress = <ProgressWrapper>
          <LinearProgress variant="determinate" value={percent}/>
       </ProgressWrapper>

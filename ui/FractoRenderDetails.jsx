@@ -4,7 +4,8 @@ import styled from "styled-components";
 
 import {CoolStyles} from "common/ui/CoolImports";
 import {render_coordinates} from "fracto/common/FractoStyles";
-import FractoData, {get_ideal_level} from "fracto/common/data/FractoData";
+import {get_ideal_level} from "fracto/common/data/FractoData";
+import FractoIndexedTiles from "../data/FractoIndexedTiles";
 
 const LABEL_WIDTH_PX = 100
 
@@ -82,7 +83,7 @@ export class FractoRenderDetails extends Component {
       const ideal_level = get_ideal_level(width_px, scope)
       const tile_counts = []
       for (let i = 0; i < 35; i++) {
-         const tiles_in_level = FractoData.tiles_in_scope(ideal_level + i - 1, focal_point, scope);
+         const tiles_in_level = FractoIndexedTiles.tiles_in_scope(ideal_level + i - 1, focal_point, scope);
          if (!tiles_in_level.length) {
             break;
          }

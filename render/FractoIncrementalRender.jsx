@@ -86,8 +86,7 @@ export class FractoIncrementalRender extends Component {
       if (width_px_changed || aspect_ratio_changed || !canvas_buffer) {
          canvas_buffer = this.init_canvas_buffer()
          this.fill_canvas_buffer(canvas_buffer, this.state.ctx);
-      }
-      else if (focal_point_x_changed || focal_point_y_changed || scope_changed || level_changed) {
+      } else if (focal_point_x_changed || focal_point_y_changed || scope_changed || level_changed) {
          this.fill_canvas_buffer(canvas_buffer, this.state.ctx);
       }
    }
@@ -104,6 +103,7 @@ export class FractoIncrementalRender extends Component {
          canvas_buffer: canvas_buffer,
          height_px: height_px
       })
+      // console.log("canvas_buffer",canvas_buffer)
       return canvas_buffer
    }
 
@@ -123,12 +123,20 @@ export class FractoIncrementalRender extends Component {
       } else {
          setTimeout(() => {
             for (let img_x = 0; img_x < width_px; img_x++) {
+               if (!canvas_buffer[img_x]) {
+                  console.log(`bad buffer ${width_px}`)
+                  return
+               }
                for (let img_y = 0; img_y < this.state.height_px; img_y++) {
+                  if (!canvas_buffer[img_x][img_y]) {
+                     console.log(`bad buffer ${this.state.height_px}`)
+                     return;
+                  }
                   canvas_buffer[img_x][img_y] = [0, 0]
                }
             }
             this.raster_canvas(canvas_buffer, initial_level, ctx)
-         }, 150)
+         }, 50)
       }
    }
 

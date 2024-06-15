@@ -61,6 +61,10 @@ export class FractoIndexedTiles extends Component {
       }
       const level_bin = FractoIndexedTiles.tile_index
          .find(bin => bin.level === level)
+      if (!level_bin) {
+         console.log(`no bin for level ${level}`)
+         return []
+      }
       const columns = level_bin.columns
          .filter(column =>
             column.left + level_bin.tile_size > viewport.left

@@ -80,8 +80,10 @@ const CenteredBlock = styled(CoolStyles.Block)`
 const MessageText = styled(CoolStyles.Block)`
    ${CoolStyles.align_center}
    ${CoolStyles.italic}
-   padding-top: 0.5rem;
+   padding: 0.75rem 0 0.25rem;
    font-size: 1.125rem;
+   letter-spacing: 0.25rem;
+   color: #aaaaaa;
 `;
 
 const ExtraText = styled(CoolStyles.Block)`
@@ -92,7 +94,6 @@ const ExtraText = styled(CoolStyles.Block)`
 
 const LogoImage = styled.img`
     width: 120px;
-    padding-top: 0.5rem;
 `;
 
 const LevelBlockWrapper = styled(CoolStyles.Block)`
@@ -212,7 +213,8 @@ export class FractoCommon {
          {extra_block}
       </LoadingWaitWrapper>
       return <CoolModal
-         width={"24rem"}
+         minWidth={"24rem"}
+         width={'fit-content'}
          settings={{no_escape: true}}
          contents={modal_contents}
       />
