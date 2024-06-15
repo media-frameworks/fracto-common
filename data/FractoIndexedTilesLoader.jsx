@@ -18,16 +18,17 @@ const ProgressWrapper = styled(CoolStyles.Block)`
    width: 20rem;
    margin: 0.5rem auto;
 `
-const IndexingSpan = styled.span`
+const IndexingBlock = styled(CoolStyles.InlineBlock)`
    ${CoolStyles.monospace}
    color: ${CoolColors.light_cool_blue}
    font-size: 0.75rem;
 `;
 
-const ReadingManifestSpan = styled.span`
+const ReadingManifestBlock = styled(CoolStyles.InlineBlock)`
    ${CoolStyles.monospace}
    color: #888888;
    font-size: 1rem;
+   margin: 0 1rem;
 `;
 
 const TitleBar = styled(CoolStyles.Block)`
@@ -86,8 +87,8 @@ export class FractoIndexedTilesLoader extends Component {
       const percent = Math.round(100 * load_index / (short_codes.length + 1))
       const indexing_message = `indexing ${short_codes.length} tiles, ${percent}% complete`
       const prompt = short_codes.length
-         ? <IndexingSpan>{indexing_message}</IndexingSpan>
-         : <ReadingManifestSpan>{`loading tile list...`}</ReadingManifestSpan>
+         ? <IndexingBlock>{indexing_message}</IndexingBlock>
+         : <ReadingManifestBlock>{`loading tile list...`}</ReadingManifestBlock>
       const progress = <ProgressWrapper>
          <LinearProgress variant="determinate" value={percent}/>
       </ProgressWrapper>

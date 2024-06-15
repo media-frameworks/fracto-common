@@ -88,7 +88,7 @@ const MessageText = styled(CoolStyles.Block)`
 
 const ExtraText = styled(CoolStyles.Block)`
    ${CoolStyles.align_center}
-   padding-bottom: 0.5rem;
+   padding: 0 1rem 0.25rem;
    font-size: 1.125rem;
 `;
 
