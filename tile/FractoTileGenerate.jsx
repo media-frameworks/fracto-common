@@ -33,7 +33,7 @@ export class FractoTileGenerate {
             console.log("ToolUtils.tile_to_bin", tile.short_code, result);
             FractoUtil.tile_to_bin(tile.short_code, "inland", "complete", result => {
                console.log("ToolUtils.tile_to_bin", tile.short_code, result);
-               cb("generated tile")
+               cb("generated tile", tile.short_code)
             })
          })
       })

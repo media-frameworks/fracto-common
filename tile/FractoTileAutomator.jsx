@@ -7,12 +7,6 @@ import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
 
 import {CoolStyles} from 'common/ui/CoolImports';
-
-import {
-   BIN_VERB_INDEXED,
-   BIN_VERB_COMPLETED,
-} from 'fracto/common/data/FractoData';
-import FractoDataLoader from 'fracto/common/data/FractoDataLoader';
 import FractoCommon from 'fracto/common/FractoCommon';
 
 import FractoTileAutomate, {CONTEXT_SIZE_PX} from 'fracto/common/tile/FractoTileAutomate';
@@ -58,7 +52,7 @@ export class FractoTileAutomator extends Component {
       width_px: PropTypes.number.isRequired,
       descriptor: PropTypes.string.isRequired,
       all_tiles: PropTypes.array.isRequired,
-      tile_action: PropTypes.func,
+      tile_action: PropTypes.func.isRequired,
       no_tile_mode: PropTypes.bool,
       on_render_tile: PropTypes.func,
       summary_text: PropTypes.string,
@@ -69,7 +63,6 @@ export class FractoTileAutomator extends Component {
    }
 
    static defaultProps = {
-      tile_action: null,
       no_tile_mode: false,
       on_render_tile: null,
       summary_text: null,
@@ -79,8 +72,8 @@ export class FractoTileAutomator extends Component {
    }
 
    state = {
-      completed_loading: true,
-      indexed_loading: true,
+      completed_loading: false,
+      indexed_loading: false,
       tile_index: 0,
       run_history: [],
       tile_details: []
@@ -90,10 +83,8 @@ export class FractoTileAutomator extends Component {
       this.initalize_tile_sets()
    }
 
-   componentDidUpdate(prevProps: Readonly<P>, prevState: Readonly<S>, snapshot: SS) {
+   componentDidUpdate(prevProps, prevState, snapshot) {
       if (prevProps.level !== this.props.level) {
-         this.initalize_tile_sets()
-      } else if (prevProps.all_tiles.length !== this.props.all_tiles.length) {
          this.initalize_tile_sets()
       }
    }
@@ -112,28 +103,33 @@ export class FractoTileAutomator extends Component {
       if (on_select_tile) {
          on_select_tile(all_tiles[tile_index])
       }
-      FractoDataLoader.load_tile_set_async(BIN_VERB_COMPLETED, result => {
-         console.log("FractoDataLoader.load_tile_set_async", BIN_VERB_COMPLETED, result)
-         this.setState({completed_loading: false});
-      });
-      FractoDataLoader.load_tile_set_async(BIN_VERB_INDEXED, result => {
-         console.log("FractoDataLoader.load_tile_set_async", BIN_VERB_INDEXED, result)
-         this.setState({indexed_loading: false});
-      });
+      // FractoDataLoader.load_tile_set_async(BIN_VERB_COMPLETED, result => {
+      //    console.log("FractoDataLoader.load_tile_set_async", BIN_VERB_COMPLETED, result)
+      //    this.setState({completed_loading: false});
+      // });
+      // FractoDataLoader.load_tile_set_async(BIN_VERB_INDEXED, result => {
+      //    console.log("FractoDataLoader.load_tile_set_async", BIN_VERB_INDEXED, result)
+      //    this.setState({indexed_loading: false});
+      // });
    }
 
-   on_tile_select = (tile_index) => {
+   on_tile_select = (tile_index, cb) => {
       const {level, descriptor, all_tiles, on_select_tile} = this.props;
       this.setState({tile_index: tile_index < all_tiles.length ? tile_index : 0})
       const level_key = `${descriptor}_tile_index_${level}`
       localStorage.setItem(level_key, `${tile_index}`)
       if (on_select_tile) {
-         on_select_tile(all_tiles[tile_index])
+         on_select_tile(all_tiles[tile_index], result => {
+            if (cb) {
+               cb(result)
+            }
+         })
       }
    }
 
    on_tile_action = (tile, cb) => {
       const {run_history, tile_index} = this.state
+      // console.log("on_tile_action", tile_index)
       const {tile_action} = this.props;
       if (!tile_action) {
          const message = "no action"
@@ -189,7 +185,7 @@ export class FractoTileAutomator extends Component {
          on_render_tile, on_render_detail, auto_refresh, on_automate
       } = this.props;
       if (indexed_loading || completed_loading) {
-         return FractoCommon.loading_wait_notice()
+         return FractoCommon.loading_wait_notice("FractoTileAutomator")
       }
       // if (!all_tiles.length) {
       //    return "no tiles 2"
@@ -210,7 +206,7 @@ export class FractoTileAutomator extends Component {
                tile_index={tile_index}
                level={level - 1}
                tile_action={this.on_tile_action}
-               on_tile_select={tile_index => this.on_tile_select(tile_index)}
+               on_tile_select={this.on_tile_select}
                no_tile_mode={no_tile_mode}
                tile_size_px={CONTEXT_SIZE_PX}
                on_render_tile={on_render_tile}

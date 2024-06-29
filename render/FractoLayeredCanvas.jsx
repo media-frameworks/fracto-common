@@ -2,9 +2,9 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import styled from "styled-components";
 
-import FractoData from "../data/FractoData";
 import FractoUtil from "../FractoUtil";
 import FractoMruCache, {TILE_CACHE} from "../data/FractoMruCache"
+import FractoIndexedTiles from "../data/FractoIndexedTiles";
 
 const FractoCanvas = styled.canvas`
    margin: 0;
@@ -143,14 +143,15 @@ export class FractoLayeredCanvas extends Component {
          cb(true);
          return;
       }
-      const short_codes = FractoData.short_codes_in_scope(level, focal_point, scope, aspect_ratio)
+      const tiles_in_scope = FractoIndexedTiles.tiles_in_scope(level, focal_point, scope, aspect_ratio)
+      const short_codes = tiles_in_scope.map(tile=>tile.short_code)
       if (short_codes.length > 1000) {
          console.log("too many tiles", short_codes.length)
          cb(true);
          return;
       }
       if (!short_codes.length) {
-         console.log("no tiles", short_codes.length)
+         // console.log("no tiles", short_codes.length)
          cb(true);
          return;
       }
@@ -181,7 +182,8 @@ export class FractoLayeredCanvas extends Component {
          }
          return;
       }
-      const short_codes = FractoData.short_codes_in_scope(adjusted_level, focal_point, scope, aspect_ratio)
+      const tiles_in_scope = FractoIndexedTiles.tiles_in_scope(adjusted_level, focal_point, scope, aspect_ratio)
+      const short_codes = tiles_in_scope.map(tile=>tile.short_code)
       FractoMruCache.get_tiles_async(short_codes, get_result => {
          this.fill_layer(adjusted_level, canvas_bounds, step.layer_opacity, ctx, result => {
             if (!result) {
@@ -203,13 +205,12 @@ export class FractoLayeredCanvas extends Component {
 
    fill_canvas = () => {
       const {ctx} = this.state;
-      const {width_px, aspect_ratio, focal_point, scope, quality} = this.props;
-      const height_px = width_px * aspect_ratio;
+      const {aspect_ratio, focal_point, scope, quality} = this.props;
       if (!ctx) {
          return
       }
-      ctx.fillStyle = `white`
-      ctx.fillRect(0, 0, width_px, height_px);
+      // ctx.fillStyle = `white`
+      // ctx.fillRect(0, 0, width_px, height_px);
 
       const half_width = scope / 2;
       const half_height = (aspect_ratio * scope) / 2;

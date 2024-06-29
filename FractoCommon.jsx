@@ -80,8 +80,8 @@ const CenteredBlock = styled(CoolStyles.Block)`
 const MessageText = styled(CoolStyles.Block)`
    ${CoolStyles.align_center}
    ${CoolStyles.italic}
-   padding: 0.75rem 0 0.25rem;
-   font-size: 1.125rem;
+   padding: 0.75rem 1rem 0.25rem;
+   font-size: 1rem;
    letter-spacing: 0.25rem;
    color: #aaaaaa;
 `;
@@ -94,6 +94,7 @@ const ExtraText = styled(CoolStyles.Block)`
 
 const LogoImage = styled.img`
     width: 120px;
+    padding-bottom: 0.5rem;
 `;
 
 const LevelBlockWrapper = styled(CoolStyles.Block)`

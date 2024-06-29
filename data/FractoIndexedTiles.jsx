@@ -1,7 +1,9 @@
 import {Component} from 'react';
 
-import {URL_BASE} from "pages/constants";
 import FractoUtil from "../FractoUtil";
+import network from "common/config/network.json";
+
+const URL_BASE = network.dev_server_url;
 
 export class FractoIndexedTiles extends Component {
 
@@ -48,6 +50,39 @@ export class FractoIndexedTiles extends Component {
          }
          tile_column.tiles.push(tile)
       }
+   }
+
+   static tiles_in_level = (level) => {
+      const level_bin = FractoIndexedTiles.tile_index
+         .find(bin => bin.level === level)
+      if (!level_bin) {
+         console.log(`no bin for level ${level}`)
+         return []
+      }
+      const columns = level_bin.columns
+      let short_codes = []
+      for (let column_index = 0; column_index < columns.length; column_index++) {
+         const tiles_in_column = columns[column_index].tiles
+         const column_left = columns[column_index].left
+         const column_tiles = tiles_in_column
+            .map(tile => {
+               return {
+                  bounds: {
+                     left: column_left,
+                     right: column_left + level_bin.tile_size,
+                     bottom: tile.bottom,
+                     top: tile.bottom + level_bin.tile_size
+                  },
+                  short_code: tile.short_code
+               }
+            })
+         short_codes = short_codes.concat(column_tiles)
+      }
+      return short_codes.sort((a, b) => {
+         return a.bounds.left === b.bounds.left ?
+            (a.bounds.top > b.bounds.top ? -1 : 1) :
+            (a.bounds.left > b.bounds.left ? 1 : -1)
+      })
    }
 
    static tiles_in_scope = (level, focal_point, scope, aspect_ratio = 1.0) => {

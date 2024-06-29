@@ -29,22 +29,22 @@ export class FractoMruCache {
    static get_tile_data_raw = (short_code, cb) => {
       CACHE_MRU[short_code] = FractoMruCache.highest_mru++;
       if (!(short_code in TILE_CACHE)) {
-         // console.log(`loading tile ${short_code}`)
+         console.log(`loading tile ${short_code}`)
          const url = `${URL_BASE}/get_tiles.php?short_codes=${short_code}`
          fetch(url).then(response => {
             // console.log("response", response)
             return response.json()
          }).then(json => {
-            // console.log("json", json)
-            if (!json["tiles"]) {
-               cb(null)
+            console.log("json", json)
+            if (!json["tiles"] || !json["tiles"][short_code]) {
+               cb([])
             } else {
                TILE_CACHE[short_code] = FractoMruCache.serialize_tile(json["tiles"][short_code])
                cb(json["tiles"][short_code])
             }
          })
       } else {
-         // console.log(`cached tile ${short_code}`)
+         console.log(`cached tile ${short_code}`)
          const tile_data = FractoMruCache.deserialize_tile(TILE_CACHE[short_code])
          cb(tile_data)
       }
