@@ -139,6 +139,7 @@ export class FractoTileNavigate extends Component {
             on_click={r => this.navigate_tile(level_tiles.length - 1)}
          />,
       ]
+      const percent_complete = Math.round(10000 * (tile_index + 1) / level_tiles.length) / 100
       const top_row_buttons = [
          <CoolButton
             key={`nav-button-${"prev. top"}`}
@@ -148,7 +149,9 @@ export class FractoTileNavigate extends Component {
             style={NAV_BUTTON_STYLE}
             on_click={r => this.previous_top()}
          />,
-         <StatusText key={'just-status'}>{`${tile_index + 1} of ${level_tiles.length}`}</StatusText>,
+         <StatusText key={'just-status'}>
+            {`${tile_index + 1} of ${level_tiles.length} (${percent_complete}%)`}
+         </StatusText>,
          <CoolButton
             key={`nav-button-${"next top"}`}
             primary={true}
