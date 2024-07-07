@@ -76,7 +76,9 @@ export class FractoTileAutomator extends Component {
       indexed_loading: false,
       tile_index: 0,
       run_history: [],
-      tile_details: []
+      tile_details: [],
+      run_start: null,
+      run_tile_index_start: 0
    };
 
    componentDidMount() {
@@ -158,7 +160,7 @@ export class FractoTileAutomator extends Component {
    }
 
    render_run_history = () => {
-      const {run_history} = this.state;
+      const {run_history, tile_index, run_tile_index_start, run_start} = this.state;
       const {summary_text} = this.props
       const recent_results = run_history.sort((a, b) => b.tile_index - a.tile_index)
          .map(result => {
@@ -172,17 +174,36 @@ export class FractoTileAutomator extends Component {
             </RecentResult>
          })
       const summary = !summary_text ? '' : `, ${summary_text}`
+      const timer_now = performance.now()
+      const tiles_per_minute = 60 * 1000 * (tile_index - run_tile_index_start) / (timer_now - run_start)
+      const rounded_tiles_per_minute = Math.round(100 * tiles_per_minute) / 100
       return [
-         <SummaryWrapper>{!recent_results.length ? '' : `${recent_results.length} results this run${summary}`}</SummaryWrapper>,
+         <SummaryWrapper>{!recent_results.length ? '' : `${recent_results.length} results this run${summary} (${rounded_tiles_per_minute} tiles/min)`}</SummaryWrapper>,
          <ResultsWrapper>{recent_results}</ResultsWrapper>
       ]
+   }
+
+   on_automate = (automate) => {
+      const {tile_index} = this.state
+      const {on_automate} = this.props
+      if (automate) {
+         console.log("starting run timer")
+         const run_start = performance.now()
+         this.setState({
+            run_start: run_start,
+            run_tile_index_start: tile_index
+         })
+         if (on_automate) {
+            on_automate(automate)
+         }
+      }
    }
 
    render() {
       const {tile_index, indexed_loading, completed_loading, run_history} = this.state;
       const {
          level, width_px, all_tiles, no_tile_mode,
-         on_render_tile, on_render_detail, auto_refresh, on_automate
+         on_render_tile, on_render_detail, auto_refresh
       } = this.props;
       if (indexed_loading || completed_loading) {
          return FractoCommon.loading_wait_notice("FractoTileAutomator")
@@ -211,7 +232,7 @@ export class FractoTileAutomator extends Component {
                tile_size_px={CONTEXT_SIZE_PX}
                on_render_tile={on_render_tile}
                auto_refresh={auto_refresh}
-               on_automate={on_automate}
+               on_automate={this.on_automate}
             />
          </AutomateWrapper>
          <DetailsWrapper>
