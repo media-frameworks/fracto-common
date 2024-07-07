@@ -70,6 +70,7 @@ export class FractoIndexedTilesLoader extends Component {
       const {short_codes} = this.state
       if (index > short_codes.length) {
          this.setState({load_complete: true})
+         console.log('load is complete')
          return;
       }
       const batch_list = short_codes.slice(index, index + BATCH_SIZE)
@@ -83,6 +84,10 @@ export class FractoIndexedTilesLoader extends Component {
    render() {
       const {short_codes, load_index, load_complete} = this.state
       const {app_page, app_name} = this.props
+      if (load_complete) {
+         console.log('load is complete, running page now')
+         return app_page
+      }
       const title_bar = <TitleBar>{app_name}</TitleBar>
       const percent = Math.round(100 * load_index / (short_codes.length + 1))
       const indexing_message = `indexing ${short_codes.length} tiles, ${percent}% complete`
@@ -97,9 +102,7 @@ export class FractoIndexedTilesLoader extends Component {
          prompt,
          short_codes.length ? progress : []
       ]
-      return load_complete
-         ? app_page
-         : FractoCommon.loading_wait_notice(extra)
+      return FractoCommon.loading_wait_notice(extra)
    }
 }
 

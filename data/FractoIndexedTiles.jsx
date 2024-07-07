@@ -9,6 +9,10 @@ export class FractoIndexedTiles extends Component {
 
    static tile_index = []
 
+   static store_tile_set = (cb) => {
+
+   }
+
    static load_short_codes = (tile_set_name, cb) => {
       const directory_url = `${URL_BASE}/directory/${tile_set_name}.csv`;
       fetch(directory_url)

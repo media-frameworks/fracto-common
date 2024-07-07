@@ -93,17 +93,22 @@ export class FractoIncrementalRender extends Component {
 
    init_canvas_buffer = () => {
       const {width_px, aspect_ratio} = this.props
+      if (width_px <= 0) {
+         return;
+      }
       let height_px = Math.round(width_px * aspect_ratio);
       if (height_px & 1) {
          height_px -= 1
       }
       console.log("init_canvas_buffer", width_px, height_px)
+      const start = performance.now()
       const canvas_buffer = new Array(width_px).fill(0).map(() => new Array(height_px).fill([0, 4]));
       this.setState({
          canvas_buffer: canvas_buffer,
          height_px: height_px
       })
-      // console.log("canvas_buffer",canvas_buffer)
+      const end = performance.now()
+      console.log(`init_canvas_buffer took ${end - start}ms`)
       return canvas_buffer
    }
 
@@ -144,6 +149,10 @@ export class FractoIncrementalRender extends Component {
       const {height_px} = this.state
       const {aspect_ratio, level, focal_point, scope, on_plan_complete, width_px} = this.props;
       const level_tiles = FractoIndexedTiles.tiles_in_scope(render_level, focal_point, scope, aspect_ratio);
+      if (!level_tiles) {
+         console.log(`no tiles found for level ${render_level} in raster_canvas`)
+         return;
+      }
       this.tiles_to_canvas(level_tiles, canvas_buffer, 1000000, lower_iteration => {
          // console.log(`level ${render_level} complete: lower_iteration=${lower_iteration}`)
          if (level > render_level) {
@@ -199,7 +208,7 @@ export class FractoIncrementalRender extends Component {
    tiles_to_canvas = (level_tiles, canvas_buffer, lowest_iteration, cb) => {
       const {ctx, height_px} = this.state
       const {width_px, aspect_ratio, scope, focal_point} = this.props;
-      if (!level_tiles.length) {
+      if (!level_tiles.length || !canvas_buffer) {
          cb(lowest_iteration);
          return;
       }
@@ -218,6 +227,9 @@ export class FractoIncrementalRender extends Component {
             }
             if (x > tile.bounds.right) {
                break
+            }
+            if (!canvas_buffer[img_x]) {
+               continue;
             }
             for (let img_y = 0; img_y < height_px; img_y++) {
                const y = top_edge - img_y * increment;

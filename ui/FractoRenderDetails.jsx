@@ -66,18 +66,6 @@ export class FractoRenderDetails extends Component {
       return <NumberValue>{scope}</NumberValue>
    }
 
-   render_dimensions = () => {
-      const {canvas_buffer} = this.props
-      if (!canvas_buffer) {
-         return []
-      }
-      const canvas_width_px = canvas_buffer.length
-      const canvas_height_px = canvas_width_px ? canvas_buffer[0].length : 0
-      return <NumberValue>
-         {`${canvas_width_px}x${canvas_height_px}px (AR: ${canvas_height_px / canvas_width_px} : 1)`}
-      </NumberValue>
-   }
-
    render_tiles = () => {
       const {width_px, scope, focal_point} = this.props
       const ideal_level = get_ideal_level(width_px, scope)
@@ -100,7 +88,6 @@ export class FractoRenderDetails extends Component {
       const {width_px} = this.props
       return [
          {label: "scope", render: this.render_scope},
-         {label: "dimensions", render: this.render_dimensions},
          {label: "centered at", render: this.render_focal_point},
          {label: "coverage", render: this.render_tiles},
          {label: "cursor", render: this.render_cursor},
