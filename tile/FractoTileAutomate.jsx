@@ -53,7 +53,7 @@ export class FractoTileAutomate extends Component {
 
    state = {
       automate: false,
-      run_count: 0
+      start_index: 0
    };
 
    componentDidMount() {
@@ -68,10 +68,10 @@ export class FractoTileAutomate extends Component {
    }
 
    act_on_tile = (tile_index) => {
-      const {automate, run_count} = this.state;
+      const {automate, start_index} = this.state;
       const {tile_action, on_tile_select, auto_refresh} = this.props;
-      console.log('act_on_tile', tile_index)
-      if (auto_refresh && run_count > auto_refresh) {
+      console.log('act_on_tile', tile_index - start_index)
+      if (auto_refresh && tile_index - start_index > auto_refresh) {
          localStorage.setItem(AUTO_REFRESH_FLAG, "1")
          window.location = "/"
       }
@@ -88,7 +88,6 @@ export class FractoTileAutomate extends Component {
                this.setState({automate: false})
                this.on_automate(false)
             } else if (automate) {
-               this.setState({run_count: run_count + 1})
                this.act_on_tile(tile_index + 1)
             }
          })
@@ -102,6 +101,7 @@ export class FractoTileAutomate extends Component {
          on_automate(automate)
       }
       if (automate) {
+         this.setState({start_index: tile_index})
          setTimeout(() => this.act_on_tile(tile_index), AUTOMATE_TIMEOUT_MS)
       }
    }
