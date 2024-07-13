@@ -20,6 +20,7 @@ export class BailiwickData {
             cb(all_bailiwicks)
          })
          .catch(e => {
+            console.log('error fetching bailiwicks', e.message)
             cb([])
          })
    }

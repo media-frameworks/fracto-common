@@ -9,10 +9,6 @@ export class FractoIndexedTiles extends Component {
 
    static tile_index = []
 
-   static store_tile_set = (cb) => {
-
-   }
-
    static load_short_codes = (tile_set_name, cb) => {
       const directory_url = `${URL_BASE}/directory/${tile_set_name}.csv`;
       fetch(directory_url)
@@ -60,7 +56,7 @@ export class FractoIndexedTiles extends Component {
       const level_bin = FractoIndexedTiles.tile_index
          .find(bin => bin.level === level)
       if (!level_bin) {
-         console.log(`no bin for level ${level}`)
+         // console.log(`no bin for level ${level}`)
          return []
       }
       const columns = level_bin.columns
@@ -101,7 +97,7 @@ export class FractoIndexedTiles extends Component {
       const level_bin = FractoIndexedTiles.tile_index
          .find(bin => bin.level === level)
       if (!level_bin) {
-         console.log(`no bin for level ${level}`)
+         // console.log(`no bin for level ${level}`)
          return []
       }
       const columns = level_bin.columns

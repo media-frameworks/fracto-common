@@ -148,7 +148,6 @@ export class FractoOrbitalsList extends Component {
             all_iterations.push(iteration_block.iteration)
          }
       }
-      console.log("all_iterations.length", all_iterations.length)
       const sorted_iterations = all_iterations.sort()
       const highest_iteration = sorted_iterations[0]
       const lowest_iteration = sorted_iterations[sorted_iterations.length - 1]

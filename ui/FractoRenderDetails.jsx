@@ -4,10 +4,10 @@ import styled from "styled-components";
 
 import {CoolStyles} from "common/ui/CoolImports";
 import {render_coordinates} from "fracto/common/FractoStyles";
-import {get_ideal_level} from "fracto/common/data/FractoData";
 import FractoIndexedTiles from "../data/FractoIndexedTiles";
 
 const LABEL_WIDTH_PX = 100
+const MAX_LEVEL = 32
 
 const DetailRow = styled(CoolStyles.Block)`
    margin: 0;
@@ -66,18 +66,41 @@ export class FractoRenderDetails extends Component {
       return <NumberValue>{scope}</NumberValue>
    }
 
-   render_tiles = () => {
-      const {width_px, scope, focal_point} = this.props
-      const ideal_level = get_ideal_level(width_px, scope)
-      const tile_counts = []
-      for (let i = 0; i < 35; i++) {
-         const tiles_in_level = FractoIndexedTiles.tiles_in_scope(ideal_level + i - 1, focal_point, scope);
-         if (!tiles_in_level.length) {
+   get_ideal_level = () => {
+      const {width_px, scope} = this.props
+      const ideal_tiles_across = Math.ceil(2 * width_px / 256);
+      const ideal_tile_scope = scope / ideal_tiles_across;
+      let ideal_level = -1;
+      for (let i = 2; i <= MAX_LEVEL; i++) {
+         const level_scope = Math.pow(2, 2 - i)
+         if (level_scope < ideal_tile_scope) {
+            ideal_level = i;
             break;
+         }
+      }
+      if (ideal_level < 2) {
+         ideal_level = 2;
+      }
+      console.log('ideal_level', ideal_level)
+      return ideal_level;
+   }
+
+   render_tiles = () => {
+      const {scope, focal_point} = this.props
+      const ideal_level = this.get_ideal_level()
+      const tile_counts = []
+      for (let i = ideal_level - 5; i < ideal_level + 10; i++) {
+         if (i < 2 || i > MAX_LEVEL) {
+            continue;
+         }
+         const tiles_in_level = FractoIndexedTiles.tiles_in_scope(i, focal_point, scope);
+         if (!tiles_in_level.length) {
+            continue;
          }
          tile_counts[i] = tiles_in_level.length
       }
-      const count_list = tile_counts.filter((count, i) => count && i < 6)
+      const count_list = tile_counts
+         .filter((count, i) => count > 3 && count < 500)
          .map((count, index) => {
             return `${ideal_level + index}:${count}`
          }).join(', ')
