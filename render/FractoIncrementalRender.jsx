@@ -21,7 +21,7 @@ export class FractoIncrementalRender extends Component {
       focal_point: PropTypes.object.isRequired,
       scope: PropTypes.number.isRequired,
       level: PropTypes.number.isRequired,
-      on_plan_complete: PropTypes.func.isRequired,
+      on_plan_complete: PropTypes.func,
       aspect_ratio: PropTypes.number,
       highlight_points: PropTypes.array,
       video_id: PropTypes.number,
@@ -177,7 +177,9 @@ export class FractoIncrementalRender extends Component {
                }
             }
             this.setState({loading_tiles: false})
-            on_plan_complete(canvas_buffer, ctx)
+            if (on_plan_complete) {
+               on_plan_complete(canvas_buffer, ctx)
+            }
          }
       })
    }
