@@ -4,8 +4,9 @@ import styled from "styled-components";
 
 import {CoolColors, CoolStyles} from "common/ui/CoolImports";
 
-import BailiwickData from "fracto/common/feature/BailiwickData";
-import {render_pattern_block} from "fracto/common/FractoStyles";
+import BailiwickData from "../feature/BailiwickData";
+import {render_pattern_block} from "../FractoStyles";
+import BailiwickDetails from "./BailiwickDetails";
 
 const RowWrapper = styled(CoolStyles.Block)`
    ${CoolStyles.pointer}
@@ -28,7 +29,6 @@ const NameWrapper = styled(CoolStyles.InlineBlock)`
    ${CoolStyles.ellipsis}
    line-height: 1.5rem;
    letter-spacing: 0.1rem;
-   width: 13rem;
    font-size: 0.9rem;
    margin-left: 0.5rem;
    color: #666666;
@@ -50,18 +50,18 @@ export class BailiwickList extends Component {
    componentDidMount() {
       BailiwickData.fetch_bailiwicks(all_bailiwicks => {
          this.setState({all_bailiwicks: all_bailiwicks})
-         const selected_index = parseInt( localStorage.getItem("selected_bailiwick"))
-         this.select_bailiwick(all_bailiwicks[selected_index], selected_index)
-         setTimeout(() => {
-            const scroll_element = this.state.scroll_ref.current
-            if (scroll_element) {
-               scroll_element.scrollIntoView({ behavior: 'smooth' });
-            }
-         }, 100)
+         // const selected_index = parseInt( localStorage.getItem("selected_bailiwick"))
+         // this.select_bailiwick(all_bailiwicks[selected_index], selected_index)
+         // setTimeout(() => {
+         //    const scroll_element = this.state.scroll_ref.current
+         //    if (scroll_element) {
+         //       scroll_element.scrollIntoView({ behavior: 'smooth' });
+         //    }
+         // }, 100)
       })
    }
 
-   select_bailiwick = (item, i)=> {
+   select_bailiwick = (item, i) => {
       const {on_select, in_wait} = this.props
       if (!item || in_wait) {
          return;
@@ -73,7 +73,7 @@ export class BailiwickList extends Component {
       this.setState({selected_index: i})
    }
 
-   render(){
+   render() {
       const {all_bailiwicks, selected_index, scroll_ref} = this.state
       const {in_wait} = this.props
       return all_bailiwicks.map((item, i) => {
@@ -86,13 +86,22 @@ export class BailiwickList extends Component {
             color: "white",
             cursor: in_wait ? "wait" : "pointer"
          }
-         const bailiwick_name = item.name // FractoUtil.bailiwick_name(item.pattern, core_point, highest_level)
+         const highest_level = Math.round(100 * (Math.log(32 / item.magnitude) / Math.log(2))) / 100
+         const bailiwick_name = item.name
+         const row_content = selected
+            ? <BailiwickDetails
+               freeform_index={item.free_ordinal}
+               highest_level={highest_level}
+               selected_bailiwick={item}/>
+            : [
+               <BlockWrapper key={`pattern_${i}`}>{pattern_block}</BlockWrapper>,
+               <NameWrapper key={`name_${i}`}>{bailiwick_name}</NameWrapper>
+            ]
          return <RowWrapper
             ref={selected ? scroll_ref : null}
-            onClick={e => this.select_bailiwick(item, i) }
+            onClick={e => this.select_bailiwick(item, i)}
             style={row_style}>
-            <BlockWrapper>{pattern_block}</BlockWrapper>
-            <NameWrapper>{bailiwick_name}</NameWrapper>
+            {row_content}
          </RowWrapper>
       })
    }
