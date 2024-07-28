@@ -115,7 +115,7 @@ export class FractoRenderDetails extends Component {
          {label: "coverage", render: this.render_tiles},
          {label: "cursor", render: this.render_cursor},
       ].map((detail, i) => {
-         const data_width_px = width_px - LABEL_WIDTH_PX - 100
+         const data_width_px = width_px - LABEL_WIDTH_PX - 25
          return <DetailRow key={`detail-${i}`}>
             <DetailLabel>{detail.label}</DetailLabel>
             <DetailData style={{width: `${data_width_px}px`}}>{detail.render()}</DetailData>

@@ -37,28 +37,17 @@ const NameWrapper = styled(CoolStyles.InlineBlock)`
 export class BailiwickList extends Component {
 
    static propTypes = {
+      bailiwick_list: PropTypes.array.isRequired,
       on_select: PropTypes.func.isRequired,
       in_wait: PropTypes.bool.isRequired,
    }
 
    state = {
-      all_bailiwicks: [],
       selected_index: 0,
       scroll_ref: React.createRef()
    };
 
    componentDidMount() {
-      BailiwickData.fetch_bailiwicks(all_bailiwicks => {
-         this.setState({all_bailiwicks: all_bailiwicks})
-         // const selected_index = parseInt( localStorage.getItem("selected_bailiwick"))
-         // this.select_bailiwick(all_bailiwicks[selected_index], selected_index)
-         // setTimeout(() => {
-         //    const scroll_element = this.state.scroll_ref.current
-         //    if (scroll_element) {
-         //       scroll_element.scrollIntoView({ behavior: 'smooth' });
-         //    }
-         // }, 100)
-      })
    }
 
    select_bailiwick = (item, i) => {
@@ -74,9 +63,9 @@ export class BailiwickList extends Component {
    }
 
    render() {
-      const {all_bailiwicks, selected_index, scroll_ref} = this.state
-      const {in_wait} = this.props
-      return all_bailiwicks.map((item, i) => {
+      const { selected_index, scroll_ref} = this.state
+      const {bailiwick_list, in_wait} = this.props
+      return bailiwick_list.map((item, i) => {
          const pattern_block = render_pattern_block(item.pattern)
          const selected = selected_index === i
          const row_style = !selected ? {} : {

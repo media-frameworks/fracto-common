@@ -63,11 +63,22 @@ const LowerWrapper = styled(CoolStyles.Block)`
 `;
 
 const PointsWrapper = styled(CoolStyles.Block)`
-   margin: 0.5rem 1rem 0.5rem 1rem;
+   margin: 0.5rem 0;
    background-color: white;
    color: #444444;
    width: fit-content;
 `;
+
+const PromptWrapper = styled(CoolStyles.InlineBlock)`
+   ${CoolStyles.italic}
+   ${CoolStyles.bold}
+   color: #444444;
+   margin-right: 0.5rem;
+`
+
+const ShowPointsSpan = styled.span`
+   ${CoolStyles.link}
+`
 
 const NODES_HEADERS = [
    {
@@ -101,7 +112,8 @@ export class BailiwickDetails extends Component {
 
    state = {
       all_node_points: [],
-      node_index: 0
+      node_index: 0,
+      show_points: false,
    }
 
    componentDidMount() {
@@ -156,8 +168,12 @@ export class BailiwickDetails extends Component {
       this.setState({node_index: index})
    }
 
+   show_hide_points = () => {
+
+   }
+
    render() {
-      const {all_node_points, node_index} = this.state
+      const {all_node_points, node_index, show_points} = this.state
       const {selected_bailiwick, highest_level, freeform_index} = this.props;
       const bailiwick_name = selected_bailiwick.name
       const block_color = FractoUtil.fracto_pattern_color(selected_bailiwick.pattern, 1000)
@@ -172,14 +188,21 @@ export class BailiwickDetails extends Component {
                long_form: node.long_form,
             }
          })
-      const points = <PointsWrapper><CoolTable
-         options={TABLE_CAN_SELECT}
-         columns={NODES_HEADERS}
-         data={table_rows}
-         key={'bailiwick-nodes'}
-         on_select_row={this.on_select_row}
-         selected_row={node_index}
-      /></PointsWrapper>
+      const points = <PointsWrapper>
+         <CoolTable
+            options={TABLE_CAN_SELECT}
+            columns={NODES_HEADERS}
+            data={table_rows}
+            key={'bailiwick-nodes'}
+            on_select_row={this.on_select_row}
+            selected_row={node_index}
+         />
+      </PointsWrapper>
+      const points_prompt = <PromptWrapper>{'node points:'}</PromptWrapper>
+      const show_hide_link = <ShowPointsSpan
+         onClick={e => this.setState({show_points: !show_points})}>
+         {show_points ? 'hide' : 'show'}
+      </ShowPointsSpan>
       return [
          <CoolStyles.Block>
             <BigColorBox
@@ -195,7 +218,9 @@ export class BailiwickDetails extends Component {
             {this.render_magnitude()}
             {this.render_cq_code()}
             {this.render_core_point()}
-            {points}
+            {points_prompt}
+            {show_hide_link}
+            {show_points ? points : []}
          </LowerWrapper>
       ]
    }

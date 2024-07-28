@@ -5,9 +5,42 @@ import network from "common/config/network.json";
 
 const URL_BASE = network.dev_server_url;
 
+const TILE_SET_INDEXED = 'tile_set_indexed'
+const TILE_SET_READY = 'tile_set_ready'
+const TILE_SET_INLAND = 'tile_set_inland'
+const TILE_SET_NEW = 'tile_set_new'
+const TILE_SET_EMPTY = 'tile_set_empty'
+const TILE_SET_UPDATED = 'tile_set_updated'
+const ALL_TILE_SETS = [
+   TILE_SET_INDEXED,
+   TILE_SET_READY,
+   TILE_SET_INLAND,
+   TILE_SET_NEW,
+   TILE_SET_EMPTY,
+   TILE_SET_UPDATED,
+]
+
 export class FractoIndexedTiles extends Component {
 
    static tile_index = []
+   static tile_set = null;
+   static init_tile_sets = () => {
+      if (FractoIndexedTiles.tile_set !== null) {
+         return;
+      }
+      FractoIndexedTiles.tile_set = {}
+      ALL_TILE_SETS.forEach(set_name => {
+         FractoIndexedTiles.tile_set[set_name] = []
+         for (let level = 2; level < 35; level++) {
+            FractoIndexedTiles.tile_set[set_name].push({
+               level: level,
+               tile_size: Math.pow(2, 2 - level),
+               columns: []
+            })
+         }
+      })
+      console.log('FractoIndexedTiles.tile_set', FractoIndexedTiles.tile_set)
+   }
 
    static load_short_codes = (tile_set_name, cb) => {
       const directory_url = `${URL_BASE}/directory/${tile_set_name}.csv`;
@@ -18,38 +51,6 @@ export class FractoIndexedTiles extends Component {
             console.log(`fetch_bin_async ${lines.length}`)
             cb(lines.slice(1))
          })
-   }
-
-   static index_tiles = (batch_list) => {
-      for (let line_index = 0; line_index < batch_list.length; line_index++) {
-         const short_code = batch_list[line_index].trim();
-         const level = short_code.length
-         const bounds = FractoUtil.bounds_from_short_code(short_code)
-         let level_bin = FractoIndexedTiles.tile_index
-            .find(bin => bin.level === level)
-         if (!level_bin) {
-            level_bin = {
-               level: level,
-               tile_size: bounds.right - bounds.left,
-               columns: []
-            }
-            FractoIndexedTiles.tile_index.push(level_bin)
-         }
-         let tile_column = level_bin.columns
-            .find(column => column.left === bounds.left)
-         if (!tile_column) {
-            tile_column = {
-               left: bounds.left,
-               tiles: []
-            }
-            level_bin.columns.push(tile_column)
-         }
-         const tile = {
-            bottom: bounds.bottom,
-            short_code: short_code
-         }
-         tile_column.tiles.push(tile)
-      }
    }
 
    static tiles_in_level = (level) => {
@@ -140,5 +141,7 @@ export class FractoIndexedTiles extends Component {
    }
 
 }
+
+FractoIndexedTiles.init_tile_sets()
 
 export default FractoIndexedTiles;
