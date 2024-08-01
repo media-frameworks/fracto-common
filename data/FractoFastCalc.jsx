@@ -113,6 +113,7 @@ export class FractoFastCalc {
       }
       return -1
    }
+
 }
 
 export default FractoFastCalc

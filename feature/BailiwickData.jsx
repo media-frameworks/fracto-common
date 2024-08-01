@@ -31,7 +31,7 @@ export class BailiwickData {
          .then(response => response.text())
          .then((str) => {
             const node_points = JSON.parse(str)
-            console.log("node_points", node_points)
+            // console.log("node_points", node_points)
             cb(node_points)
          })
          .catch(e => {
