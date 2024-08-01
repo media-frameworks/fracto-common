@@ -47,7 +47,7 @@ export class FractoIndexedTilesLoader extends Component {
 
    componentDidMount() {
       if (!FractoIndexedTiles.tile_index.length) {
-         const url = `${TILE_SERVER_BASE}/tile_index?filename=packet_manifest.json`
+         const url = `${TILE_SERVER_BASE}/tile_index?filename=/indexed/packet_manifest.json`
          fetch(url)
             .then(response => response.json())
             .then(json => {
@@ -70,7 +70,7 @@ export class FractoIndexedTilesLoader extends Component {
          return;
       }
       this.setState({packet_index: packet_index})
-      const url = `${TILE_SERVER_BASE}/tile_index?filename=${packet_manifest.packet_files[packet_index]}`
+      const url = `${TILE_SERVER_BASE}/tile_index?filename=/indexed/${packet_manifest.packet_files[packet_index]}`
       fetch(url)
          .then(response => response.json())
          .then(json => {

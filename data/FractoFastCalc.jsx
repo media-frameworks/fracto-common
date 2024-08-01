@@ -2,7 +2,6 @@ import Complex from "common/math/Complex";
 
 const MAX_ORBITAL_SIZE = 25000
 const MIN_ITERATION = 1200000
-const MAX_ITERATION = MIN_ITERATION + MAX_ORBITAL_SIZE
 
 export class FractoFastCalc {
 
@@ -63,9 +62,12 @@ export class FractoFastCalc {
                      y: Q_y
                   })
                }
+               if (iteration < 60000) {
+                  iteration = FractoFastCalc.best_iteration(orbital, x0, y0)
+               }
                return {
                   pattern: orbital,
-                  iteration: iteration - MAX_ORBITAL_SIZE / 2,
+                  iteration: iteration,
                   orbital_points: orbital_points
                };
             }
@@ -87,80 +89,29 @@ export class FractoFastCalc {
       };
    }
 
-   static calc_not = (x0, y0) => {
-      const in_cardioid = FractoFastCalc.point_in_main_cardioid(x0, y0)
-
-      const P_x = x0
-      const P_y = y0
+   static best_iteration = (pattern, x, y) => {
+      const P_x = x
+      const P_y = y
       let Q_x_squared = 0
       let Q_y_squared = 0
       let Q_x = 0
       let Q_y = 0
-
-      let product = null
-      let sum = null
-      let least_magnitude = 1
-      let orbital = -1
-      let iteration = 0
-      let min_iteration = MIN_ITERATION
-      let first_pos = {}
-      let best_orbital = 0
-      for (; iteration < MAX_ITERATION; iteration++) {
+      let first_pos_x = x
+      let first_pos_y = y
+      for (let iteration = 0; iteration < 60000; iteration++) {
          Q_y = 2 * Q_x * Q_y + P_y;
          Q_x = Q_x_squared - Q_y_squared + P_x;
          Q_x_squared = Q_x * Q_x
          Q_y_squared = Q_y * Q_y
-         if (Q_x_squared + Q_y_squared > 100) {
-            return {
-               pattern: 0,
-               iteration: iteration,
-            };
-         }
-
-         if (iteration < min_iteration) {
-            continue
-         }
-         if (iteration === min_iteration) {
-            if (!in_cardioid) {
-               sum = new Complex(Q_x, Q_y)
-               product = new Complex(1, 0)
-            } else {
-               first_pos = {x: Q_x, y: Q_y}
-               orbital = 0
+         if (iteration % pattern === 0 && iteration) {
+            if (Q_x === first_pos_x && Q_y === first_pos_y) {
+               return iteration
             }
-            continue
-         }
-
-         if (in_cardioid) {
-            orbital++
-            const difference = new Complex(Q_x - first_pos.x, Q_y - first_pos.y)
-            const mag_difference = difference.magnitude()
-            if (mag_difference === 0) {
-               best_orbital = orbital
-               break;
-            }
-            if (mag_difference < least_magnitude) {
-               least_magnitude = mag_difference
-               best_orbital = orbital
-            }
-         } else {
-            sum = sum.offset(Q_x, Q_y)
-            product = product.mul(sum)
-            const product_minus_one = product.offset(-1, 0)
-            const magnitude = product_minus_one.magnitude()
-            if (magnitude < least_magnitude) {
-               least_magnitude = magnitude
-               best_orbital = iteration - min_iteration
-            }
-            sum = new Complex(Q_x, Q_y)
+            first_pos_x = Q_x
+            first_pos_y = Q_y
          }
       }
-
-      return {
-         pattern: best_orbital,
-         iteration: iteration,
-         Q_s: []
-      };
+      return -1
    }
 }
 
