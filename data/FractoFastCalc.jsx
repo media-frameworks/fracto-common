@@ -2,7 +2,6 @@ import Complex from "common/math/Complex";
 
 const MAX_ORBITAL_SIZE = 25000
 const MIN_ITERATION = 1200000
-const MAX_ITERATION = MIN_ITERATION + MAX_ORBITAL_SIZE
 
 export class FractoFastCalc {
 
@@ -63,9 +62,12 @@ export class FractoFastCalc {
                      y: Q_y
                   })
                }
+               if (iteration < 60000) {
+                  iteration = FractoFastCalc.best_iteration(orbital, x0, y0)
+               }
                return {
                   pattern: orbital,
-                  iteration: iteration - MAX_ORBITAL_SIZE / 2,
+                  iteration: iteration,
                   orbital_points: orbital_points
                };
             }

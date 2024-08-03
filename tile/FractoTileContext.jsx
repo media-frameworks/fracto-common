@@ -17,6 +17,7 @@ export class FractoTileContext extends Component {
       tile: PropTypes.object.isRequired,
       level: PropTypes.number.isRequired,
       width_px: PropTypes.number.isRequired,
+      on_context_rendered: PropTypes.func
    }
 
    static wrapper_ref = React.createRef()
@@ -25,7 +26,7 @@ export class FractoTileContext extends Component {
    };
 
    render() {
-      const {tile, level, width_px} = this.props;
+      const {tile, level, width_px, on_context_rendered} = this.props;
       const wrapper_style = {
          width: `${width_px}px`,
          height: `${width_px}px`,
@@ -47,6 +48,7 @@ export class FractoTileContext extends Component {
             aspect_ratio={1.0}
             scope={context_scope}
             quality={QUALITY_LOW}
+            on_plan_complete={on_context_rendered}
             focal_point={focal_point}/>
          {tile_outline}
       </ContextWrapper>

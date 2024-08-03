@@ -205,12 +205,12 @@ export class FractoLayeredCanvas extends Component {
 
    fill_canvas = () => {
       const {ctx} = this.state;
-      const {aspect_ratio, focal_point, scope, quality} = this.props;
+      const {aspect_ratio, focal_point, scope, quality, width_px} = this.props;
       if (!ctx) {
          return
       }
-      // ctx.fillStyle = `white`
-      // ctx.fillRect(0, 0, width_px, height_px);
+      ctx.fillStyle = `white`
+      ctx.fillRect(0, 0, width_px, width_px * aspect_ratio);
 
       const half_width = scope / 2;
       const half_height = (aspect_ratio * scope) / 2;

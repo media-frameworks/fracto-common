@@ -39,6 +39,7 @@ export class FractoTileAutomate extends Component {
       on_tile_select: PropTypes.func.isRequired,
       no_tile_mode: PropTypes.bool,
       on_render_tile: PropTypes.func,
+      on_context_rendered: PropTypes.func,
       tile_size_px: PropTypes.number,
       auto_refresh: PropTypes.number,
       on_automate: PropTypes.func,
@@ -114,7 +115,7 @@ export class FractoTileAutomate extends Component {
       }
       const tile = all_tiles[tile_index]
       if (!tile) {
-         console.log("!tile")
+         console.log(`!tile, tile_index = ${tile_index} all_tiles.length=${all_tiles.length}`)
          return null
       }
       const tile_bounds = FractoUtil.bounds_from_short_code(tile.short_code)
@@ -137,7 +138,7 @@ export class FractoTileAutomate extends Component {
 
    render() {
       const {automate} = this.state;
-      const {tile_index, on_render_tile, tile_size_px} = this.props;
+      const {tile_index, on_render_tile, tile_size_px, on_context_rendered} = this.props;
       const {all_tiles, level, no_tile_mode} = this.props
       // if (!all_tiles.length) {
       //    return "no tiles 1"
@@ -155,11 +156,12 @@ export class FractoTileAutomate extends Component {
             no_tile_mode={no_tile_mode}/>
       return [
          <ContextWrapper
-            key={`ContextWrapper_${tile.short_code}`}>
+            key={`ContextWrapper`}>
             <FractoTileContext
                key={`tile-context`}
                tile={tile}
                level={level}
+               on_context_rendered={on_context_rendered}
                width_px={CONTEXT_SIZE_PX}/>
          </ContextWrapper>,
          <RenderWrapper

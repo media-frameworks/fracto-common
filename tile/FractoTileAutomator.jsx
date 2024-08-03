@@ -60,6 +60,7 @@ export class FractoTileAutomator extends Component {
       on_select_tile: PropTypes.func,
       auto_refresh: PropTypes.number,
       on_automate: PropTypes.func,
+      on_context_rendered: PropTypes.func,
    }
 
    static defaultProps = {
@@ -203,7 +204,7 @@ export class FractoTileAutomator extends Component {
       const {tile_index, indexed_loading, completed_loading, run_history} = this.state;
       const {
          level, width_px, all_tiles, no_tile_mode,
-         on_render_tile, on_render_detail, auto_refresh
+         on_render_tile, on_render_detail, auto_refresh, on_context_rendered
       } = this.props;
       if (indexed_loading || completed_loading) {
          return FractoCommon.loading_wait_notice("FractoTileAutomator")
@@ -231,6 +232,7 @@ export class FractoTileAutomator extends Component {
                no_tile_mode={no_tile_mode}
                tile_size_px={CONTEXT_SIZE_PX}
                on_render_tile={on_render_tile}
+               on_context_rendered={on_context_rendered}
                auto_refresh={auto_refresh}
                on_automate={this.on_automate}
             />

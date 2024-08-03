@@ -9,6 +9,7 @@ export class FractoTileGenerate {
       console.log("calculate_tile", tile)
       const level = tile.short_code.length
       const increment = (tile.bounds.right - tile.bounds.left) / 256.0;
+      let inland_tile = true
       for (let img_x = 0; img_x < 256; img_x++) {
          const x = tile.bounds.left + img_x * increment;
          const x_naught = img_x % 2 === 0
@@ -23,19 +24,22 @@ export class FractoTileGenerate {
             const y = tile.bounds.top - img_y * increment;
             const values = FractoFastCalc.calc(x, y, level)
             tile_points[img_x][img_y] = [values.pattern, values.iteration];
+            if (values.pattern === 0) {
+               inland_tile = false
+            }
          }
       }
 
       const index_url = `tiles/256/indexed/${tile.short_code}.json`;
       StoreS3.put_file_async(index_url, JSON.stringify(tile_points), "fracto", result => {
          console.log("StoreS3.put_file_async", index_url, result);
-         FractoUtil.tile_to_bin(tile.short_code, "ready", "complete", result => {
-            console.log("ToolUtils.tile_to_bin", tile.short_code, result);
-            FractoUtil.tile_to_bin(tile.short_code, "inland", "complete", result => {
+         FractoUtil.tile_to_bin(
+            tile.short_code,
+            inland_tile ? "inland" : "ready", "complete",
+            result => {
                console.log("ToolUtils.tile_to_bin", tile.short_code, result);
                cb(`generated tile ${tile.short_code}`)
             })
-         })
       })
    }
 
