@@ -16,6 +16,11 @@ export class BailiwickData {
          .then((str) => {
             const all_bailiwicks = JSON.parse(str)
                .sort((a, b) => b.magnitude - a.magnitude)
+               .map((b, i) => {
+                  b.free_ordinal = i
+                  return b
+               })
+               .sort((a, b) => a.magnitude - b.magnitude)
             console.log("all_bailiwicks", all_bailiwicks)
             cb(all_bailiwicks)
          })

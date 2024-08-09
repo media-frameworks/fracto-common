@@ -209,8 +209,8 @@ export class FractoLayeredCanvas extends Component {
       if (!ctx) {
          return
       }
-      ctx.fillStyle = `white`
-      ctx.fillRect(0, 0, width_px, width_px * aspect_ratio);
+      // ctx.fillStyle = `white`
+      // ctx.fillRect(0, 0, width_px, width_px * aspect_ratio);
 
       const half_width = scope / 2;
       const half_height = (aspect_ratio * scope) / 2;

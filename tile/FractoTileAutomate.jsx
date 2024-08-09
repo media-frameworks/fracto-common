@@ -83,7 +83,7 @@ export class FractoTileAutomate extends Component {
          return;
       }
       on_tile_select(tile_index, result0 => {
-         // console.log(`tile is selected: ${result0}`)
+         console.log(`tile is selected: ${result0}`)
          tile_action(tile, result => {
             if (result === false) {
                this.setState({automate: false})
@@ -150,7 +150,7 @@ export class FractoTileAutomate extends Component {
       const rendered_tile = on_render_tile ?
          on_render_tile(tile, tile_size_px) :
          <FractoTileRender
-            key={`render-${tile.short_code}`}
+            key={`render-tile`}
             tile={tile}
             width_px={tile_size_px}
             no_tile_mode={no_tile_mode}/>

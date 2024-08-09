@@ -57,7 +57,7 @@ export class FractoTileRender extends Component {
 
    load_tile = (ctx) => {
       const {tile, width_px, tile_data} = this.props;
-      // console.log("load_tile", tile.short_code)
+      console.log("load_tile", tile.short_code, tile_data)
       if (tile_data) {
          FractoUtil.data_to_canvas(tile_data, ctx, width_px);
          this.setState({tile_loaded: true})

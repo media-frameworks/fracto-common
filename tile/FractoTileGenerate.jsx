@@ -17,7 +17,10 @@ export class FractoTileGenerate {
             const y_naught = img_y % 2 === 0
             if (x_naught && y_naught) {
                const [pattern, iteration] = tile_points[img_x][img_y]
-               if (pattern >= 0) {
+               if (pattern === 0) {
+                  continue;
+               }
+               if (iteration > 50000 && pattern > 0) {
                   continue;
                }
             }
@@ -97,6 +100,103 @@ export class FractoTileGenerate {
       return new Array(256).fill(0).map(() => new Array(256).fill([0, 0]));
    }
 
+   static test_edge_case = (tile, tile_data) => {
+      if (tile.bounds.bottom === 0) {
+         // console.log("will not edge bottom tile");
+         return false
+      }
+      const [pattern0, iterations0] = tile_data[0][0];
+      for (let img_x = 0; img_x < 256; img_x++) {
+         for (let img_y = 0; img_y < 256; img_y++) {
+            const [pattern, iterations] = tile_data[img_x][img_y];
+            if (iterations !== iterations0 || pattern !== pattern0) {
+               // console.log("not on edge");
+               return false;
+            }
+         }
+      }
+      console.log("all points are", iterations0);
+      return true
+   }
+
+   static compare_tile_data = (points_1, points_2) => {
+      if (!points_1) {
+         debugger;
+         return false
+      }
+      if (!points_2) {
+         debugger;
+         return false
+      }
+      if (points_1.length !== 256) {
+         debugger;
+         return false
+      }
+      if (points_2.length !== 256) {
+         debugger;
+         return false
+      }
+      for (let img_x = 0; img_x < 256; img_x++) {
+         if (points_1[img_x].length !== 256) {
+            debugger;
+            return false
+         }
+         if (points_2[img_x].length !== 256) {
+            debugger;
+            return false
+         }
+         for (let img_y = 0; img_y < 256; img_y++) {
+            if (points_1[img_x][img_y].length !== 2) {
+               debugger;
+               return false;
+            }
+            if (points_2[img_x][img_y].length !== 2) {
+               debugger;
+               return false;
+            }
+            if (points_1[img_x][img_y][0] !== points_2[img_x][img_y][0]) {
+               debugger;
+               return false
+            }
+            if (points_1[img_x][img_y][1] !== points_2[img_x][img_y][1]) {
+               debugger;
+               return false
+            }
+         }
+      }
+      return true;
+   }
+
+   static begin = (tile, cb) => {
+      console.log('begin generate tile', tile)
+      const start = performance.now()
+      const tile_points = FractoTileGenerate.prepare_tile()
+      let tile_copy = JSON.parse(JSON.stringify(tile))
+      FractoTileGenerate.generate_tile(tile_copy, tile_points, response => {
+         const is_edge_tile = FractoTileGenerate.test_edge_case(tile, tile_points);
+         if (is_edge_tile) {
+            FractoUtil.empty_tile(tile.short_code, result => {
+               console.log("FractoUtil.empty_tile", tile.short_code, result);
+               const full_history = [response, 'is empty', result].join(', ')
+               cb(full_history)
+            })
+         } else {
+            FractoUtil.tile_to_bin(tile.short_code, "complete", "indexed", result => {
+               console.log("FractoUtil.tile_to_bin", tile.short_code, "complete", "indexed", result);
+               const end = performance.now()
+               FractoMruCache.get_tile_data_raw(tile.short_code, data => {
+                  // console.log(`get_tile_data_raw ${tile.short_code}`, data ? data.length : 0)
+                  const success = FractoTileGenerate.compare_tile_data(tile_points, data)
+                  const seconds = Math.round((end - start)) / 1000
+                  const full_history = `${response}, ${result.result} in ${seconds}s`
+                  setTimeout(() => {
+                     cb(success ? full_history : false, tile_points)
+                  }, 50)
+               })
+            })
+         }
+      })
+   }
 }
 
 export default FractoTileGenerate;

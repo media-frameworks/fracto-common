@@ -191,8 +191,8 @@ export class FractoUtil {
       if (!ctx || !tile_points) {
          return;
       }
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, width_px, width_px);
+      // ctx.fillStyle = 'white';
+      // ctx.fillRect(0, 0, width_px, width_px);
       const scale_factor = width_px / 256;
       const pixel_size = 1.375 * scale_factor
       for (let img_x = 0; img_x < 256; img_x++) {

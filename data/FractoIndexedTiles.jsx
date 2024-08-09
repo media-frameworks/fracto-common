@@ -22,6 +22,7 @@ const ALL_TILE_SETS = [
 export class FractoIndexedTiles extends Component {
 
    static tile_set = null;
+   static tile_sets_loaded = [];
    static init_tile_sets = () => {
       if (FractoIndexedTiles.tile_set !== null) {
          return;
@@ -40,6 +41,11 @@ export class FractoIndexedTiles extends Component {
       // console.log('FractoIndexedTiles.tile_set', FractoIndexedTiles.tile_set)
    }
 
+   static tile_set_is_loaded = (set_name) => {
+      console.log("FractoIndexedTiles.tile_sets_loaded", FractoIndexedTiles.tile_sets_loaded)
+      return FractoIndexedTiles.tile_sets_loaded.includes(set_name);
+   }
+
    static get_set_level = (set_name, level) => {
       if (FractoIndexedTiles.tile_set === null) {
          FractoIndexedTiles.init_tile_sets();
@@ -51,7 +57,15 @@ export class FractoIndexedTiles extends Component {
 
    static integrate_tile_packet = (set_name, packet_data) => {
       const level = packet_data.level
-      const set_level = FractoIndexedTiles.get_set_level(set_name, level)
+      if (!FractoIndexedTiles.tile_sets_loaded.includes(set_name)) {
+         FractoIndexedTiles.tile_sets_loaded.push(set_name)
+      }
+      let set_level = FractoIndexedTiles.get_set_level(set_name, level)
+      // console.log('integrate_tile_packet', level, set_name, packet_data.columns, set_level.columns)
+      if (!set_level) {
+         console.log(`problem with ${set_name}:${level}`)
+         return;
+      }
       set_level.columns = set_level.columns.concat(packet_data.columns)
    }
 
@@ -109,22 +123,37 @@ export class FractoIndexedTiles extends Component {
       }
       const set_level = FractoIndexedTiles.get_set_level(set_name, level)
       if (!set_level) {
-         // console.log(`no bin for level ${level}`)
+         console.log(`no bin for level ${level} of set_name ${set_name}`)
+         return []
+      }
+      if (!set_level.columns.length) {
+         console.log(`no columns for level ${level} of set_name ${set_name}`)
          return []
       }
       const columns = set_level.columns
-         .filter(column =>
-            column.left + set_level.tile_size > viewport.left
-            && column.left < viewport.right)
+         .filter(column => {
+            if (column.left > viewport.right) {
+               return false
+            }
+            if (column.left + set_level.tile_size < viewport.left) {
+               return false
+            }
+            return true;
+         })
       let short_codes = []
       for (let column_index = 0; column_index < columns.length; column_index++) {
          const tiles_in_column = columns[column_index].tiles
          const column_left = columns[column_index].left
          const column_tiles = tiles_in_column
-            .filter(tile =>
-               tile.bottom + set_level.tile_size > viewport.bottom
-               && tile.bottom < viewport.top
-            )
+            .filter(tile => {
+                  if (tile.bottom > viewport.top) {
+                     return false
+                  }
+                  if (tile.bottom + set_level.tile_size < viewport.bottom) {
+                     return false
+                  }
+                  return true
+               })
             .map(tile => {
                return {
                   bounds: {
@@ -149,6 +178,28 @@ export class FractoIndexedTiles extends Component {
             return new_tile
          })
          .sort((a, b) => b.distance - a.distance)
+   }
+
+   static get_tile_scopes = (set_name, focal_point, scope) => {
+      // console.log('get_tile_scopes = (set_name, focal_point, scope)', set_name, focal_point, scope)
+      const level_tiles_in_scope = []
+      // console.log('FractoIndexedTiles.tile_set[set_name]', set_name, FractoIndexedTiles.tile_set[set_name])
+      for (let level = 2; level < 35; level++) {
+         const tiles_in_level = FractoIndexedTiles
+            .tiles_in_scope(level, focal_point, scope, 1.0, set_name);
+         if (!tiles_in_level.length) {
+            continue;
+         }
+         // console.log('tiles_in_level', level, tiles_in_level)
+         if (tiles_in_level.length > 350) {
+            continue;
+         }
+         level_tiles_in_scope.push({
+            level: level,
+            tiles: tiles_in_level
+         })
+      }
+      return level_tiles_in_scope
    }
 
 }

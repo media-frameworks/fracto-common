@@ -102,7 +102,7 @@ export class FractoRenderDetails extends Component {
       const count_list = tile_counts
          .filter((count, i) => count > 3 && count < 500)
          .map((count, index) => {
-            return `${ideal_level + index}:${count}`
+            return `${ideal_level - 4 + index}:${count}`
          }).join(', ')
       return <NumberValue>{count_list}</NumberValue>
    }

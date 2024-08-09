@@ -23,6 +23,14 @@ const BlockWrapper = styled(CoolStyles.InlineBlock)`
    vertical-align: center;
 `;
 
+const IndexWrapper = styled(CoolStyles.InlineBlock)`
+   ${CoolStyles.align_right}
+   ${CoolStyles.bold}
+   ${CoolStyles.monospace}
+   width: 2.5rem;
+   vertical-align: center;
+`;
+
 const NameWrapper = styled(CoolStyles.InlineBlock)`
    ${CoolStyles.bold}
    ${CoolStyles.italic}
@@ -57,7 +65,6 @@ export class BailiwickList extends Component {
       }
       localStorage.setItem('selected_bailiwick', String(i))
       let item_copy = JSON.parse(JSON.stringify(item))
-      item_copy.free_ordinal = i
       on_select(item_copy)
       this.setState({selected_index: i})
    }
@@ -83,6 +90,7 @@ export class BailiwickList extends Component {
                highest_level={highest_level}
                selected_bailiwick={item}/>
             : [
+               <IndexWrapper key={`index_${i}`}>{`${item.free_ordinal}. `}</IndexWrapper>,
                <BlockWrapper key={`pattern_${i}`}>{pattern_block}</BlockWrapper>,
                <NameWrapper key={`name_${i}`}>{bailiwick_name}</NameWrapper>
             ]
