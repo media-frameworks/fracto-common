@@ -16,11 +16,11 @@ export class BailiwickData {
          .then((str) => {
             const all_bailiwicks = JSON.parse(str)
                .sort((a, b) => b.magnitude - a.magnitude)
-               .map((b, i) => {
-                  b.free_ordinal = i
-                  return b
+               .map((c, i) => {
+                  c.free_ordinal = i
+                  return c
                })
-               .sort((a, b) => a.magnitude - b.magnitude)
+               .sort((e, d) => d.updated_at > e.updated_at ? -1 : 1)
             console.log("all_bailiwicks", all_bailiwicks)
             cb(all_bailiwicks)
          })
@@ -60,7 +60,8 @@ export class BailiwickData {
          core_point: JSON.stringify(bailiwick.core_point),
          octave_point: JSON.stringify(bailiwick.octave_point),
          display_settings: JSON.stringify(bailiwick.display_settings),
-         registry_filename: bailiwick.registry_filename
+         registry_filename: bailiwick.registry_filename,
+         updated_at: 'CURRENT_TIMESTAMP'
       }
       if (bailiwick.id) {
          data.id = bailiwick.id

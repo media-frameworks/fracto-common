@@ -8,7 +8,16 @@ import {
    CELL_TYPE_NUMBER,
    CELL_TYPE_TEXT, CELL_TYPE_TIME_AGO
 } from "common/ui/CoolTable";
+import {render_short_code} from "../FractoStyles";
 
+const ShortCodeSpan = styled.span`
+   ${CoolStyles.monospace}
+`
+const MessageSpan = styled.span`
+   ${CoolStyles.italic}
+   font-size: 0.85rem;
+   color: #666666;
+`
 const HISTORY_HEADERS = [
    {
       id: "index",
@@ -16,18 +25,18 @@ const HISTORY_HEADERS = [
       type: CELL_TYPE_NUMBER,
       align: CELL_ALIGN_CENTER
    },
-   {
-      id: "timestamp",
-      label: "when",
-      type: CELL_TYPE_TIME_AGO,
-      width_px: 120
-   },
-   {
-      id: "elapsed",
-      label: "elapsed",
-      type: CELL_TYPE_TEXT,
-      width_px: 120
-   },
+   // {
+   //    id: "timestamp",
+   //    label: "when",
+   //    type: CELL_TYPE_TIME_AGO,
+   //    width_px: 120
+   // },
+   // {
+   //    id: "elapsed",
+   //    label: "elapsed",
+   //    type: CELL_TYPE_TEXT,
+   //    width_px: 120
+   // },
    {
       id: "short_code",
       label: "short code",
@@ -38,7 +47,7 @@ const HISTORY_HEADERS = [
       id: "result",
       label: "result",
       type: CELL_TYPE_TEXT,
-      width_px: 250,
+      width_px: 600,
    },
 ]
 
@@ -81,11 +90,13 @@ export class FractoTileRunHistory extends Component {
       const history_data = history_items.sort((a, b) => {
          return b.timestamp - a.timestamp
       }).map((item, i) => {
+         const short_code =item.tile ? <ShortCodeSpan>{item.tile.short_code}</ShortCodeSpan> : '?'
+         const message = <MessageSpan title={item.message}>{item.message}</MessageSpan>
          const result = {
             index: history_items.length - i,
             timestamp: item.timestamp,
-            short_code: item.tile ? item.tile.short_code : '',
-            result: item.message,
+            short_code: short_code,
+            result: message,
             elapsed: i === history_items.length - 1 || i === 0 ? '-' : this.diff_times(item.timestamp, previous_ts)
          }
          previous_ts = item.timestamp
