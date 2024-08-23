@@ -23,15 +23,7 @@ const BlockWrapper = styled(CoolStyles.InlineBlock)`
    vertical-align: center;
 `;
 
-const IndexWrapper = styled(CoolStyles.InlineBlock)`
-   ${CoolStyles.align_right}
-   ${CoolStyles.bold}
-   ${CoolStyles.monospace}
-   width: 2.5rem;
-   vertical-align: center;
-`;
-
-const NameWrapper = styled(CoolStyles.InlineBlock)`
+const SizeWrapper = styled(CoolStyles.InlineBlock)`
    ${CoolStyles.bold}
    ${CoolStyles.italic}
    ${CoolStyles.ellipsis}
@@ -49,6 +41,17 @@ const UpdatedWrapper = styled(CoolStyles.InlineBlock)`
    font-size: 0.9rem;
    margin-left: 0.5rem;
    color: #666666;
+`;
+
+const StatValue = styled(CoolStyles.InlineBlock)`
+   ${CoolStyles.monospace}
+   ${CoolStyles.bold}
+   font-size: 0.95rem;
+   color: black;
+`;
+
+const InlineWrapper = styled(CoolStyles.InlineBlock)`
+   margin-left: 0.25rem;
 `;
 
 export class BailiwickList extends Component {
@@ -78,6 +81,14 @@ export class BailiwickList extends Component {
       this.setState({selected_index: i})
    }
 
+   render_magnitude = (item) => {
+      const rounded = Math.round(item.magnitude * 100000000) / 100
+      const mu = <i>{'\u03BC'}</i>
+      return <CoolStyles.Block>
+         <InlineWrapper><StatValue>{rounded}</StatValue>{mu}</InlineWrapper>
+      </CoolStyles.Block>
+   }
+
    render() {
       const {selected_index, scroll_ref} = this.state
       const {bailiwick_list, in_wait} = this.props
@@ -93,18 +104,18 @@ export class BailiwickList extends Component {
                cursor: in_wait ? "wait" : "pointer"
             }
             const highest_level = Math.round(100 * (Math.log(32 / item.magnitude) / Math.log(2))) / 100
-            const bailiwick_name = item.name
             const updated_at = <ReactTimeAgo date={item.updated_at}/>
+            const size = this.render_magnitude(item)
             const row_content = selected
                ? <BailiwickDetails
                   freeform_index={item.free_ordinal}
                   highest_level={highest_level}
                   selected_bailiwick={item}/>
                : [
-                  <IndexWrapper key={`index_${i}`}>{`${item.free_ordinal + 1}. `}</IndexWrapper>,
                   <BlockWrapper key={`pattern_${i}`}>{pattern_block}</BlockWrapper>,
-                  <NameWrapper key={`name_${i}`}>{bailiwick_name}</NameWrapper>,
-                  <UpdatedWrapper key={`updated_${i}`}>{updated_at}</UpdatedWrapper>
+                  <SizeWrapper key={`size_${i}`}>{size}</SizeWrapper>,
+                  <UpdatedWrapper key={`updated_${i}`}>{updated_at},</UpdatedWrapper>,
+                  <UpdatedWrapper key={`index_${i}`}>{`#${item.free_ordinal + 1} in size`}</UpdatedWrapper>,
                ]
             return <RowWrapper
                ref={selected ? scroll_ref : null}
