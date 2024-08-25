@@ -2,13 +2,18 @@ import {Component} from 'react';
 import PropTypes from 'prop-types';
 import styled from "styled-components";
 
+import ReactTimeAgo from 'react-time-ago';
+import TimeAgo from 'javascript-time-ago'
+import en from 'javascript-time-ago/locale/en'
+
 import {CoolStyles, CoolTable} from 'common/ui/CoolImports';
 import {
    CELL_ALIGN_CENTER,
    CELL_TYPE_NUMBER,
    CELL_TYPE_TEXT, CELL_TYPE_TIME_AGO
 } from "common/ui/CoolTable";
-import {render_short_code} from "../FractoStyles";
+
+TimeAgo.locale(en)
 
 const ShortCodeSpan = styled.span`
    ${CoolStyles.monospace}
@@ -18,6 +23,10 @@ const MessageSpan = styled.span`
    font-size: 0.85rem;
    color: #666666;
 `
+const SmallSpacer = styled(CoolStyles.InlineBlock)`
+   width: 0.25rem;
+`
+
 const HISTORY_HEADERS = [
    {
       id: "index",
@@ -25,18 +34,6 @@ const HISTORY_HEADERS = [
       type: CELL_TYPE_NUMBER,
       align: CELL_ALIGN_CENTER
    },
-   // {
-   //    id: "timestamp",
-   //    label: "when",
-   //    type: CELL_TYPE_TIME_AGO,
-   //    width_px: 120
-   // },
-   // {
-   //    id: "elapsed",
-   //    label: "elapsed",
-   //    type: CELL_TYPE_TEXT,
-   //    width_px: 120
-   // },
    {
       id: "short_code",
       label: "short code",
@@ -71,9 +68,7 @@ export class FractoTileRunHistory extends Component {
       var date1 = new Date(timestamp1);
       var date2 = new Date(timestamp2);
 
-      var diff = date2.getTime() - date1.getTime();
-
-      var msec = diff;
+      var msec = date2.getTime() - date1.getTime();
       var hh = Math.floor(msec / 1000 / 60 / 60);
       msec -= hh * 1000 * 60 * 60;
       var mm = Math.floor(msec / 1000 / 60);
@@ -90,8 +85,12 @@ export class FractoTileRunHistory extends Component {
       const history_data = history_items.sort((a, b) => {
          return b.timestamp - a.timestamp
       }).map((item, i) => {
-         const short_code =item.tile ? <ShortCodeSpan>{item.tile.short_code}</ShortCodeSpan> : '?'
-         const message = <MessageSpan title={item.message}>{item.message}</MessageSpan>
+         const short_code = item.tile ? <ShortCodeSpan>{item.tile.short_code}</ShortCodeSpan> : '?'
+         const time_ago =<ReactTimeAgo date={item.timestamp}/>
+         const message = <MessageSpan
+            title={item.message}>
+            {[`${item.message},`, <SmallSpacer />, time_ago]}
+         </MessageSpan>
          const result = {
             index: history_items.length - i,
             timestamp: item.timestamp,

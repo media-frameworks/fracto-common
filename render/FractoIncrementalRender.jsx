@@ -100,15 +100,15 @@ export class FractoIncrementalRender extends Component {
       if (height_px & 1) {
          height_px -= 1
       }
-      console.log("init_canvas_buffer", width_px, height_px)
-      const start = performance.now()
+      // console.log("init_canvas_buffer", width_px, height_px)
+      // const start = performance.now()
       const canvas_buffer = new Array(width_px).fill(0).map(() => new Array(height_px).fill([0, 4]));
       this.setState({
          canvas_buffer: canvas_buffer,
          height_px: height_px
       })
-      const end = performance.now()
-      console.log(`init_canvas_buffer took ${end - start}ms`)
+      // const end = performance.now()
+      // console.log(`init_canvas_buffer took ${end - start}ms`)
       return canvas_buffer
    }
 
@@ -207,6 +207,54 @@ export class FractoIncrementalRender extends Component {
       })
    }
 
+   static tile_to_canvas = (
+      ctx,
+      tile,
+      focal_point,
+      scope,
+      aspect_ratio,
+      width_px,
+      height_px,
+      tile_data,
+      canvas_buffer) => {
+      const tile_width = tile.bounds.right - tile.bounds.left
+      const one_by_tile_width = 1 / tile_width
+      const left_edge = focal_point.x - scope / 2;
+      const top_edge = focal_point.y + aspect_ratio * scope / 2;
+      const increment = scope / width_px;
+      for (let img_x = 0; img_x < width_px; img_x++) {
+         const x = left_edge + img_x * increment;
+         if (x < tile.bounds.left) {
+            continue
+         }
+         if (x > tile.bounds.right) {
+            break
+         }
+         if (!canvas_buffer[img_x]) {
+            continue;
+         }
+         for (let img_y = 0; img_y < height_px; img_y++) {
+            const y = top_edge - img_y * increment;
+            if (Math.abs(y) > tile.bounds.top) {
+               continue
+            }
+            if (Math.abs(y) < tile.bounds.bottom) {
+               continue
+            }
+            const tile_x = Math.floor(255 * (x - tile.bounds.left) * one_by_tile_width);
+            const tile_y = Math.floor(255 * (tile.bounds.top - Math.abs(y)) * one_by_tile_width);
+            if (tile_data[tile_x][tile_y]) {
+               const pattern = tile_data[tile_x][tile_y][0]
+               const iteration = tile_data[tile_x][tile_y][1]
+               canvas_buffer[img_x][img_y] = [pattern, iteration];
+               const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(pattern, iteration)
+               ctx.fillStyle = `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`
+               ctx.fillRect(img_x, img_y, 1, 1);
+            }
+         }
+      }
+   }
+
    tiles_to_canvas = (level_tiles, canvas_buffer, lowest_iteration, cb) => {
       const {ctx, height_px} = this.state
       const {width_px, aspect_ratio, scope, focal_point} = this.props;
@@ -215,47 +263,18 @@ export class FractoIncrementalRender extends Component {
          return;
       }
       const tile = level_tiles.pop()
-      const tile_width = tile.bounds.right - tile.bounds.left
-      const one_by_tile_width = 1 / tile_width
-      const left_edge = focal_point.x - scope / 2;
-      const top_edge = focal_point.y + aspect_ratio * scope / 2;
-      const increment = scope / width_px;
       let lower_iteration = lowest_iteration
       FractoMruCache.get_tile_data(tile.short_code, tile_data => {
-         for (let img_x = 0; img_x < width_px; img_x++) {
-            const x = left_edge + img_x * increment;
-            if (x < tile.bounds.left) {
-               continue
-            }
-            if (x > tile.bounds.right) {
-               break
-            }
-            if (!canvas_buffer[img_x]) {
-               continue;
-            }
-            for (let img_y = 0; img_y < height_px; img_y++) {
-               const y = top_edge - img_y * increment;
-               if (Math.abs(y) > tile.bounds.top) {
-                  continue
-               }
-               if (Math.abs(y) < tile.bounds.bottom) {
-                  continue
-               }
-               const tile_x = Math.floor(255 * (x - tile.bounds.left) * one_by_tile_width);
-               const tile_y = Math.floor(255 * (tile.bounds.top - Math.abs(y)) * one_by_tile_width);
-               if (tile_data[tile_x][tile_y]) {
-                  const pattern = tile_data[tile_x][tile_y][0]
-                  const iteration = tile_data[tile_x][tile_y][1]
-                  canvas_buffer[img_x][img_y] = [pattern, iteration];
-                  const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(pattern, iteration)
-                  ctx.fillStyle = `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`
-                  ctx.fillRect(img_x, img_y, 1, 1);
-                  if (pattern === 0 && iteration < lower_iteration) {
-                     lower_iteration = iteration
-                  }
-               }
-            }
-         }
+         FractoIncrementalRender.tile_to_canvas(
+            ctx,
+            tile,
+            focal_point,
+            scope,
+            aspect_ratio,
+            width_px,
+            height_px,
+            tile_data,
+            canvas_buffer)
          this.tiles_to_canvas(level_tiles, canvas_buffer, lower_iteration, cb)
       })
    }

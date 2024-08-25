@@ -61,10 +61,10 @@ export class BailiwickData {
          octave_point: JSON.stringify(bailiwick.octave_point),
          display_settings: JSON.stringify(bailiwick.display_settings),
          registry_filename: bailiwick.registry_filename,
-         updated_at: 'CURRENT_TIMESTAMP'
       }
       if (bailiwick.id) {
          data.id = bailiwick.id
+         // data.updated_at = 'CURRENT_TIMESTAMP'
       }
       const data_keys = Object.keys(data)
       const encoded_params = data_keys.map(key => {
