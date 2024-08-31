@@ -64,6 +64,8 @@ export class FractoIncrementalRender extends Component {
          height_px: height_px,
          ctx: ctx
       })
+      ctx.fillStyle = FractoUtil.fracto_pattern_color_hsl(0, 10);
+      ctx.fillRect(0, 0, width_px, width_px);
       const canvas_buffer = this.init_canvas_buffer()
       this.fill_canvas_buffer(canvas_buffer, ctx)
    }
@@ -100,15 +102,11 @@ export class FractoIncrementalRender extends Component {
       if (height_px & 1) {
          height_px -= 1
       }
-      // console.log("init_canvas_buffer", width_px, height_px)
-      // const start = performance.now()
       const canvas_buffer = new Array(width_px).fill(0).map(() => new Array(height_px).fill([0, 4]));
       this.setState({
          canvas_buffer: canvas_buffer,
          height_px: height_px
       })
-      // const end = performance.now()
-      // console.log(`init_canvas_buffer took ${end - start}ms`)
       return canvas_buffer
    }
 
