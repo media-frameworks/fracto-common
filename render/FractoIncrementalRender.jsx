@@ -8,6 +8,7 @@ import FractoUtil from "../FractoUtil";
 import FractoMruCache from "../data/FractoMruCache";
 import FractoIndexedTiles from "../data/FractoIndexedTiles";
 import TransitData from "../feature/TransitData";
+import {fill_canvas} from "./FractoLayeredImage";
 
 const FractoCanvas = styled.canvas`   
    ${CoolStyles.narrow_box_shadow}
@@ -49,7 +50,7 @@ export class FractoIncrementalRender extends Component {
 
    componentDidMount() {
       const {canvas_ref} = this.state;
-      const {width_px, aspect_ratio} = this.props;
+      const {width_px, aspect_ratio, focal_point, scope} = this.props;
       const canvas = canvas_ref.current;
       if (!canvas) {
          console.log('no canvas');
@@ -64,8 +65,9 @@ export class FractoIncrementalRender extends Component {
          height_px: height_px,
          ctx: ctx
       })
-      ctx.fillStyle = FractoUtil.fracto_pattern_color_hsl(0, 10);
-      ctx.fillRect(0, 0, width_px, width_px);
+
+      // ctx.fillStyle = 'white'// FractoUtil.fracto_pattern_color_hsl(0, 10);
+      // ctx.fillRect(0, 0, width_px, width_px);
       const canvas_buffer = this.init_canvas_buffer()
       this.fill_canvas_buffer(canvas_buffer, ctx)
    }
@@ -111,7 +113,9 @@ export class FractoIncrementalRender extends Component {
    }
 
    fill_canvas_buffer = (canvas_buffer, ctx) => {
-      const {level, width_px, video_id, incremental_depth} = this.props
+      const {level, width_px, aspect_ratio, video_id, incremental_depth} = this.props
+      // ctx.fillStyle = FractoUtil.fracto_pattern_color_hsl(0, 10);
+      // ctx.fillRect(0, 0, width_px, width_px * aspect_ratio);
       let initial_level = level - incremental_depth
       if (initial_level < 2) {
          initial_level = 2
@@ -205,16 +209,8 @@ export class FractoIncrementalRender extends Component {
       })
    }
 
-   static tile_to_canvas = (
-      ctx,
-      tile,
-      focal_point,
-      scope,
-      aspect_ratio,
-      width_px,
-      height_px,
-      tile_data,
-      canvas_buffer) => {
+   static tile_to_canvas = (ctx, tile, focal_point, scope, aspect_ratio,
+                            width_px, height_px, tile_data, canvas_buffer) => {
       const tile_width = tile.bounds.right - tile.bounds.left
       const one_by_tile_width = 1 / tile_width
       const left_edge = focal_point.x - scope / 2;
@@ -263,16 +259,9 @@ export class FractoIncrementalRender extends Component {
       const tile = level_tiles.pop()
       let lower_iteration = lowest_iteration
       FractoMruCache.get_tile_data(tile.short_code, tile_data => {
-         FractoIncrementalRender.tile_to_canvas(
-            ctx,
-            tile,
-            focal_point,
-            scope,
-            aspect_ratio,
-            width_px,
-            height_px,
-            tile_data,
-            canvas_buffer)
+         FractoIncrementalRender.tile_to_canvas(ctx, tile, focal_point, scope,
+            aspect_ratio, width_px, height_px, tile_data, canvas_buffer)
+         // fill_canvas(ctx, width_px, focal_point, scope, 1.0, canvas_buffer)
          this.tiles_to_canvas(level_tiles, canvas_buffer, lower_iteration, cb)
       })
    }

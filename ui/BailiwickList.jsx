@@ -58,12 +58,12 @@ export class BailiwickList extends Component {
 
    static propTypes = {
       bailiwick_list: PropTypes.array.isRequired,
+      selected_index: PropTypes.func.isRequired,
       on_select: PropTypes.func.isRequired,
       in_wait: PropTypes.bool.isRequired,
    }
 
    state = {
-      selected_index: 0,
       scroll_ref: React.createRef()
    };
 
@@ -77,8 +77,7 @@ export class BailiwickList extends Component {
       }
       localStorage.setItem('selected_bailiwick', String(i))
       let item_copy = JSON.parse(JSON.stringify(item))
-      on_select(item_copy)
-      this.setState({selected_index: i})
+      on_select(item_copy, i)
    }
 
    render_magnitude = (item) => {
@@ -90,8 +89,8 @@ export class BailiwickList extends Component {
    }
 
    render() {
-      const {selected_index, scroll_ref} = this.state
-      const {bailiwick_list, in_wait} = this.props
+      const {scroll_ref} = this.state
+      const {bailiwick_list, selected_index, in_wait} = this.props
       return bailiwick_list
          .map((item, i) => {
             const pattern_block = render_pattern_block(item.pattern)

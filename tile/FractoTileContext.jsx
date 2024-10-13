@@ -5,7 +5,7 @@ import styled from "styled-components";
 import {CoolStyles} from 'common/ui/CoolImports';
 
 import FractoUtil from "../FractoUtil";
-import FractoIncrementalRender from "../render/FractoIncrementalRender";
+import {FractoLayeredImage} from "../render/FractoLayeredImage";
 
 const ContextWrapper = styled(CoolStyles.InlineBlock)`
    background-color: #f8f8f8;
@@ -21,9 +21,6 @@ export class FractoTileContext extends Component {
    }
 
    static wrapper_ref = React.createRef()
-
-   state = {
-   };
 
    render() {
       const {tile, level, width_px, on_context_rendered} = this.props;
@@ -41,10 +38,8 @@ export class FractoTileContext extends Component {
       return <ContextWrapper
          ref={FractoTileContext.wrapper_ref}
          style={wrapper_style}>
-         <FractoIncrementalRender
-            key={'canvas'}
+         <FractoLayeredImage
             width_px={width_px}
-            level={level - 1}
             aspect_ratio={1.0}
             scope={context_scope}
             on_plan_complete={on_context_rendered}

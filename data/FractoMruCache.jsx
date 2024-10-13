@@ -27,7 +27,6 @@ export class FractoMruCache {
    }
 
    static get_tile_data_raw = (short_code, cb) => {
-      CACHE_MRU[short_code] = FractoMruCache.highest_mru++;
       if (!(short_code in TILE_CACHE)) {
          console.log(`loading tile raw data ${short_code}`)
          const url = `${URL_BASE}/get_tiles.php?short_codes=${short_code}`
@@ -37,22 +36,30 @@ export class FractoMruCache {
          }).then(json => {
             // console.log("json", json)
             if (!json["tiles"] || !json["tiles"][short_code]) {
-               cb([])
+               if (cb) {
+                  cb([])
+               }
             } else {
+               CACHE_MRU[short_code] = FractoMruCache.highest_mru++;
                TILE_CACHE[short_code] = FractoMruCache.serialize_tile(json["tiles"][short_code])
-               cb(json["tiles"][short_code])
+               if (cb) {
+                  cb(json["tiles"][short_code])
+               }
             }
          })
       } else {
          // console.log(`cached tile ${short_code}`)
+         CACHE_MRU[short_code] = FractoMruCache.highest_mru++;
          const tile_data = FractoMruCache.deserialize_tile(TILE_CACHE[short_code])
-         cb(tile_data)
+         if (cb) {
+            cb(tile_data)
+         }
       }
    }
 
-   static get_tile_data = (short_code, cb) => {
-      CACHE_MRU[short_code] = FractoMruCache.highest_mru++;
+   static get_tile_data = (short_code, cb = null) => {
       if (!(short_code in TILE_CACHE)) {
+         // console.log('tile is not cached, calling server', short_code)
          const packages_url = `${TILE_SERVER_BASE}/get_packages?short_codes=${short_code}`
          fetch(packages_url)
             .then(response => response.json())
@@ -67,15 +74,24 @@ export class FractoMruCache {
                   const buf = Buffer.from(decompressed, 'ascii');
                   const tile_data = JSON.parse(buf.toString())
                   // console.log("tile_data", tile_data)
+                  CACHE_MRU[short_code] = FractoMruCache.highest_mru++;
                   TILE_CACHE[short_code] = tile_data
-                  cb(tile_data)
+                  if (cb) {
+                     cb(tile_data)
+                  }
                }
             })
+         return false
 
       } else {
          // console.log(`cached tile ${short_code}`)
+         CACHE_MRU[short_code] = FractoMruCache.highest_mru++;
          const tile_data = FractoMruCache.deserialize_tile(TILE_CACHE[short_code])
-         cb(tile_data)
+         if (cb) {
+            cb(tile_data)
+         } else {
+            return (tile_data)
+         }
       }
    }
 

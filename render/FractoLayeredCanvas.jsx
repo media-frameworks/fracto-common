@@ -103,7 +103,7 @@ export class FractoLayeredCanvas extends Component {
 
       const tile_span = tile_bounds.right - tile_bounds.left
       const tile_pixel_size = tile_span / 256;
-      const canvas_pixel_size = (1.5 * bg_factor / 100) * (width_px * tile_span) / (256 * scope)
+      const canvas_pixel_size  = (1.5 * bg_factor / 100) * (width_px * tile_span) / (256 * scope)
 
       for (let tile_x = 0; tile_x < 256; tile_x++) {
          const left = tile_bounds.left + tile_x * tile_pixel_size;
@@ -209,8 +209,8 @@ export class FractoLayeredCanvas extends Component {
       if (!ctx) {
          return
       }
-      ctx.fillStyle = `white`
-      ctx.fillRect(0, 0, width_px, width_px * aspect_ratio);
+      // ctx.fillStyle = `white`
+      // ctx.fillRect(0, 0, width_px, width_px * aspect_ratio);
 
       const half_width = scope / 2;
       const half_height = (aspect_ratio * scope) / 2;

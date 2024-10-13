@@ -165,7 +165,7 @@ export class FractoTileAutomate extends Component {
                width_px={CONTEXT_SIZE_PX}/>
          </ContextWrapper>,
          <RenderWrapper
-            key={`RenderWrapper_${tile.short_code}`}>
+            key={`RenderWrapper`}>
             {rendered_tile}
          </RenderWrapper>,
          <NavigationArapper

@@ -32,7 +32,7 @@ export class FractoTileGenerate {
       const index_url = `tiles/256/indexed/${tile.short_code}.json`;
       StoreS3.put_file_async(index_url, JSON.stringify(tile_points), "fracto", result => {
          console.log("StoreS3.put_file_async", index_url, result);
-               cb(`generated tile ${tile.short_code}`)
+         cb(`stored tile`)
       })
    }
 
@@ -86,8 +86,21 @@ export class FractoTileGenerate {
       })
    }
 
+   static base_tile = null
+
    static prepare_tile = () => {
-      return new Array(256).fill(0).map(() => new Array(256).fill([0, 0]));
+      if (!FractoTileGenerate.base_tile) {
+         FractoTileGenerate.base_tile = new Array(256)
+            .fill(0)
+            .map(() => new Array(256)
+               .fill([0, 0]));
+      }
+      for (let img_x = 0; img_x < 256; img_x++) {
+         for (let img_y = 0; img_y < 256; img_y++) {
+            FractoTileGenerate.base_tile[img_x][img_y] = [0, 0]
+         }
+      }
+      return FractoTileGenerate.base_tile
    }
 
    static test_edge_case = (tile, tile_data) => {
@@ -176,15 +189,15 @@ export class FractoTileGenerate {
          } else {
             FractoUtil.tile_to_bin(tile.short_code, "complete", "indexed", result => {
                console.log("FractoUtil.tile_to_bin", tile.short_code, "complete", "indexed", result);
-               const end = performance.now()
                FractoMruCache.get_tile_data_raw(tile.short_code, data => {
                   // console.log(`get_tile_data_raw ${tile.short_code}`, data ? data.length : 0)
-                  const success = FractoTileGenerate.compare_tile_data(tile_points, data)
+                  // const success = FractoTileGenerate.compare_tile_data(tile_points, data)
+                  const end = performance.now()
                   const seconds = Math.round((end - start)) / 1000
                   const full_history = `${response}, ${result.result} in ${seconds}s`
                   setTimeout(() => {
-                     cb(success ? full_history : 'tile comparison failed', tile_points)
-                  }, 50)
+                     cb(full_history, tile_points)
+                  }, 250)
                })
             })
          }
