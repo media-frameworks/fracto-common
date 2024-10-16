@@ -81,6 +81,9 @@ const apply_per_pixel = (tile, tile_data, ctx, width_px, focal_point, scope, asp
    const canvas_increment = scope / width_px
    const tile_width = tile.bounds.right - tile.bounds.left
    const tile_increment = tile_width / 256
+   if (!tile_data || !Array.isArray(tile_data[0])) {
+      return;
+   }
    for (let canvas_x = 0; canvas_x < width_px; canvas_x++) {
       const x = leftmost + canvas_x * canvas_increment
       if (x < tile.bounds.left) {
@@ -89,7 +92,7 @@ const apply_per_pixel = (tile, tile_data, ctx, width_px, focal_point, scope, asp
       if (x > tile.bounds.right) {
          break
       }
-      const tile_x = Math.floor( (x - tile.bounds.left) / tile_increment)
+      const tile_x = Math.floor((x - tile.bounds.left) / tile_increment)
       for (let canvas_y = 0; canvas_y < width_px; canvas_y++) {
          const y = Math.abs(topmost - canvas_y * canvas_increment)
          if (y > tile.bounds.top) {
@@ -99,14 +102,16 @@ const apply_per_pixel = (tile, tile_data, ctx, width_px, focal_point, scope, asp
             continue
          }
          const tile_y = Math.floor((tile.bounds.top - y) / tile_increment)
-         const pattern = tile_data[tile_x][tile_y][0]
-         const iteration = tile_data[tile_x][tile_y][1]
-         if (canvas_buffer[canvas_x] && canvas_buffer[canvas_x][canvas_y]) {
-            canvas_buffer[canvas_x][canvas_y] = [pattern, iteration];
+         if (Array.isArray(tile_data[tile_x]) && Array.isArray(tile_data[tile_x][tile_y])) {
+            const pattern = tile_data[tile_x][tile_y][0]
+            const iteration = tile_data[tile_x][tile_y][1]
+            if (canvas_buffer[canvas_x] && canvas_buffer[canvas_x][canvas_y]) {
+               canvas_buffer[canvas_x][canvas_y] = [pattern, iteration];
+            }
+            const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(pattern, iteration)
+            ctx.fillStyle = `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`
+            ctx.fillRect(canvas_x, canvas_y, 1, 1);
          }
-         const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(pattern, iteration)
-         ctx.fillStyle = `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`
-         ctx.fillRect(canvas_x, canvas_y, 1, 1);
       }
    }
    // apply_large_pixels(tile, tile_data, ctx, 1, width_px, focal_point, scope, aspect_ratio, canvas_buffer)
