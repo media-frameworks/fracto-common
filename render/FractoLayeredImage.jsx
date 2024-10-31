@@ -15,7 +15,7 @@ const FractoCanvas = styled.canvas`
    margin: 0;
 `;
 
-const get_tiles = (width_px, focal_point, scope, aspect_ratio, quality = 0) => {
+const get_tiles = (width_px, focal_point, scope, aspect_ratio, quality = 1) => {
    const all_tiles = []
    const tiles_on_edge = Math.ceil(width_px / 256) + quality;
    const max_tiles = Math.ceil(tiles_on_edge * tiles_on_edge)
@@ -147,7 +147,7 @@ export const fill_canvas = (ctx, width_px, focal_point, scope, aspect_ratio, can
    FractoMruCache.get_tiles_async(short_codes, when_complete => {
       for (let i = 0; i < short_codes.length; i++) {
          const short_code = short_codes[i]
-         console.log('short_code', short_code)
+         // console.log('short_code', short_code)
          const tile = tiles.find(tile => tile.short_code === short_code)
          const tile_data = FractoMruCache.get_tile_data(short_code)
          apply_tile_data(tile, tile_data, ctx, width_px, focal_point, scope, aspect_ratio, canvas_buffer)

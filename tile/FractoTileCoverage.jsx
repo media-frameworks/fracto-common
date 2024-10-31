@@ -142,6 +142,10 @@ export class FractoTileCoverage extends Component {
 
       for (let level = 2; level < ideal_level + 12; level++) {
          const level_tiles = FractoIndexedTiles.tiles_in_scope(level, focal_point, scope)
+         if (level_tiles.length > 100000) {
+            console.log('level_tiles.length', level_tiles.length)
+            break
+         }
          tiles_in_scope.push({
             level: level,
             tiles: level_tiles

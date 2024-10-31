@@ -55,12 +55,13 @@ export class FractoTileRunHistory extends Component {
       history_items: PropTypes.array.isRequired,
    }
 
-   static format_history_item = (tile, operation, message) => {
+   static format_history_item = (tile, operation, message, tile_index) => {
       return {
          tile: tile,
          operation: operation,
          message: message,
-         timestamp: new Date()
+         timestamp: new Date(),
+         tile_index: tile_index
       }
    }
 
@@ -92,7 +93,7 @@ export class FractoTileRunHistory extends Component {
             {[`${item.message},`, <SmallSpacer />, time_ago]}
          </MessageSpan>
          const result = {
-            index: history_items.length - i,
+            index: item.tile_index,
             timestamp: item.timestamp,
             short_code: short_code,
             result: message,

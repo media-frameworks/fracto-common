@@ -180,16 +180,6 @@ export class FractoIndexedTiles extends Component {
          short_codes = short_codes.concat(column_tiles)
       }
       return short_codes
-         .map(tile => {
-            let new_tile = JSON.parse(JSON.stringify(tile))
-            const center_x = (new_tile.bounds.left + new_tile.bounds.right) / 2
-            const center_y = (new_tile.bounds.top + new_tile.bounds.bottom) / 2
-            const diff_x = center_x - focal_point.x
-            const diff_y = center_y - focal_point.y
-            new_tile.distance = Math.sqrt(diff_x * diff_x + diff_y * diff_y)
-            return new_tile
-         })
-         .sort((a, b) => b.distance - a.distance)
    }
 
    static get_tile_scopes = (set_name, focal_point, scope) => {
