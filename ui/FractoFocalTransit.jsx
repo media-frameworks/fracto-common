@@ -3,11 +3,10 @@ import PropTypes from 'prop-types';
 import styled from "styled-components";
 
 import {CoolStyles} from 'common/ui/CoolImports';
-import {
-   TRANSIT_PADDING_PX,
-   CURVED_CORNERS_FACTOR
-} from "pages/styles/TabTransitStyles";
 import FractoUtil from "../FractoUtil";
+
+const TRANSIT_PADDING_PX = 5
+const CURVED_CORNERS_FACTOR = 25
 
 const CanvasSubstrate = styled.canvas`
    ${CoolStyles.narrow_box_shadow}

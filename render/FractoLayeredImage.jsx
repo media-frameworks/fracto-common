@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import styled from "styled-components";
 
-import {CoolStyles} from "../../../common/ui/CoolImports";
+import {CoolStyles} from "common/ui/CoolImports";
 
 import FractoIndexedTiles from "../data/FractoIndexedTiles";
 import FractoMruCache from "../data/FractoMruCache";
@@ -30,7 +30,7 @@ const get_tiles = (width_px, focal_point, scope, aspect_ratio, quality = 1) => {
          break;
       }
    }
-   return all_tiles.filter(tiles => tiles.level_tiles.length).slice(-5)
+   return all_tiles.filter(tiles => tiles.level_tiles.length).slice(-3)
 }
 
 const apply_large_pixels = (tile, tile_data, ctx, pixel_size, width_px, focal_point, scope, aspect_ratio, canvas_buffer) => {
@@ -163,13 +163,15 @@ export class FractoLayeredImage extends Component {
       scope: PropTypes.number.isRequired,
       on_plan_complete: PropTypes.func,
       aspect_ratio: PropTypes.number,
-      disabled: PropTypes.bool.isRequired,
-      update_counter: PropTypes.number.isRequired,
-      filter_level: PropTypes.number.isRequired,
+      disabled: PropTypes.bool,
+      update_counter: PropTypes.number,
+      filter_level: PropTypes.number,
    }
 
    static defaultProps = {
       aspect_ratio: 1.0,
+      disabled: false,
+      update_counter: 1,
    }
 
    state = {
