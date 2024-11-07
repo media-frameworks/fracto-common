@@ -7,6 +7,7 @@ import {CoolStyles} from "common/ui/CoolImports";
 import FractoIndexedTiles from "../data/FractoIndexedTiles";
 import FractoMruCache, {TILE_CACHE} from "../data/FractoMruCache";
 import FractoUtil from "../FractoUtil";
+import FractoFastCalc from "../data/FractoFastCalc";
 
 const FractoCanvas = styled.canvas`   
    ${CoolStyles.narrow_box_shadow}
@@ -18,9 +19,9 @@ const MAX_LEVEL = 35;
 const get_tiles = (width_px, focal_point, scope, aspect_ratio, quality = 1) => {
    const all_tiles = []
    const height_px = width_px * aspect_ratio
-   const tiles_on_edge_x = Math.ceil(width_px / 256);
-   const tiles_on_edge_y = Math.ceil(height_px / 256);
-   const max_tiles = Math.ceil(tiles_on_edge_x * tiles_on_edge_y + quality)
+   const tiles_on_edge_x = Math.ceil(width_px / 256) + 0.5;
+   const tiles_on_edge_y = Math.ceil(height_px / 256) + 0.5;
+   const max_tiles = Math.ceil(tiles_on_edge_x * tiles_on_edge_y + 0.5)
    for (let level = 2; level < MAX_LEVEL; level++) {
       const level_tiles = FractoIndexedTiles.tiles_in_scope(
          level, focal_point, scope, aspect_ratio);
@@ -171,12 +172,13 @@ export class FractoRasterImage extends Component {
             })
             .sort((a, b) => a.level > b.level ? -1 : 1)
          this.raster_fill(level_data_sets, ctx)
-         on_plan_complete()
+         on_plan_complete(canvas_buffer, ctx)
          this.setState({loading_tiles: false})
       })
    }
 
    raster_fill = (level_data_sets, ctx) => {
+      const {canvas_buffer} = this.state
       const {
          width_px,
          focal_point,
@@ -199,6 +201,7 @@ export class FractoRasterImage extends Component {
          const x = horz_scale[canvas_x]
          for (let canvas_y = 0; canvas_y < height_px; canvas_y++) {
             const y = vert_scale[canvas_y]
+            let found_point = false
             for (let index = 0; index < level_data_sets.length; index++) {
                const level_data_set = level_data_sets[index]
                const tile = level_data_set.level_tiles
@@ -214,11 +217,21 @@ export class FractoRasterImage extends Component {
                      (tile.bounds.top - y) / level_data_set.tile_increment)
                   const pattern = tile_data[tile_x][tile_y][0]
                   const iteration = tile_data[tile_x][tile_y][1]
+                  canvas_buffer[canvas_x][canvas_y] = [pattern, iteration]
                   const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(pattern, iteration)
                   ctx.fillStyle = `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`
                   ctx.fillRect(canvas_x, canvas_y, 2, 2);
+                  found_point = true
                   break;
                }
+            }
+            if (!found_point) {
+               const {pattern, iteration} = FractoFastCalc.calc(x, y)
+               canvas_buffer[canvas_x][canvas_y] = [pattern, iteration]
+               const [hue, sat_pct, lum_pct] =
+                  FractoUtil.fracto_pattern_color_hsl(pattern, iteration)
+               ctx.fillStyle = `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`
+               ctx.fillRect(canvas_x, canvas_y, 2, 2);
             }
          }
       }
