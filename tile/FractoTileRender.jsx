@@ -5,8 +5,8 @@ import styled from "styled-components";
 import {CoolStyles} from 'common/ui/CoolImports';
 
 import FractoUtil from '../FractoUtil';
-import FractoLayeredCanvas from "../render/FractoLayeredCanvas";
 import FractoMruCache from "../data/FractoMruCache";
+import FractoRasterImage from "../render/FractoRasterImage";
 
 const RenderWrapper = styled(CoolStyles.InlineBlock)`
    background-color: #f8f8f8;
@@ -82,7 +82,7 @@ export class FractoTileRender extends Component {
          }
          const level = tile.short_code.length - 1
          return <RenderWrapper style={canvas_style}>
-            <FractoLayeredCanvas
+            <FractoRasterImage
                focal_point={focal_point}
                scope={scope}
                aspect_ratio={1.0}

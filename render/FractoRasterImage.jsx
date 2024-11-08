@@ -34,7 +34,6 @@ const get_tiles = (width_px, focal_point, scope, aspect_ratio, quality = 1) => {
       }
    }
    return all_tiles.filter(tiles => tiles.level_tiles.length)
-      .slice(-5)
       .sort((a, b) => a.level > b.level ? 1 : -1)
 }
 
@@ -54,7 +53,7 @@ export class FractoRasterImage extends Component {
    static defaultProps = {
       aspect_ratio: 1.0,
       disabled: false,
-      update_counter: 1,
+      update_counter: 0,
       filter_level: 0,
    }
 
@@ -94,8 +93,9 @@ export class FractoRasterImage extends Component {
       const focal_point_x_changed = prevProps.focal_point.x !== this.props.focal_point.x;
       const focal_point_y_changed = prevProps.focal_point.y !== this.props.focal_point.y;
       const scope_changed = prevProps.scope !== this.props.scope;
-      const filter_level_changed = prevProps.filter_level !== this.props.filter_level;
-      const update_counter_changed = prevProps.update_counter !== this.props.update_counter;
+      const disabled_changed = false// prevProps.disabled !== this.props.disabled;
+      const filter_level_changed = this.props.filter_level && prevProps.filter_level !== this.props.filter_level;
+      const update_counter_changed = false// this.props.update_counter && prevProps.update_counter !== this.props.update_counter;
       let canvas_buffer = this.state.canvas_buffer
       if (this.state.loading_tiles) {
          return;
@@ -111,6 +111,7 @@ export class FractoRasterImage extends Component {
          || focal_point_y_changed
          || scope_changed
          || filter_level_changed
+         || disabled_changed
          || update_counter_changed) {
          this.fill_canvas_buffer(canvas_buffer, this.state.ctx);
       }
@@ -146,12 +147,19 @@ export class FractoRasterImage extends Component {
          scope,
          aspect_ratio,
          on_plan_complete,
-         filter_level
+         filter_level,
+         disabled
       } = this.props
+      // if (disabled) {
+      //    return;
+      // }return
       let all_short_codes = []
       const all_level_sets = []
       get_tiles(width_px, focal_point, scope, aspect_ratio)
          .forEach(level_set => {
+            if (filter_level && filter_level !== level_set.level) {
+               return;
+            }
             const level_short_codes = level_set.level_tiles
                .map(tile => tile.short_code)
             all_short_codes = all_short_codes.concat(level_short_codes)
@@ -160,25 +168,27 @@ export class FractoRasterImage extends Component {
       if (!all_short_codes) {
          return;
       }
-      this.setState({loading_tiles: true})
-      FractoMruCache.get_tiles_async(all_short_codes, when_complete => {
-         const level_data_sets = all_level_sets
-            .map(level_set => {
-               const tile_width =
-                  level_set.level_tiles[0].bounds.right
-                  - level_set.level_tiles[0].bounds.left
-               level_set.tile_increment = tile_width / 256
-               return level_set
-            })
-            .sort((a, b) => a.level > b.level ? -1 : 1)
-         this.raster_fill(level_data_sets, ctx)
-         on_plan_complete(canvas_buffer, ctx)
-         this.setState({loading_tiles: false})
-      })
+      setTimeout(() => {
+         FractoMruCache.get_tiles_async(all_short_codes, when_complete => {
+            const level_data_sets = all_level_sets
+               .map(level_set => {
+                  const tile_width =
+                     level_set.level_tiles[0].bounds.right
+                     - level_set.level_tiles[0].bounds.left
+                  level_set.tile_increment = tile_width / 256
+                  return level_set
+               })
+               .sort((a, b) => a.level > b.level ? -1 : 1)
+            this.raster_fill(canvas_buffer, level_data_sets, ctx)
+            if (on_plan_complete) {
+               on_plan_complete(canvas_buffer, ctx)
+            }
+            this.setState({loading_tiles: false})
+         })
+      }, 10)
    }
 
-   raster_fill = (level_data_sets, ctx) => {
-      const {canvas_buffer} = this.state
+   raster_fill = (canvas_buffer, level_data_sets, ctx) => {
       const {
          width_px,
          focal_point,
@@ -213,8 +223,14 @@ export class FractoRasterImage extends Component {
                   const tile_data = TILE_CACHE[tile.short_code]
                   const tile_x = Math.floor(
                      (x - tile.bounds.left) / level_data_set.tile_increment)
+                  if (!tile_data[tile_x]) {
+                     continue
+                  }
                   const tile_y = Math.floor(
                      (tile.bounds.top - y) / level_data_set.tile_increment)
+                  if (!tile_data[tile_x][tile_y]) {
+                     continue
+                  }
                   const pattern = tile_data[tile_x][tile_y][0]
                   const iteration = tile_data[tile_x][tile_y][1]
                   canvas_buffer[canvas_x][canvas_y] = [pattern, iteration]

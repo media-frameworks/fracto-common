@@ -5,7 +5,7 @@ import styled from "styled-components";
 import {CoolStyles} from 'common/ui/CoolImports';
 
 import FractoUtil from "../FractoUtil";
-import {FractoLayeredImage} from "../render/FractoLayeredImage";
+import FractoRasterImage from "../render/FractoRasterImage";
 
 const ContextWrapper = styled(CoolStyles.InlineBlock)`
    background-color: #f8f8f8;
@@ -38,7 +38,7 @@ export class FractoTileContext extends Component {
       return <ContextWrapper
          ref={FractoTileContext.wrapper_ref}
          style={wrapper_style}>
-         <FractoLayeredImage
+         <FractoRasterImage
             width_px={width_px}
             aspect_ratio={1.0}
             scope={context_scope}
