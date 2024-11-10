@@ -165,7 +165,7 @@ export class FractoRasterImage extends Component {
             all_short_codes = all_short_codes.concat(level_short_codes)
             all_level_sets.push(level_set)
          })
-      if (!all_short_codes) {
+      if (!all_short_codes.length) {
          return;
       }
       setTimeout(() => {
@@ -221,6 +221,9 @@ export class FractoRasterImage extends Component {
                      && tile.bounds.bottom < y)
                if (tile) {
                   const tile_data = TILE_CACHE[tile.short_code]
+                  if (!tile_data) {
+                     continue;
+                  }
                   const tile_x = Math.floor(
                      (x - tile.bounds.left) / level_data_set.tile_increment)
                   if (!tile_data[tile_x]) {
