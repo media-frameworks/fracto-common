@@ -81,8 +81,8 @@ export class FractoRasterImage extends Component {
          ctx: ctx
       })
 
-      // ctx.fillStyle = FractoUtil.fracto_pattern_color_hsl(0, 10);
-      // ctx.fillRect(0, 0, width_px, width_px);
+      ctx.fillStyle ='#eeeeee'// FractoUtil.fracto_pattern_color_hsl(0, 10);
+      ctx.fillRect(0, 0, width_px, width_px);
       const canvas_buffer = this.init_canvas_buffer()
       this.fill_canvas_buffer(canvas_buffer, ctx)
    }
@@ -119,12 +119,12 @@ export class FractoRasterImage extends Component {
 
    init_canvas_buffer = () => {
       const {canvas_buffer, ctx} = this.state
+      const {width_px, aspect_ratio} = this.props
       if (canvas_buffer) {
          ctx.fillStyle = FractoUtil.fracto_pattern_color_hsl(0, 10)
          ctx.fillRect(0, 0, width_px, width_px);
          return (canvas_buffer)
       }
-      const {width_px, aspect_ratio} = this.props
       if (width_px <= 0) {
          return;
       }
@@ -236,7 +236,9 @@ export class FractoRasterImage extends Component {
                   }
                   const pattern = tile_data[tile_x][tile_y][0]
                   const iteration = tile_data[tile_x][tile_y][1]
-                  canvas_buffer[canvas_x][canvas_y] = [pattern, iteration]
+                  if (canvas_buffer && canvas_buffer[canvas_x] && canvas_buffer[canvas_x][canvas_y]) {
+                     canvas_buffer[canvas_x][canvas_y] = [pattern, iteration]
+                  }
                   const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(pattern, iteration)
                   ctx.fillStyle = `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`
                   ctx.fillRect(canvas_x, canvas_y, 2, 2);
@@ -246,7 +248,9 @@ export class FractoRasterImage extends Component {
             }
             if (!found_point) {
                const {pattern, iteration} = FractoFastCalc.calc(x, y)
-               canvas_buffer[canvas_x][canvas_y] = [pattern, iteration]
+               if (canvas_buffer && canvas_buffer[canvas_x] && canvas_buffer[canvas_x][canvas_y]) {
+                  canvas_buffer[canvas_x][canvas_y] = [pattern, iteration]
+               }
                const [hue, sat_pct, lum_pct] =
                   FractoUtil.fracto_pattern_color_hsl(pattern, iteration)
                ctx.fillStyle = `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`

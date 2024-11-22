@@ -4,7 +4,7 @@ import {decompressSync} from 'fflate';
 
 const URL_BASE = network.fracto_server_url;
 const TILE_SERVER_BASE = network.tile_server_url;
-const MAX_TILE_CACHE = 150;
+const MAX_TILE_CACHE = 100;
 
 export var TILE_CACHE = {};
 export var PACKAGE_CACHE = {};
@@ -145,13 +145,13 @@ export class FractoMruCache {
       const cache_keys = Object.keys(TILE_CACHE).sort((a, b) =>
          CACHE_MRU[a] - CACHE_MRU[b])
       if (cache_keys.length < MAX_TILE_CACHE) {
-         // console.log("no cleanup required")
+         console.log("no cleanup required")
          return;
       }
       console.log("cleanup_cache: performance.memory", performance.memory)
       // console.log(`cleanup_cache ${cache_keys.length} tiles in cache`)
       const keys_to_delete = cache_keys.length - 100;
-      // console.log(`deleting ${keys_to_delete} tiles from cache`)
+      console.log(`deleting ${keys_to_delete} tiles from cache`)
       for (let key_index = 0; key_index < keys_to_delete; key_index++) {
          const short_code = cache_keys[key_index];
          // console.log(`delete tile with mru ${CACHE_MRU[short_code]}`)

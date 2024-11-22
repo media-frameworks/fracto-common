@@ -8,7 +8,6 @@ import FractoUtil from "../FractoUtil";
 import FractoMruCache from "../data/FractoMruCache";
 import FractoIndexedTiles from "../data/FractoIndexedTiles";
 import TransitData from "../feature/TransitData";
-import {fill_canvas} from "./FractoLayeredImage";
 
 const FractoCanvas = styled.canvas`   
    ${CoolStyles.narrow_box_shadow}
