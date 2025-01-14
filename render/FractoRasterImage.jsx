@@ -130,6 +130,7 @@ export class FractoRasterImage extends Component {
          width_px,
          focal_point,
          scope,
+         () => { this.setState({loading_tiles: false}) },
          aspect_ratio,
          on_plan_complete,
          filter_level)
@@ -139,7 +140,7 @@ export class FractoRasterImage extends Component {
       const {canvas_ref, loading_tiles} = this.state;
       const {width_px, disabled, aspect_ratio} = this.props;
       const canvas_style = {
-         cursor: loading_tiles || disabled ? "wait" : "crosshair"
+         cursor: disabled ? "wait" : "crosshair"
       }
       return <FractoCanvas
          key={'fracto-canvas'}
