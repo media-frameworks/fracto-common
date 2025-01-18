@@ -53,6 +53,13 @@ const COVERAGE_TABLE_COLUMNS = [
       width_px: 80,
       align: CELL_ALIGN_CENTER
    },
+   {
+      id: "interior_tiles",
+      label: "interior_tiles",
+      type: CELL_TYPE_NUMBER,
+      width_px: 80,
+      align: CELL_ALIGN_CENTER
+   },
 ]
 
 export class FractoTileCoverage extends Component {
@@ -76,10 +83,12 @@ export class FractoTileCoverage extends Component {
       repair_level: 0,
       loading_indexed: true,
       loading_blanks: true,
+      loading_interiors: true,
    }
 
    static indexed_tiles = null
    static blank_tiles = null
+   static interior_tiles = null
 
    componentDidMount() {
       if (!FractoTileCoverage.indexed_tiles) {
@@ -113,6 +122,22 @@ export class FractoTileCoverage extends Component {
          })
       } else {
          this.setState({loading_blanks: false})
+      }
+      if (!FractoTileCoverage.interior_tiles) {
+         FractoTileCoverage.interior_tiles = []
+         for (let level = 0; level < 50; level++) {
+            FractoTileCoverage.interior_tiles[level] = {}
+         }
+         FractoIndexedTiles.load_short_codes('interior', short_codes => {
+            console.log('interior short codes:', short_codes.length)
+            short_codes.forEach(short_code => {
+               const level = short_code.length
+               FractoTileCoverage.interior_tiles[level][short_code] = true
+            })
+            this.setState({loading_interiors: false})
+         })
+      } else {
+         this.setState({loading_interiors: false})
       }
    }
 
@@ -199,6 +224,7 @@ export class FractoTileCoverage extends Component {
       // console.log('coverage_data', coverage_data)
       const can_do = []
       const blank_tiles = []
+      const interior_tiles = []
       all_tiles.forEach(tile => {
          const short_code = tile.short_code
          const short_code_0 = `${short_code}0`
@@ -206,23 +232,35 @@ export class FractoTileCoverage extends Component {
          const short_code_2 = `${short_code}2`
          const short_code_3 = `${short_code}3`
          const level = short_code.length + 1
+
          if (FractoTileCoverage.blank_tiles[level][short_code_0]) {
             blank_tiles.push(short_code_0)
+         } else if (FractoTileCoverage.interior_tiles[level][short_code_0]) {
+            interior_tiles.push(short_code_0)
          } else if (!FractoTileCoverage.indexed_tiles[level][short_code_0]) {
             can_do.push(short_code_0)
          }
+
          if (FractoTileCoverage.blank_tiles[level][short_code_1]) {
             blank_tiles.push(short_code_1)
+         } else if (FractoTileCoverage.interior_tiles[level][short_code_1]) {
+            interior_tiles.push(short_code_1)
          } else if (!FractoTileCoverage.indexed_tiles[level][short_code_1]) {
             can_do.push(short_code_1)
          }
+
          if (FractoTileCoverage.blank_tiles[level][short_code_2]) {
             blank_tiles.push(short_code_2)
+         } else if (FractoTileCoverage.interior_tiles[level][short_code_2]) {
+            interior_tiles.push(short_code_2)
          } else if (!FractoTileCoverage.indexed_tiles[level][short_code_2]) {
             can_do.push(short_code_2)
          }
+
          if (FractoTileCoverage.blank_tiles[level][short_code_3]) {
             blank_tiles.push(short_code_3)
+         } else if (FractoTileCoverage.interior_tiles[level][short_code_3]) {
+            interior_tiles.push(short_code_3)
          } else if (!FractoTileCoverage.indexed_tiles[level][short_code_3]) {
             can_do.push(short_code_3)
          }
@@ -239,11 +277,15 @@ export class FractoTileCoverage extends Component {
          const blanks_by_level = blank_tiles
             .filter(short_code => short_code.length === data.level)
          // console.log("level, blanks_by_level", data.level, blanks_by_level)
+         const interiors_by_level = interior_tiles
+            .filter(short_code => short_code.length === data.level)
+         // console.log("level, blanks_by_level", data.level, blanks_by_level)
          data.can_do = filtered_by_level.length ? <LinkedCell
             onClick={e => this.set_enhanced(filtered_by_level, data.level)}>
             <CoolStyles.LinkSpan>{filtered_by_level.length}</CoolStyles.LinkSpan>
          </LinkedCell> : '-'
          data.blank_tiles = blanks_by_level.length ? blanks_by_level.length : '-'
+         data.interior_tiles = interiors_by_level.length ? interiors_by_level.length : '-'
          data.tile_count = data.tiles.length ? <LinkedCell
             onClick={e => this.set_can_repair(data.tiles, data.level)}>
             <CoolStyles.LinkSpan>{data.tiles.length}</CoolStyles.LinkSpan>

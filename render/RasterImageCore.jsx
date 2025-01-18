@@ -102,7 +102,7 @@ const raster_fill = (
 export const fill_canvas_buffer = (
    canvas_buffer, ctx,
    width_px, focal_point, scope,
-   when_complete,
+   final_callback,
    aspect_ratio = 1, on_plan_complete = null, filter_level = null) => {
 
    let all_short_codes = []
@@ -135,7 +135,7 @@ export const fill_canvas_buffer = (
          if (on_plan_complete) {
             on_plan_complete(canvas_buffer, ctx)
          }
-         when_complete()
+         final_callback()
       })
    }, 10)
 }
