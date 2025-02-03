@@ -81,7 +81,7 @@ export class FractoTileRunHistory extends Component {
 
    render() {
       const {history_items} = this.props
-      console.log("history_items", history_items)
+      // console.log("history_items", history_items)
       let previous_ts = 0
       const history_data = history_items.sort((a, b) => {
          return b.timestamp - a.timestamp

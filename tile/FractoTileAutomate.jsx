@@ -72,10 +72,10 @@ export class FractoTileAutomate extends Component {
       const {automate, start_index} = this.state;
       const {tile_action, on_tile_select, auto_refresh} = this.props;
       console.log('act_on_tile', tile_index - start_index)
-      if (auto_refresh && tile_index - start_index > auto_refresh) {
-         localStorage.setItem(AUTO_REFRESH_FLAG, "1")
-         window.location = "/"
-      }
+      // if (auto_refresh && tile_index - start_index > auto_refresh) {
+      //    localStorage.setItem(AUTO_REFRESH_FLAG, "1")
+      //    window.location = "/"
+      // }
       const tile = this.get_active_tile(tile_index)
       if (!tile) {
          this.setState({automate: false});

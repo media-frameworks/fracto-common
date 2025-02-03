@@ -31,7 +31,7 @@ export class FractoIndexedTiles extends Component {
       FractoIndexedTiles.tile_set = {}
       ALL_TILE_SETS.forEach(set_name => {
          FractoIndexedTiles.tile_set[set_name] = []
-         for (let level = 2; level < 40; level++) {
+         for (let level = 2; level < 35; level++) {
             FractoIndexedTiles.tile_set[set_name].push({
                level: level,
                tile_size: Math.pow(2, 2 - level),

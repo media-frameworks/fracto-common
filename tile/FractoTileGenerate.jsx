@@ -80,12 +80,16 @@ export class FractoTileGenerate {
       const parent_short_code = tile.short_code.substr(0, tile.short_code.length - 1)
       const quad_code = tile.short_code[tile.short_code.length - 1];
       const parent_tile_data = await FractoTileCache.get_tile(parent_short_code);
+      if (!parent_tile_data) {
+         cb (false)
+      } else {
       // FractoMruCache.get_tile_data(parent_short_code, parent_tile_data => {
          FractoTileGenerate.prepare_generator(tile_points, parent_tile_data, quad_code)
          FractoTileGenerate.calculate_tile(tile, tile_points, result => {
             cb(result)
          })
       // })
+      }
    }
 
    static base_tile = null

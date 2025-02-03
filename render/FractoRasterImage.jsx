@@ -249,7 +249,7 @@ export class FractoRasterImage extends Component {
                   break;
                }
             }
-            if (!found_point) {
+            if (!found_point && (x < -2 || x > 1 || y > 1 || y < -1)) {
                const {pattern, iteration} = FractoFastCalc.calc(x, y)
                if (canvas_buffer && canvas_buffer[canvas_x] && canvas_buffer[canvas_x][canvas_y]) {
                   canvas_buffer[canvas_x][canvas_y] = [pattern, iteration]
