@@ -86,13 +86,13 @@ export class FractoTileCoverage extends Component {
       loading_interiors: true,
    }
 
-   static indexed_tiles = null
-   static blank_tiles = null
-   static interior_tiles = null
+   static indexed_tiles = []
+   static blank_tiles = []
+   static interior_tiles = []
 
    componentDidMount() {
-      if (!FractoTileCoverage.indexed_tiles) {
-         FractoTileCoverage.indexed_tiles = []
+      if (!FractoTileCoverage.indexed_tiles.length) {
+         // FractoTileCoverage.indexed_tiles = []
          for (let level = 0; level < 50; level++) {
             FractoTileCoverage.indexed_tiles[level] = {}
          }
@@ -107,8 +107,8 @@ export class FractoTileCoverage extends Component {
       } else {
          this.setState({loading_indexed: false})
       }
-      if (!FractoTileCoverage.blank_tiles) {
-         FractoTileCoverage.blank_tiles = []
+      if (!FractoTileCoverage.blank_tiles.length) {
+         // FractoTileCoverage.blank_tiles = []
          for (let level = 0; level < 50; level++) {
             FractoTileCoverage.blank_tiles[level] = {}
          }
@@ -123,8 +123,8 @@ export class FractoTileCoverage extends Component {
       } else {
          this.setState({loading_blanks: false})
       }
-      if (!FractoTileCoverage.interior_tiles) {
-         FractoTileCoverage.interior_tiles = []
+      if (!FractoTileCoverage.interior_tiles.length) {
+         // FractoTileCoverage.interior_tiles = []
          for (let level = 0; level < 50; level++) {
             FractoTileCoverage.interior_tiles[level] = {}
          }

@@ -8,7 +8,7 @@ const EPSILON = 0.0000000001;
 const ONE_BY_LOG_TEN_THOUSAND = 1 / Math.log(10000);
 const ONE_BY_LOG_ONE_MILLION = 1 / Math.log(1000000);
 
-const FRACTO_PHP_URL_BASE = network.dev_server_url;
+// const FRACTO_PHP_URL_BASE = network.dev_server_url;
 
 export const DEFAULT_FRACTO_VALUES = {
    scope: 2.5,
@@ -393,23 +393,23 @@ export class FractoUtil {
       }
    }
 
-   static tile_to_bin = (short_code, from, to, cb) => {
-      const url = `${FRACTO_PHP_URL_BASE}/tile_to_bin.php?from=${from}&to=${to}&short_code=${short_code}`;
-      fetch(url)
-         .then(response => response.json())
-         .then(result => {
-            cb(result)
-         })
-   }
-
-   static empty_tile = (short_code, cb) => {
-      const url = `${FRACTO_PHP_URL_BASE}/empty_tile.php?short_code=${short_code}&confirmed=CONFIRMED`;
-      fetch(url)
-         .then(response => response.json())
-         .then(result => {
-            cb(result)
-         })
-   }
+   // static tile_to_bin = (short_code, from, to, cb) => {
+   //    const url = `${FRACTO_PHP_URL_BASE}/tile_to_bin.php?from=${from}&to=${to}&short_code=${short_code}`;
+   //    fetch(url)
+   //       .then(response => response.json())
+   //       .then(result => {
+   //          cb(result)
+   //       })
+   // }
+   //
+   // static empty_tile = (short_code, cb) => {
+   //    const url = `${FRACTO_PHP_URL_BASE}/empty_tile.php?short_code=${short_code}&confirmed=CONFIRMED`;
+   //    fetch(url)
+   //       .then(response => response.json())
+   //       .then(result => {
+   //          cb(result)
+   //       })
+   // }
 
    static CQ_code_from_point = (x, y) => {
       const CQ_str = new ComplexQuarternary(x, y).to_string()

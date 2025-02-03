@@ -26,36 +26,36 @@ export class FractoMruCache {
       return data
    }
 
-   static get_tile_data_raw = (short_code, cb) => {
-      if (!(short_code in TILE_CACHE)) {
-         console.log(`loading tile raw data ${short_code}`)
-         const url = `${URL_BASE}/get_tiles.php?short_codes=${short_code}`
-         fetch(url).then(response => {
-            // console.log("response", response)
-            return response.json()
-         }).then(json => {
-            // console.log("json", json)
-            if (!json["tiles"] || !json["tiles"][short_code]) {
-               if (cb) {
-                  cb([])
-               }
-            } else {
-               CACHE_MRU[short_code] = FractoMruCache.highest_mru++;
-               TILE_CACHE[short_code] = FractoMruCache.serialize_tile(json["tiles"][short_code])
-               if (cb) {
-                  cb(json["tiles"][short_code])
-               }
-            }
-         })
-      } else {
-         // console.log(`cached tile ${short_code}`)
-         CACHE_MRU[short_code] = FractoMruCache.highest_mru++;
-         const tile_data = FractoMruCache.deserialize_tile(TILE_CACHE[short_code])
-         if (cb) {
-            cb(tile_data)
-         }
-      }
-   }
+   // static get_tile_data_raw = (short_code, cb) => {
+   //    if (!(short_code in TILE_CACHE)) {
+   //       console.log(`loading tile raw data ${short_code}`)
+   //       const url = `${URL_BASE}/get_tiles.php?short_codes=${short_code}`
+   //       fetch(url).then(response => {
+   //          // console.log("response", response)
+   //          return response.json()
+   //       }).then(json => {
+   //          // console.log("json", json)
+   //          if (!json["tiles"] || !json["tiles"][short_code]) {
+   //             if (cb) {
+   //                cb([])
+   //             }
+   //          } else {
+   //             CACHE_MRU[short_code] = FractoMruCache.highest_mru++;
+   //             TILE_CACHE[short_code] = FractoMruCache.serialize_tile(json["tiles"][short_code])
+   //             if (cb) {
+   //                cb(json["tiles"][short_code])
+   //             }
+   //          }
+   //       })
+   //    } else {
+   //       // console.log(`cached tile ${short_code}`)
+   //       CACHE_MRU[short_code] = FractoMruCache.highest_mru++;
+   //       const tile_data = FractoMruCache.deserialize_tile(TILE_CACHE[short_code])
+   //       if (cb) {
+   //          cb(tile_data)
+   //       }
+   //    }
+   // }
 
    static get_tile_data = (short_code, cb = null) => {
       if (!(short_code in TILE_CACHE)) {
@@ -142,6 +142,7 @@ export class FractoMruCache {
    }
 
    static cleanup_cache = () => {
+      return;
       const cache_keys = Object.keys(TILE_CACHE).sort((a, b) =>
          CACHE_MRU[a] - CACHE_MRU[b])
       if (cache_keys.length < MAX_TILE_CACHE) {
@@ -158,7 +159,7 @@ export class FractoMruCache {
          delete CACHE_MRU[short_code]
          delete TILE_CACHE[short_code]
       }
-      console.log("cleanup_cache complete")
+      // console.log("cleanup_cache complete")
       // const new_cache = Object.assign({}, TILE_CACHE)
       // TILE_CACHE = null
       // TILE_CACHE = new_cache

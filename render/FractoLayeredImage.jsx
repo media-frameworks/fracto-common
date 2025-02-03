@@ -7,6 +7,7 @@ import {CoolStyles} from "common/ui/CoolImports";
 import FractoIndexedTiles from "../data/FractoIndexedTiles";
 import FractoMruCache from "../data/FractoMruCache";
 import FractoUtil from "../FractoUtil";
+import FractoTileCache from "../data/FractoTileCache";
 
 const MAX_LEVEL = 35
 
@@ -144,12 +145,13 @@ export const fill_canvas = (ctx, width_px, focal_point, scope, aspect_ratio, can
    console.log('tiles', tiles)
    console.log('tiles_in_scope', tiles_in_scope)
    const short_codes = tiles.map(tile => tile.short_code)
-   FractoMruCache.get_tiles_async(short_codes, when_complete => {
+   FractoMruCache.get_tiles_async(short_codes, async when_complete => {
       for (let i = 0; i < short_codes.length; i++) {
          const short_code = short_codes[i]
          // console.log('short_code', short_code)
          const tile = tiles.find(tile => tile.short_code === short_code)
-         const tile_data = FractoMruCache.get_tile_data(short_code)
+         const tile_data = await FractoTileCache.get_tile(tile.short_code)
+         // const tile_data = FractoMruCache.get_tile_data(short_code)
          apply_tile_data(tile, tile_data, ctx, width_px, focal_point, scope, aspect_ratio, canvas_buffer)
       }
    })

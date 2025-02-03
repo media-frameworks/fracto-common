@@ -68,8 +68,8 @@ export const get_indexed_short_codes = (level) => {
    return Object.keys(LEVEL_SCOPES[level][BIN_VERB_INDEXED]);
 }
 
-const URL_BASE = network.dev_server_url;
-const BIN_COUNTS_URL = `${URL_BASE}/directory/bin_counts.json`;
+// const URL_BASE = network.dev_server_url;
+// const BIN_COUNTS_URL = `${URL_BASE}/directory/bin_counts.json`;
 
 export class FractoData extends Component {
 
@@ -104,14 +104,14 @@ export class FractoData extends Component {
          })
    }
 
-   static load_bin_counts_async = (cb) => {
-      console.log(`loading bin counts`)
-      fetch(BIN_COUNTS_URL)
-         .then(response => response.json())
-         .then(json => {
-            cb(json);
-         })
-   }
+   // static load_bin_counts_async = (cb) => {
+   //    console.log(`loading bin counts`)
+   //    fetch(BIN_COUNTS_URL)
+   //       .then(response => response.json())
+   //       .then(json => {
+   //          cb(json);
+   //       })
+   // }
 
    static tiles_in_scope = (level, focal_point, scope, aspect_ratio = 1.0, verbs = [BIN_VERB_COMPLETED, BIN_VERB_INDEXED]) => {
       if (level < 2 || level > 34) {

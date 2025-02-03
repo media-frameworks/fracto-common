@@ -8,6 +8,7 @@ import FractoUtil from "../FractoUtil";
 import FractoMruCache from "../data/FractoMruCache";
 import FractoIndexedTiles from "../data/FractoIndexedTiles";
 import TransitData from "../feature/TransitData";
+import FractoTileCache from "../data/FractoTileCache";
 
 const FractoCanvas = styled.canvas`   
    ${CoolStyles.narrow_box_shadow}
@@ -248,7 +249,7 @@ export class FractoIncrementalRender extends Component {
       }
    }
 
-   tiles_to_canvas = (level_tiles, canvas_buffer, lowest_iteration, cb) => {
+   tiles_to_canvas = async (level_tiles, canvas_buffer, lowest_iteration, cb) => {
       const {ctx, height_px} = this.state
       const {width_px, aspect_ratio, scope, focal_point} = this.props;
       if (!level_tiles.length || !canvas_buffer) {
@@ -257,12 +258,13 @@ export class FractoIncrementalRender extends Component {
       }
       const tile = level_tiles.pop()
       let lower_iteration = lowest_iteration
-      FractoMruCache.get_tile_data(tile.short_code, tile_data => {
+      const tile_data = await FractoTileCache.get_tile(tile.short_code)
+      // FractoMruCache.get_tile_data(tile.short_code, tile_data => {
          FractoIncrementalRender.tile_to_canvas(ctx, tile, focal_point, scope,
             aspect_ratio, width_px, height_px, tile_data, canvas_buffer)
          // fill_canvas(ctx, width_px, focal_point, scope, 1.0, canvas_buffer)
          this.tiles_to_canvas(level_tiles, canvas_buffer, lower_iteration, cb)
-      })
+      // })
    }
 
    render() {
