@@ -5,7 +5,6 @@ import styled from "styled-components";
 import {CoolStyles} from 'common/ui/CoolImports';
 
 import FractoUtil from '../FractoUtil';
-import FractoMruCache from "../data/FractoMruCache";
 import FractoRasterImage from "../render/FractoRasterImage";
 import FractoTileCache from "../data/FractoTileCache";
 

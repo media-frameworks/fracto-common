@@ -5,14 +5,13 @@ import styled from "styled-components";
 import {CoolStyles} from "common/ui/CoolImports";
 
 import FractoUtil from "../FractoUtil";
-import FractoMruCache from "../data/FractoMruCache";
 import FractoIndexedTiles from "../data/FractoIndexedTiles";
 import TransitData from "../feature/TransitData";
 import FractoTileCache from "../data/FractoTileCache";
 
-const FractoCanvas = styled.canvas`   
-   ${CoolStyles.narrow_box_shadow}
-   margin: 0;
+const FractoCanvas = styled.canvas`
+    ${CoolStyles.narrow_box_shadow}
+    margin: 0;
 `;
 
 export class FractoIncrementalRender extends Component {
@@ -259,12 +258,9 @@ export class FractoIncrementalRender extends Component {
       const tile = level_tiles.pop()
       let lower_iteration = lowest_iteration
       const tile_data = await FractoTileCache.get_tile(tile.short_code)
-      // FractoMruCache.get_tile_data(tile.short_code, tile_data => {
-         FractoIncrementalRender.tile_to_canvas(ctx, tile, focal_point, scope,
-            aspect_ratio, width_px, height_px, tile_data, canvas_buffer)
-         // fill_canvas(ctx, width_px, focal_point, scope, 1.0, canvas_buffer)
-         this.tiles_to_canvas(level_tiles, canvas_buffer, lower_iteration, cb)
-      // })
+      FractoIncrementalRender.tile_to_canvas(ctx, tile, focal_point, scope,
+         aspect_ratio, width_px, height_px, tile_data, canvas_buffer)
+      this.tiles_to_canvas(level_tiles, canvas_buffer, lower_iteration, cb)
    }
 
    render() {
