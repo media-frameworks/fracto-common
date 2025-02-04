@@ -185,7 +185,7 @@ export class FractoTileGenerate {
          const is_edge_tile = FractoTileGenerate.test_edge_case(tile, tile_points);
          if (is_edge_tile) {
 
-            cb(['tile is blank'])
+            cb('tile is blank')
 
             // FractoUtil.empty_tile(tile.short_code, result => {
             //    // console.log("FractoUtil.empty_tile", tile.short_code, result);
