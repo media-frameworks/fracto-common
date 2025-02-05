@@ -1,6 +1,4 @@
-// import FractoUtil from "../FractoUtil";
 import FractoFastCalc from "../data/FractoFastCalc";
-// import FractoMruCache from "../data/FractoMruCache";
 import FractoTileCache from "../data/FractoTileCache";
 
 export class FractoTileGenerate {
@@ -29,12 +27,6 @@ export class FractoTileGenerate {
          }
       }
       cb('calculated tile')
-
-      // const index_url = `tiles/256/indexed/${tile.short_code}.json`;
-      // StoreS3.put_file_async(index_url, JSON.stringify(tile_points), "fracto", result => {
-      //    console.log("StoreS3.put_file_async", index_url, result);
-      //    cb(`stored tile`)
-      // })
    }
 
    static prepare_generator = (tile_points, parent_tile_data, quad_code) => {
@@ -81,14 +73,12 @@ export class FractoTileGenerate {
       const quad_code = tile.short_code[tile.short_code.length - 1];
       const parent_tile_data = await FractoTileCache.get_tile(parent_short_code);
       if (!parent_tile_data) {
-         cb (false)
+         cb(false)
       } else {
-      // FractoMruCache.get_tile_data(parent_short_code, parent_tile_data => {
          FractoTileGenerate.prepare_generator(tile_points, parent_tile_data, quad_code)
          FractoTileGenerate.calculate_tile(tile, tile_points, result => {
             cb(result)
          })
-      // })
       }
    }
 
@@ -128,54 +118,6 @@ export class FractoTileGenerate {
       return true
    }
 
-   // static compare_tile_data = (points_1, points_2) => {
-   //    if (!points_1) {
-   //       debugger;
-   //       return false
-   //    }
-   //    if (!points_2) {
-   //       debugger;
-   //       return false
-   //    }
-   //    if (points_1.length !== 256) {
-   //       debugger;
-   //       return false
-   //    }
-   //    if (points_2.length !== 256) {
-   //       debugger;
-   //       return false
-   //    }
-   //    for (let img_x = 0; img_x < 256; img_x++) {
-   //       if (points_1[img_x].length !== 256) {
-   //          debugger;
-   //          return false
-   //       }
-   //       if (points_2[img_x].length !== 256) {
-   //          debugger;
-   //          return false
-   //       }
-   //       for (let img_y = 0; img_y < 256; img_y++) {
-   //          if (points_1[img_x][img_y].length !== 2) {
-   //             debugger;
-   //             return false;
-   //          }
-   //          if (points_2[img_x][img_y].length !== 2) {
-   //             debugger;
-   //             return false;
-   //          }
-   //          if (points_1[img_x][img_y][0] !== points_2[img_x][img_y][0]) {
-   //             debugger;
-   //             return false
-   //          }
-   //          if (points_1[img_x][img_y][1] !== points_2[img_x][img_y][1]) {
-   //             debugger;
-   //             return false
-   //          }
-   //       }
-   //    }
-   //    return true;
-   // }
-
    static begin = (tile, cb) => {
       // console.log('begin generate tile', tile)
       const start = performance.now()
@@ -184,31 +126,14 @@ export class FractoTileGenerate {
       FractoTileGenerate.generate_tile(tile_copy, tile_points, response => {
          const is_edge_tile = FractoTileGenerate.test_edge_case(tile, tile_points);
          if (is_edge_tile) {
-
             cb('tile is blank')
-
-            // FractoUtil.empty_tile(tile.short_code, result => {
-            //    // console.log("FractoUtil.empty_tile", tile.short_code, result);
-            //    const full_history = [
-            //       response,
-            //       `${result.all_descendants.length} ${result.result}`
-            //    ].join(', ')
-            //    cb(full_history)
-            // })
          } else {
-            // FractoUtil.tile_to_bin(tile.short_code, "complete", "indexed", result => {
-            //    console.log("FractoUtil.tile_to_bin", tile.short_code, "complete", "indexed", result);
-            //    FractoMruCache.get_tile_data_raw(tile.short_code, data => {
-                  // console.log(`get_tile_data_raw ${tile.short_code}`, data ? data.length : 0)
-                  // const success = FractoTileGenerate.compare_tile_data(tile_points, data)
-                  const end = performance.now()
-                  const seconds = Math.round((end - start)) / 1000
-                  const full_history = `${response}, in ${seconds}s`
-                  setTimeout(() => {
-                     cb(full_history, tile_points)
-                  }, 250)
-               // })
-            // })
+            const end = performance.now()
+            const seconds = Math.round((end - start)) / 1000
+            const full_history = `${response}, in ${seconds}s`
+            setTimeout(() => {
+               cb(full_history, tile_points)
+            }, 150)
          }
       })
    }
