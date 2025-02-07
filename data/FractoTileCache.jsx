@@ -9,7 +9,7 @@ setInterval(() => {
    FractoTileCache.trim_cache()
 }, 10000)
 
-const CACHE_TIMEOUT = 3 * 1000 * 60;
+const CACHE_TIMEOUT = 2 * 1000 * 60;
 const MIN_CACHE = 150
 
 export class FractoTileCache {
