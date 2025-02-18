@@ -44,7 +44,8 @@ export class BailiwickData {
          })
    }
 
-   static save_bailiwick = (bailiwick, bailiwick_index, cb) => {
+   static save_bailiwick = (bailiwick, bailiwick_index, cb = null) => {
+      console.log('save_bailiwicka', bailiwick)
       const url = bailiwick.id ? `${FRACTO_DB_URL}/update_free_bailiwick` : `${FRACTO_DB_URL}/new_free_bailiwick`;
       const highest_level = get_ideal_level(BAILIWICK_MAX_SIZE, bailiwick.display_settings.scope, 1.5);
       const bailiwick_name = FractoUtil.bailiwick_name(bailiwick.pattern, bailiwick.core_point, highest_level)
@@ -60,7 +61,8 @@ export class BailiwickData {
          core_point: JSON.stringify(bailiwick.core_point),
          octave_point: JSON.stringify(bailiwick.octave_point),
          display_settings: JSON.stringify(bailiwick.display_settings),
-         registry_filename: bailiwick.registry_filename,
+         is_node: !!bailiwick.is_node,
+         is_inline: !!bailiwick.is_inline,
       }
       if (bailiwick.id) {
          data.id = bailiwick.id
@@ -71,6 +73,7 @@ export class BailiwickData {
          return `${key}=${data[key]}`
       })
       const data_url = `${url}?${encoded_params.join('&')}`
+      console.log('data_url', data_url)
       fetch(data_url, {
          body: JSON.stringify(data), // data you send.
          headers: {'Content-Type': 'application/json'},
@@ -83,7 +86,9 @@ export class BailiwickData {
          return ["ok"];
       }).then(function (json_data) {
          console.log("save_bailiwick", url, json_data)
-         cb(`saved ${bailiwick.name}`)
+         if (cb) {
+            cb(`saved ${bailiwick.name}`)
+         }
       });
    }
 

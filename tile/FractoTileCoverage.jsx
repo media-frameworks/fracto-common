@@ -5,23 +5,24 @@ import styled from "styled-components";
 import {CoolInputText, CoolStyles} from "common/ui/CoolImports";
 import FractoIndexedTiles from "fracto/common/data/FractoIndexedTiles";
 import CoolTable, {
-   CELL_ALIGN_CENTER,
+   CELL_ALIGN_CENTER, CELL_TYPE_LINK,
    CELL_TYPE_NUMBER,
    TABLE_CAN_SELECT
 } from "common/ui/CoolTable";
 import {get_ideal_level} from "../data/FractoData";
 import {INSPECTOR_SIZE_PX} from "pages/constants";
 import FractoUtil from "../FractoUtil";
+import FractoTileCache from "../data/FractoTileCache";
 
 const SectionWrapper = styled(CoolStyles.Block)`
-   ${CoolStyles.align_center}
-   padding: 0.5rem;
-   background-color: white;
-   margin-left: 1rem;
+    ${CoolStyles.align_center}
+    padding: 0.5rem;
+    background-color: white;
+    margin-left: 1rem;
 `
 
 const LinkedCell = styled(CoolStyles.InlineBlock)`
-   margin: 0;
+    margin: 0;
 `
 
 const COVERAGE_TABLE_COLUMNS = [
@@ -60,6 +61,13 @@ const COVERAGE_TABLE_COLUMNS = [
       width_px: 80,
       align: CELL_ALIGN_CENTER
    },
+   {
+      id: "repair_tiles",
+      label: "to be repaired",
+      type: CELL_TYPE_NUMBER,
+      width_px: 80,
+      align: CELL_ALIGN_CENTER
+   },
 ]
 
 export class FractoTileCoverage extends Component {
@@ -84,6 +92,7 @@ export class FractoTileCoverage extends Component {
       loading_indexed: true,
       loading_blanks: true,
       loading_interiors: true,
+      repairs_by_level: {},
    }
 
    static indexed_tiles = []
@@ -202,8 +211,38 @@ export class FractoTileCoverage extends Component {
       }
    }
 
+   test_for_repairs = (tiles) => {
+      const {repairs_by_level} = this.state
+      let needs_repairs = []
+      tiles.forEach(async (tile) => {
+         const tile_data = await FractoTileCache.get_tile(tile.short_code)
+         if (!tile_data) {
+            return;
+         }
+         for (let img_x = 0; img_x < 256; img_x++) {
+            if (!tile_data[img_x]) {
+               return;
+            }
+            for (let img_y = 0; img_y < 256; img_y++) {
+               if (!tile_data[img_x][img_y]) {
+                  return;
+               }
+               const [pattern, iteration] = tile_data[img_x][img_y]
+               if (iteration === -1) {
+                  needs_repairs.push(tile)
+                  return;
+               }
+            }
+         }
+      })
+      if (tiles.length) {
+         repairs_by_level[`level_${tiles[0].short_code.length}`] = needs_repairs
+         this.setState({repairs_by_level})
+      }
+   }
+
    render_coverage = () => {
-      const {tiles_in_scope} = this.state
+      const {tiles_in_scope, repairs_by_level} = this.state
       const {selected_level} = this.props
       let all_tiles = []
       const coverage_data = tiles_in_scope.map(scoped => {
@@ -290,6 +329,17 @@ export class FractoTileCoverage extends Component {
             onClick={e => this.set_can_repair(data.tiles, data.level)}>
             <CoolStyles.LinkSpan>{data.tiles.length}</CoolStyles.LinkSpan>
          </LinkedCell> : '-'
+         const tested_for_repairs = repairs_by_level[`level_${data.level}`]
+         let repair_link = '0'
+         if (tested_for_repairs && tested_for_repairs.length) {
+            repair_link = <CoolStyles.LinkSpan>{tested_for_repairs.length}</CoolStyles.LinkSpan>
+         }
+         data.repair_tiles = tested_for_repairs
+            ? repair_link
+            : <CoolStyles.LinkSpan
+               onClick={() => this.test_for_repairs(data.tiles)}>
+               test
+            </CoolStyles.LinkSpan>
       })
       const selected_row = selected_level
          ? coverage_data.findIndex(data => data.level === selected_level)

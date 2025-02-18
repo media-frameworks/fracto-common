@@ -9,49 +9,51 @@ import BailiwickDetails from "./BailiwickDetails";
 import ReactTimeAgo from "react-time-ago";
 
 const RowWrapper = styled(CoolStyles.Block)`
-   ${CoolStyles.pointer}
-   vertical-align: center;
-   padding: 0.125rem;
-   &: hover{
-      background-color: #eeeeee;
-   }
+    ${CoolStyles.pointer}
+    vertical-align: center;
+    padding: 0.125rem;
+
+    &:hover {
+        background-color: #eeeeee;
+    }
 `;
 
 const BlockWrapper = styled(CoolStyles.InlineBlock)`
-   ${CoolStyles.align_center}
-   width: 2.5rem;
-   vertical-align: center;
+    ${CoolStyles.pointer}
+    ${CoolStyles.align_center}
+    width: 3.5rem;
+    vertical-align: center;
 `;
 
 const SizeWrapper = styled(CoolStyles.InlineBlock)`
-   ${CoolStyles.bold}
-   ${CoolStyles.italic}
-   ${CoolStyles.ellipsis}
-   line-height: 1.5rem;
-   letter-spacing: 0.1rem;
-   font-size: 0.9rem;
-   margin-left: 0.5rem;
-   color: #666666;
+    ${CoolStyles.bold}
+    ${CoolStyles.italic}
+    ${CoolStyles.ellipsis}
+    line-height: 1.5rem;
+    letter-spacing: 0.1rem;
+    font-size: 0.9rem;
+    margin-left: 0.5rem;
+    color: #666666;
 `;
 
 const UpdatedWrapper = styled(CoolStyles.InlineBlock)`
-   ${CoolStyles.italic}
-   line-height: 1.5rem;
-   letter-spacing: 0.1rem;
-   font-size: 0.9rem;
-   margin-left: 0.5rem;
-   color: #666666;
+    ${CoolStyles.italic}
+    line-height: 1.5rem;
+    letter-spacing: 0.1rem;
+    font-size: 0.9rem;
+    margin-left: 0.5rem;
+    color: #666666;
 `;
 
 const StatValue = styled(CoolStyles.InlineBlock)`
-   ${CoolStyles.monospace}
-   ${CoolStyles.bold}
-   font-size: 0.95rem;
-   color: black;
+    ${CoolStyles.monospace}
+    ${CoolStyles.bold}
+    font-size: 0.95rem;
+    color: black;
 `;
 
 const InlineWrapper = styled(CoolStyles.InlineBlock)`
-   margin-left: 0.25rem;
+    margin-left: 0.25rem;
 `;
 
 export class BailiwickList extends Component {
@@ -71,8 +73,8 @@ export class BailiwickList extends Component {
    }
 
    select_bailiwick = (item, i) => {
-      const {on_select, in_wait} = this.props
-      if (!item || in_wait) {
+      const {on_select, in_wait, selected_index} = this.props
+      if (!item || in_wait || selected_index === i) {
          return;
       }
       localStorage.setItem('selected_bailiwick', String(i))
@@ -95,12 +97,14 @@ export class BailiwickList extends Component {
          .map((item, i) => {
             const pattern_block = render_pattern_block(item.pattern)
             const selected = selected_index === i
-            const row_style = !selected ? {} : {
+            const row_style = !selected ? {cursor: 'pointer'} : {
                border: `0.1rem solid ${CoolColors.deep_blue}`,
                borderRadius: `0.25rem`,
                backgroundColor: "#cccccc",
                color: "white",
-               cursor: in_wait ? "wait" : "pointer"
+               padding: '0.25rem 0.375rem',
+               margin: '0.125rem 0',
+               cursor: in_wait ? "wait" : 'default',
             }
             const highest_level = Math.round(100 * (Math.log(32 / item.magnitude) / Math.log(2))) / 100
             const updated_at = <ReactTimeAgo date={item.updated_at}/>
@@ -111,14 +115,17 @@ export class BailiwickList extends Component {
                   highest_level={highest_level}
                   selected_bailiwick={item}/>
                : [
-                  <BlockWrapper key={`pattern_${i}`}>{pattern_block}</BlockWrapper>,
+                  <BlockWrapper
+                     key={`pattern_${i}`}>
+                     {pattern_block}
+                  </BlockWrapper>,
                   <SizeWrapper key={`size_${i}`}>{size}</SizeWrapper>,
                   <UpdatedWrapper key={`updated_${i}`}>{updated_at},</UpdatedWrapper>,
                   <UpdatedWrapper key={`index_${i}`}>{`#${item.free_ordinal + 1} in size`}</UpdatedWrapper>,
                ]
             return <RowWrapper
-               ref={selected ? scroll_ref : null}
                onClick={e => this.select_bailiwick(item, i)}
+               ref={selected ? scroll_ref : null}
                style={row_style}>
                {row_content}
             </RowWrapper>

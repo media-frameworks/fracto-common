@@ -12,6 +12,17 @@ setInterval(() => {
 const CACHE_TIMEOUT = 2 * 1000 * 60;
 const MIN_CACHE = 150
 
+const AXIOS_CONFIG = {
+   responseType: 'blob',
+   headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Expose-Headers': 'Access-Control-*',
+      'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+   },
+   mode: 'no-cors',
+   crossdomain: true,
+}
+
 export class FractoTileCache {
 
    static get_tile = async (short_code) => {
@@ -24,16 +35,7 @@ export class FractoTileCache {
       const naught = level < 10 ? '0' : ''
       const url = `${network["fracto-prod"]}/L${naught}${level}/${short_code}.gz`
       try {
-         const response = await axios.get(url, {
-            responseType: 'blob',
-            headers: {
-               'Access-Control-Allow-Origin': '*',
-               'Access-Control-Expose-Headers': 'Access-Control-*',
-               'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
-            },
-            mode: 'no-cors',
-            crossdomain: true,
-         });
+         const response = await axios.get(url, AXIOS_CONFIG);
          const blob = new Blob([response.data], {type: 'application/gzip'});
          const arrayBuffer = await blob.arrayBuffer();
          const buffer = Buffer.from(arrayBuffer);
