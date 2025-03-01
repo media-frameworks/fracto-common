@@ -5,37 +5,39 @@ import styled from "styled-components";
 import {CoolStyles} from "common/ui/CoolImports";
 import {render_coordinates} from "fracto/common/FractoStyles";
 import FractoIndexedTiles from "../data/FractoIndexedTiles";
+import {INSPECTOR_SIZE_PX} from "../../../pages/constants";
+import {get_tiles} from 'fracto/common/render/FractoRasterImage';
 
 const LABEL_WIDTH_PX = 100
 const MAX_LEVEL = 32
 
 const DetailRow = styled(CoolStyles.Block)`
-   margin: 0;
+    margin: 0;
 `;
 
 const DetailLabel = styled(CoolStyles.InlineBlock)`
-   ${CoolStyles.align_right}
-   ${CoolStyles.italic}
-   ${CoolStyles.bold}
-   ${CoolStyles.align_top}
-   width: ${LABEL_WIDTH_PX}px;
-   margin-right: 0.5rem;
-   color: #aaaaaa;
-   line-height: 1rem;
-   margin-top: 0.25rem;
+    ${CoolStyles.align_right}
+    ${CoolStyles.italic}
+    ${CoolStyles.bold}
+    ${CoolStyles.align_top}
+    width: ${LABEL_WIDTH_PX}px;
+    margin-right: 0.5rem;
+    color: #aaaaaa;
+    line-height: 1rem;
+    margin-top: 0.25rem;
 `;
 
 const DetailData = styled(CoolStyles.InlineBlock)`
-   ${CoolStyles.align_middle}
-   margin: 0.25rem;
-   line-height: 1rem;
+    ${CoolStyles.align_middle}
+    margin: 0.25rem;
+    line-height: 1rem;
 `;
 
 const NumberValue = styled(CoolStyles.InlineBlock)`
-   ${CoolStyles.deep_blue_text}
-   ${CoolStyles.monospace}
-   ${CoolStyles.bold}
-   font-size: 0.95rem;
+    ${CoolStyles.deep_blue_text}
+    ${CoolStyles.monospace}
+    ${CoolStyles.bold}
+    font-size: 0.95rem;
 `;
 
 export class FractoRenderDetails extends Component {
@@ -87,24 +89,16 @@ export class FractoRenderDetails extends Component {
 
    render_tiles = () => {
       const {scope, focal_point} = this.props
-      const ideal_level = this.get_ideal_level()
-      const tile_counts = []
-      for (let i = ideal_level - 5; i < ideal_level + 10; i++) {
-         if (i < 2 || i > MAX_LEVEL) {
-            continue;
-         }
-         const tiles_in_level = FractoIndexedTiles.tiles_in_scope(i, focal_point, scope);
-         if (!tiles_in_level.length) {
-            continue;
-         }
-         tile_counts[i] = tiles_in_level.length
-      }
-      const count_list = tile_counts
-         .filter((count, i) => count > 3 && count < 500)
-         .map((count, index) => {
-            return `${ideal_level - 4 + index}:${count}`
+      const coverage_data = get_tiles(
+         INSPECTOR_SIZE_PX, focal_point, scope, 1.0, true)
+      // console.log('coverage_data', coverage_data)
+      const coverage_str = coverage_data
+         .sort((a, b) => b.level - a.level)
+         .slice(0, 8)
+         .map((item) => {
+            return `${item.level}:${item.level_tiles.length}`
          }).join(', ')
-      return <NumberValue>{count_list}</NumberValue>
+      return <NumberValue>{coverage_str}</NumberValue>
    }
 
    render() {

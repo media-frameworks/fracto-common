@@ -44,8 +44,58 @@ export class BailiwickData {
          })
    }
 
+   static post_data_url = (data_url, data, cb) => {
+      fetch(data_url, {
+         body: JSON.stringify(data), // data you send.
+         headers: {'Content-Type': 'application/json'},
+         method: 'POST',
+         mode: 'no-cors', // no-cors, cors, *same-origin
+      }).then(function (response) {
+         if (response.body) {
+            return response.json();
+         }
+         return ["ok"];
+      }).then(function (json_data) {
+         console.log("save_bailiwick", data_url, data)
+         if (cb) {
+            cb(`published ${bailiwick.name}`)
+         }
+      });
+   }
+
+   static publish_bailiwick = (bailiwick, cb = null) => {
+      const url = `${FRACTO_DB_URL}/publish_bailiwick`;
+      const data = {
+         id: bailiwick.id,
+         published_at: bailiwick.published_at,
+      }
+      const data_keys = Object.keys(data)
+      const encoded_params = data_keys.map(key => {
+         return `${key}=${data[key]}`
+      })
+      const data_url = `${url}?${encoded_params.join('&')}`
+      console.log('data_url', data_url)
+      BailiwickData.post_data_url(data_url, data, cb)
+   }
+
+   static save_thumbnail = (id, thumbnail_name, cb = null) => {
+      const url = `${FRACTO_DB_URL}/save_thumbnail`;
+      const data = {
+         id: id,
+         thumbnail_name: `'${thumbnail_name}'`,
+      }
+      const data_keys = Object.keys(data)
+      const encoded_params = data_keys.map(key => {
+         return `${key}=${data[key]}`
+      })
+      const data_url = `${url}?${encoded_params.join('&')}`
+      console.log('data_url', data_url)
+      BailiwickData.post_data_url(data_url, data, cb)
+   }
+
+
    static save_bailiwick = (bailiwick, bailiwick_index, cb = null) => {
-      console.log('save_bailiwicka', bailiwick)
+      console.log('save_bailiwick', bailiwick)
       const url = bailiwick.id ? `${FRACTO_DB_URL}/update_free_bailiwick` : `${FRACTO_DB_URL}/new_free_bailiwick`;
       const highest_level = get_ideal_level(BAILIWICK_MAX_SIZE, bailiwick.display_settings.scope, 1.5);
       const bailiwick_name = FractoUtil.bailiwick_name(bailiwick.pattern, bailiwick.core_point, highest_level)
@@ -58,11 +108,17 @@ export class BailiwickData {
          best_level: display_level,
          free_ordinal: bailiwick_index + 1,
          magnitude: bailiwick.magnitude,
-         core_point: JSON.stringify(bailiwick.core_point),
-         octave_point: JSON.stringify(bailiwick.octave_point),
-         display_settings: JSON.stringify(bailiwick.display_settings),
-         is_node: !!bailiwick.is_node,
-         is_inline: !!bailiwick.is_inline,
+         core_point: typeof bailiwick.core_point === 'string'
+            ? bailiwick.core_point
+            : JSON.stringify(bailiwick.core_point),
+         octave_point: typeof bailiwick.octave_point === 'string'
+            ? bailiwick.octave_point
+            : JSON.stringify(bailiwick.octave_point),
+         display_settings: typeof bailiwick.display_settings === 'string'
+            ? bailiwick.display_settings
+            : JSON.stringify(bailiwick.display_settings),
+         is_node: bailiwick.is_node ? 1 : 0,
+         is_inline: bailiwick.is_inline ? 1 : 0,
       }
       if (bailiwick.id) {
          data.id = bailiwick.id
@@ -74,22 +130,7 @@ export class BailiwickData {
       })
       const data_url = `${url}?${encoded_params.join('&')}`
       console.log('data_url', data_url)
-      fetch(data_url, {
-         body: JSON.stringify(data), // data you send.
-         headers: {'Content-Type': 'application/json'},
-         method: 'POST',
-         mode: 'no-cors', // no-cors, cors, *same-origin
-      }).then(function (response) {
-         if (response.body) {
-            return response.json();
-         }
-         return ["ok"];
-      }).then(function (json_data) {
-         console.log("save_bailiwick", url, json_data)
-         if (cb) {
-            cb(`saved ${bailiwick.name}`)
-         }
-      });
+      BailiwickData.post_data_url(data_url, cb)
    }
 
    static save_node_point = (node_point, bailiwick_id, root, cb) => {

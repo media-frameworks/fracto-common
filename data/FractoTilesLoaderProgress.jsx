@@ -6,7 +6,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 import {Buffer} from 'buffer';
 
 import network from "common/config/network.json";
-import CoolStyles from "common/ui/CoolStyles";
+import CoolStyles from "common/ui/styles/CoolStyles";
 import FractoIndexedTiles from "./FractoIndexedTiles";
 import axios from "axios";
 

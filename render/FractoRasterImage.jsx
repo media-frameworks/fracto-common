@@ -17,11 +17,12 @@ const FractoCanvas = styled.canvas`
 const MAX_LEVEL = 35;
 export var BAD_TILES = {};
 
-const get_tiles = (
+export const get_tiles = (
    width_px,
    focal_point,
    scope,
-   aspect_ratio) => {
+   aspect_ratio,
+   list_all = false) => {
 
    const all_tiles = []
    const height_px = width_px * aspect_ratio
@@ -35,7 +36,7 @@ const get_tiles = (
          level: level,
          level_tiles: level_tiles
       })
-      if (level_tiles.length > max_tiles) {
+      if (level_tiles.length > max_tiles && !list_all) {
          break;
       }
    }
@@ -147,6 +148,7 @@ export class FractoRasterImage extends Component {
    }
 
    fill_canvas_buffer = async (canvas_buffer, ctx) => {
+      const {canvas_ref} = this.state
       const {
          width_px,
          focal_point,
@@ -182,7 +184,7 @@ export class FractoRasterImage extends Component {
       })
       await this.raster_fill(canvas_buffer, level_data_sets, ctx)
       if (on_plan_complete) {
-         on_plan_complete(canvas_buffer, ctx)
+         on_plan_complete(canvas_buffer, ctx, canvas_ref.current)
       }
       this.setState({loading_tiles: false})
    }

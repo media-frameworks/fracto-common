@@ -3,7 +3,7 @@ import styled from "styled-components";
 import PropTypes from "prop-types";
 
 import FractoCommon from "../FractoCommon";
-import CoolStyles from "common/ui/CoolStyles";
+import CoolStyles from "common/ui/styles/CoolStyles";
 import FractoTilesLoaderProgress from "./FractoTilesLoaderProgress";
 import {TILE_SET_INDEXED} from "./FractoIndexedTiles";
 

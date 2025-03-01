@@ -145,7 +145,7 @@ export class FractoIndexedTiles extends Component {
          return []
       }
       if (!set_level.columns.length) {
-         console.log(`no columns for level ${level} of set_name ${set_name}`)
+         // console.log(`no columns for level ${level} of set_name ${set_name}`)
          return []
       }
       const columns = set_level.columns

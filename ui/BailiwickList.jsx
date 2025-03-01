@@ -74,9 +74,9 @@ export class BailiwickList extends Component {
 
    select_bailiwick = (item, i) => {
       const {on_select, in_wait, selected_index} = this.props
-      if (!item || in_wait || selected_index === i) {
-         return;
-      }
+      // if (!item || in_wait || selected_index === i) {
+      //    return;
+      // }
       localStorage.setItem('selected_bailiwick', String(i))
       let item_copy = JSON.parse(JSON.stringify(item))
       on_select(item_copy, i)

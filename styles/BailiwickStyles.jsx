@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import {CoolStyles} from 'common/ui/CoolImports'
+import {CoolColors, CoolStyles} from 'common/ui/CoolImports'
 
 export class BailiwickStyles {
    static ContentWrapper = styled(CoolStyles.Block)`
@@ -67,15 +67,47 @@ export class BailiwickStyles {
    `;
 
    static CheckboxWrapper = styled(CoolStyles.InlineBlock)`
+       margin-top: 0.25rem;
        overflow: hidden;
    `;
    static CheckboxLabel = styled(CoolStyles.InlineBlock)`
        ${CoolStyles.bold}
        ${CoolStyles.italic}
+       margin-top: 0.25rem;
        margin-right: 1rem;
        color: #444444;
    `;
 
+   static PublishButton = styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.uppercase}
+       ${CoolStyles.pointer}
+       color: white;
+       background-color: ${CoolColors.cool_blue};
+       padding: 0.125rem 0.5rem;
+       border: 0.1rem solid ${CoolColors.deep_blue};
+       border-radius: 0.25rem;
+       font-size: 0.75rem;
+       opacity: 0.65;
+       margin-left: 1rem;
+       margin-top: 0.5rem;
+       &:hover {
+           opacity: 1.0;
+       }
+   `;
+
+   static ThumbnailWrapper = styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.pointer}
+       float: right;
+       vertical-align: top;
+       margin: 0.25rem;
+   `;
+   static ThumbnailName = styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.pointer}
+       ${CoolStyles.monospace}
+       color: ${CoolColors.deep_blue};
+       font-size: 0.85rem;
+       margin-right: 0.5rem;
+   `;
 }
 
 export default BailiwickStyles

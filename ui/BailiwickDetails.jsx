@@ -6,6 +6,7 @@ import {CoolStyles} from 'common/ui/CoolImports';
 import FractoUtil from "fracto/common/FractoUtil";
 import {render_coordinates, render_pattern_block} from "fracto/common/FractoStyles";
 import BailiwickData from "../feature/BailiwickData";
+import FractoRasterImage from "../render/FractoRasterImage";
 
 export class BailiwickDetails extends Component {
 
@@ -15,7 +16,9 @@ export class BailiwickDetails extends Component {
       freeform_index: PropTypes.number.isRequired
    }
 
-   state = {}
+   state = {
+      thumbnail_canvas: null
+   }
 
    componentDidMount() {
    }
@@ -53,11 +56,6 @@ export class BailiwickDetails extends Component {
          <styles.StatLabel>core point:</styles.StatLabel>
          <styles.StatValue>{core_point}</styles.StatValue>
       </CoolStyles.Block>
-   }
-
-   on_select_row = (index) => {
-      console.log("on_select_row", index)
-      this.setState({node_index: index})
    }
 
    set_inline = (e) => {
@@ -107,6 +105,22 @@ export class BailiwickDetails extends Component {
       }
    }
 
+   publish = () => {
+      const {selected_bailiwick} = this.props;
+      BailiwickData.publish_bailiwick({
+         id: selected_bailiwick.id,
+         published_at: 'CURRENT_TIMESTAMP'
+      })
+   }
+
+   unpublish = () => {
+      const {selected_bailiwick} = this.props;
+      BailiwickData.publish_bailiwick({
+         id: selected_bailiwick.id,
+         published_at: null
+      })
+   }
+
    render_specs = () => {
       const {selected_bailiwick} = this.props;
       // console.log('render_specs', selected_bailiwick)
@@ -134,6 +148,46 @@ export class BailiwickDetails extends Component {
       ]
    }
 
+   download_thumbnail = () => {
+      const {thumbnail_canvas} = this.state
+      const {selected_bailiwick} = this.props;
+      if (!thumbnail_canvas) {
+         return
+      }
+      const link = document.createElement('a');
+      link.href = thumbnail_canvas.toDataURL();
+      const filename = `${selected_bailiwick.name}.png`
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      BailiwickData.save_thumbnail(selected_bailiwick.id, filename)
+      document.body.removeChild(link);
+   };
+
+   on_plan_complete = (canvas_buffer, ctx, canvas) => {
+      this.setState({thumbnail_canvas: canvas})
+   }
+
+   render_thumbnail = () => {
+      const {selected_bailiwick} = this.props;
+      const display_settings = typeof selected_bailiwick.display_settings === 'string'
+         ? JSON.parse(selected_bailiwick.display_settings)
+         : selected_bailiwick.display_settings
+      return <styles.ThumbnailWrapper onClick={this.download_thumbnail}>
+         <CoolStyles.Block>
+            <styles.ThumbnailName>
+               {selected_bailiwick.thumbnail_name}
+            </styles.ThumbnailName>
+            <FractoRasterImage
+               width_px={100}
+               focal_point={display_settings.focal_point}
+               scope={display_settings.scope}
+               on_plan_complete={this.on_plan_complete}
+            />
+         </CoolStyles.Block>
+      </styles.ThumbnailWrapper>
+   }
+
    render() {
       const {selected_bailiwick, highest_level, freeform_index} = this.props;
       const bailiwick_name = selected_bailiwick.name
@@ -145,10 +199,16 @@ export class BailiwickDetails extends Component {
                style={{backgroundColor: block_color}}>
                {selected_bailiwick.pattern}
             </styles.BigColorBox>
+            {this.render_thumbnail()}
             <styles.BailiwickNameBlock>
                <styles.BailiwickNameSpan>{bailiwick_name}</styles.BailiwickNameSpan>
                <styles.StatsWrapper>{stats}</styles.StatsWrapper>
             </styles.BailiwickNameBlock>
+            <styles.PublishButton
+               onClick={selected_bailiwick.published_at ? this.unpublish : this.publish}
+               key={`button-publish`}>
+               {selected_bailiwick.published_at ? `unpublish now` : 'publish now'}
+            </styles.PublishButton>,
          </CoolStyles.Block>,
          <styles.LowerWrapper>
             {this.render_magnitude()}
