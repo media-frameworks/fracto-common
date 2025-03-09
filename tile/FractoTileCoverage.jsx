@@ -61,13 +61,6 @@ const COVERAGE_TABLE_COLUMNS = [
       width_px: 80,
       align: CELL_ALIGN_CENTER
    },
-   {
-      id: "repair_tiles",
-      label: "to be repaired",
-      type: CELL_TYPE_NUMBER,
-      width_px: 80,
-      align: CELL_ALIGN_CENTER
-   },
 ]
 
 export class FractoTileCoverage extends Component {
@@ -334,12 +327,6 @@ export class FractoTileCoverage extends Component {
          if (tested_for_repairs && tested_for_repairs.length) {
             repair_link = <CoolStyles.LinkSpan>{tested_for_repairs.length}</CoolStyles.LinkSpan>
          }
-         data.repair_tiles = tested_for_repairs
-            ? repair_link
-            : <CoolStyles.LinkSpan
-               onClick={() => this.test_for_repairs(data.tiles)}>
-               test
-            </CoolStyles.LinkSpan>
       })
       const selected_row = selected_level
          ? coverage_data.findIndex(data => data.level === selected_level)

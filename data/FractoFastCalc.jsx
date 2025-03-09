@@ -32,7 +32,7 @@ export class FractoFastCalc {
       let least_magnitude = 1
       let best_orbital = 0
       let iteration = 1
-      const iteration_factor = (MIN_ITERATION * level / 10) + MAX_ORBITAL_SIZE
+      const iteration_factor = (MIN_ITERATION * level / 3) + MAX_ORBITAL_SIZE
       const max_iteration = Math.round(iteration_factor / MAX_ORBITAL_SIZE) * MAX_ORBITAL_SIZE
       for (; iteration < max_iteration; iteration++) {
          Q_y = 2 * Q_x * Q_y + P_y;

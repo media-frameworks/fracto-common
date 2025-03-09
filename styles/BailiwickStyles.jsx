@@ -94,6 +94,9 @@ export class BailiwickStyles {
            opacity: 1.0;
        }
    `;
+   static ExportButton = styled(BailiwickStyles.PublishButton)`
+       float: right;
+   `
 
    static ThumbnailWrapper = styled(CoolStyles.InlineBlock)`
        ${CoolStyles.pointer}

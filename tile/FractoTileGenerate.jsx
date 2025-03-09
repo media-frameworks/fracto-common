@@ -124,9 +124,9 @@ export class FractoTileGenerate {
       const tile_points = FractoTileGenerate.prepare_tile()
       let tile_copy = JSON.parse(JSON.stringify(tile))
       FractoTileGenerate.generate_tile(tile_copy, tile_points, response => {
-         const is_edge_tile = FractoTileGenerate.test_edge_case(tile, tile_points);
+         const is_edge_tile = FractoTileGenerate.test_edge_case(tile_copy, tile_points);
          if (is_edge_tile) {
-            cb('tile is blank')
+            cb('tile is blank', tile_copy, tile_points)
          } else {
             const end = performance.now()
             const seconds = Math.round((end - start)) / 1000

@@ -91,18 +91,18 @@ export class BailiwickDetails extends Component {
    }
 
    checked_input = (name, is_checked) => {
-      if (is_checked) {
+      // if (is_checked) {
          return <input
             type={"checkbox"}
             name={`checkbox-inline`}
-            checked
+            checked={is_checked}
          />
-      } else {
-         return <input
-            type={"checkbox"}
-            name={`checkbox-inline`}
-         />
-      }
+      // } else {
+      //    return <input
+      //       type={"checkbox"}
+      //       name={`checkbox-inline`}
+      //    />
+      // }
    }
 
    publish = () => {
@@ -128,7 +128,7 @@ export class BailiwickDetails extends Component {
          <styles.CheckboxWrapper
             onClick={this.set_inline}
             key={`checkbox-inline`}>
-            {this.checked_input('checkbox-inline', selected_bailiwick.is_inline)}
+            {this.checked_input('checkbox-inline', selected_bailiwick.is_inline ? 1 : 0)}
          </styles.CheckboxWrapper>,
          <styles.CheckboxLabel
             onClick={this.set_inline}
