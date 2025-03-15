@@ -13,6 +13,7 @@ import {get_ideal_level} from "../data/FractoData";
 import {INSPECTOR_SIZE_PX} from "pages/constants";
 import FractoUtil from "../FractoUtil";
 import FractoTileCache from "../data/FractoTileCache";
+import FractoFastCalc from "../data/FractoFastCalc";
 
 const SectionWrapper = styled(CoolStyles.Block)`
     ${CoolStyles.align_center}
@@ -56,9 +57,16 @@ const COVERAGE_TABLE_COLUMNS = [
    },
    {
       id: "interior_tiles",
-      label: "interior_tiles",
+      label: "interior",
       type: CELL_TYPE_NUMBER,
       width_px: 80,
+      align: CELL_ALIGN_CENTER
+   },
+   {
+      id: "parimeter_tiles",
+      label: "parimeter",
+      type: CELL_TYPE_NUMBER,
+      width_px: 60,
       align: CELL_ALIGN_CENTER
    },
 ]
@@ -321,6 +329,25 @@ export class FractoTileCoverage extends Component {
          data.tile_count = data.tiles.length ? <LinkedCell
             onClick={e => this.set_can_repair(data.tiles, data.level)}>
             <CoolStyles.LinkSpan>{data.tiles.length}</CoolStyles.LinkSpan>
+         </LinkedCell> : '-'
+         const parimeter_tiles = data.tiles.filter(tile => {
+            const ul_in_cardioid = FractoFastCalc.point_in_main_cardioid(
+               tile.bounds.left, tile.bounds.top)
+            const ur_in_cardioid = FractoFastCalc.point_in_main_cardioid(
+               tile.bounds.right, tile.bounds.top)
+            const bl_in_cardioid = FractoFastCalc.point_in_main_cardioid(
+               tile.bounds.left, tile.bounds.bottom)
+            const br_in_cardioid = FractoFastCalc.point_in_main_cardioid(
+               tile.bounds.right, tile.bounds.bottom)
+            const all_match  =
+               (ul_in_cardioid === ur_in_cardioid) &&
+               (bl_in_cardioid === br_in_cardioid) &&
+               (ul_in_cardioid === bl_in_cardioid)
+            return !(all_match)
+         })
+         data.parimeter_tiles = parimeter_tiles.length ? <LinkedCell
+            onClick={e => this.set_can_repair(parimeter_tiles, data.level)}>
+            <CoolStyles.LinkSpan>{parimeter_tiles.length}</CoolStyles.LinkSpan>
          </LinkedCell> : '-'
          const tested_for_repairs = repairs_by_level[`level_${data.level}`]
          let repair_link = '0'
