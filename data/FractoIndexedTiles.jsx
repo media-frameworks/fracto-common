@@ -148,6 +148,7 @@ export class FractoIndexedTiles extends Component {
          // console.log(`no columns for level ${level} of set_name ${set_name}`)
          return []
       }
+      console.log(`tiles_in_scope columns for level ${level}: ${set_level.columns.length}`)
       const columns = set_level.columns
          .filter(column => {
             if (column.left > viewport.right) {
@@ -188,27 +189,27 @@ export class FractoIndexedTiles extends Component {
       return short_codes
    }
 
-   static get_tile_scopes = (set_name, focal_point, scope) => {
-      // console.log('get_tile_scopes = (set_name, focal_point, scope)', set_name, focal_point, scope)
-      const level_tiles_in_scope = []
-      // console.log('FractoIndexedTiles.tile_set[set_name]', set_name, FractoIndexedTiles.tile_set[set_name])
-      for (let level = 2; level < 35; level++) {
-         const tiles_in_level = FractoIndexedTiles
-            .tiles_in_scope(level, focal_point, scope, 1.0, set_name);
-         if (!tiles_in_level.length) {
-            continue;
-         }
-         // console.log('tiles_in_level', level, tiles_in_level)
-         if (tiles_in_level.length > 350) {
-            continue;
-         }
-         level_tiles_in_scope.push({
-            level: level,
-            tiles: tiles_in_level
-         })
-      }
-      return level_tiles_in_scope
-   }
+   // static get_tile_scopes = (set_name, focal_point, scope) => {
+   //    console.log('get_tile_scopes = (set_name, focal_point, scope)', set_name, focal_point, scope)
+   //    const level_tiles_in_scope = []
+   //    // console.log('FractoIndexedTiles.tile_set[set_name]', set_name, FractoIndexedTiles.tile_set[set_name])
+   //    for (let level = 2; level < 35; level++) {
+   //       const tiles_in_level = FractoIndexedTiles
+   //          .tiles_in_scope(level, focal_point, scope, 1.0, set_name);
+   //       if (!tiles_in_level.length) {
+   //          continue;
+   //       }
+   //       // console.log('tiles_in_level', level, tiles_in_level)
+   //       if (tiles_in_level.length > 350) {
+   //          continue;
+   //       }
+   //       level_tiles_in_scope.push({
+   //          level: level,
+   //          tiles: tiles_in_level
+   //       })
+   //    }
+   //    return level_tiles_in_scope
+   // }
 
 }
 
