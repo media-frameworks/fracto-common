@@ -13,6 +13,9 @@ import axios from "axios";
 const FRACTO_PROD = network["fracto-prod"];
 const TIMEOUT_MS = 100
 
+export const LS_TILE_LOADER_PROGRESS_PCT = 'LS_TILE_LOADER_PROGRESS_PCT';
+export const LS_TILE_LOADER_LEVEL = 'LS_TILE_LOADER_LEVEL';
+
 const ProgressWrapper = styled(CoolStyles.Block)`
     ${CoolStyles.align_center}
     width: 20rem;
