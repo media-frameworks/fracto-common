@@ -59,12 +59,14 @@ export class FractoTileRender extends Component {
       const {tile, width_px, tile_data} = this.props;
       // console.log("load_tile", tile.short_code, tile_data)
       if (tile_data) {
-         FractoUtil.data_to_canvas(tile_data, ctx, width_px);
+         // FractoUtil.data_to_canvas(tile_data, ctx, width_px);
+         FractoRasterImage.buffer_to_canvas(tile_data, ctx, width_px / 256)
          this.setState({tile_loaded: true})
       } else {
          const tile_data = await FractoTileCache.get_tile(tile.short_code)
          // FractoMruCache.get_tile_data(tile.short_code, tile_data => {
-            FractoUtil.data_to_canvas(tile_data, ctx, width_px);
+         //    FractoUtil.data_to_canvas(tile_data, ctx, width_px);
+         FractoRasterImage.buffer_to_canvas(tile_data, ctx, width_px / 256)
             this.setState({tile_loaded: true})
          // })
       }

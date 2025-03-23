@@ -212,36 +212,6 @@ export class FractoTileCoverage extends Component {
       }
    }
 
-   test_for_repairs = (tiles) => {
-      const {repairs_by_level} = this.state
-      let needs_repairs = []
-      tiles.forEach(async (tile) => {
-         const tile_data = await FractoTileCache.get_tile(tile.short_code)
-         if (!tile_data) {
-            return;
-         }
-         for (let img_x = 0; img_x < 256; img_x++) {
-            if (!tile_data[img_x]) {
-               return;
-            }
-            for (let img_y = 0; img_y < 256; img_y++) {
-               if (!tile_data[img_x][img_y]) {
-                  return;
-               }
-               const [pattern, iteration] = tile_data[img_x][img_y]
-               if (iteration === -1) {
-                  needs_repairs.push(tile)
-                  return;
-               }
-            }
-         }
-      })
-      if (tiles.length) {
-         repairs_by_level[`level_${tiles[0].short_code.length}`] = needs_repairs
-         this.setState({repairs_by_level})
-      }
-   }
-
    render_coverage = () => {
       const {tiles_in_scope, repairs_by_level} = this.state
       const {selected_level} = this.props
@@ -319,13 +289,26 @@ export class FractoTileCoverage extends Component {
          // console.log("level, blanks_by_level", data.level, blanks_by_level)
          const interiors_by_level = interior_tiles
             .filter(short_code => short_code.length === data.level)
+         const interiors_with_bounds = interiors_by_level
+            .filter(cd => cd.length === data.level)
+            .map(short_code => {
+               return {
+                  short_code,
+                  bounds: FractoUtil.bounds_from_short_code(short_code)
+               }
+            })
          // console.log("level, blanks_by_level", data.level, blanks_by_level)
          data.can_do = filtered_by_level.length ? <LinkedCell
             onClick={e => this.set_enhanced(filtered_by_level, data.level)}>
             <CoolStyles.LinkSpan>{filtered_by_level.length}</CoolStyles.LinkSpan>
          </LinkedCell> : '-'
          data.blank_tiles = blanks_by_level.length ? blanks_by_level.length : '-'
-         data.interior_tiles = interiors_by_level.length ? interiors_by_level.length : '-'
+         data.interior_tiles = interiors_with_bounds.length
+            ? <LinkedCell
+               onClick={e => this.set_enhanced(interiors_with_bounds, data.level)}>
+               <CoolStyles.LinkSpan>{interiors_with_bounds.length}</CoolStyles.LinkSpan>
+            </LinkedCell>
+            : '-'
          data.tile_count = data.tiles.length ? <LinkedCell
             onClick={e => this.set_can_repair(data.tiles, data.level)}>
             <CoolStyles.LinkSpan>{data.tiles.length}</CoolStyles.LinkSpan>
@@ -339,7 +322,7 @@ export class FractoTileCoverage extends Component {
                tile.bounds.left, tile.bounds.bottom)
             const br_in_cardioid = FractoFastCalc.point_in_main_cardioid(
                tile.bounds.right, tile.bounds.bottom)
-            const all_match  =
+            const all_match =
                (ul_in_cardioid === ur_in_cardioid) &&
                (bl_in_cardioid === br_in_cardioid) &&
                (ul_in_cardioid === bl_in_cardioid)

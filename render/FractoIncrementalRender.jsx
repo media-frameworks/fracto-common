@@ -8,6 +8,7 @@ import FractoUtil from "../FractoUtil";
 import FractoIndexedTiles from "../data/FractoIndexedTiles";
 import TransitData from "../feature/TransitData";
 import FractoTileCache from "../data/FractoTileCache";
+import FractoRasterImage from "./FractoRasterImage";
 
 const FractoCanvas = styled.canvas`
     ${CoolStyles.narrow_box_shadow}
@@ -240,12 +241,13 @@ export class FractoIncrementalRender extends Component {
                const pattern = tile_data[tile_x][tile_y][0]
                const iteration = tile_data[tile_x][tile_y][1]
                canvas_buffer[img_x][img_y] = [pattern, iteration];
-               const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(pattern, iteration)
-               ctx.fillStyle = `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`
-               ctx.fillRect(img_x, img_y, 1, 1);
+               // const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(pattern, iteration)
+               // ctx.fillStyle = `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`
+               // ctx.fillRect(img_x, img_y, 1, 1);
             }
          }
       }
+      FractoRasterImage.buffer_to_canvas(canvas_buffer, ctx);
    }
 
    tiles_to_canvas = async (level_tiles, canvas_buffer, lowest_iteration, cb) => {

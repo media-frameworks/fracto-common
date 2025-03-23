@@ -3,7 +3,7 @@ import FractoTileCache from "../data/FractoTileCache";
 
 export class FractoTileGenerate {
 
-   static calculate_tile = (tile, tile_points, cb) => {
+   static calculate_tile = (tile, tile_points, is_updated, cb) => {
       console.log("calculate_tile", tile)
       const level = tile.short_code.length
       const increment = (tile.bounds.right - tile.bounds.left) / 256.0;
@@ -12,7 +12,7 @@ export class FractoTileGenerate {
          const x_naught = img_x % 2 === 0
          for (let img_y = 0; img_y < 256; img_y++) {
             const y_naught = img_y % 2 === 0
-            if (x_naught && y_naught) {
+            if (x_naught && y_naught && !is_updated) {
                const [pattern, iteration] = tile_points[img_x][img_y]
                if (pattern === 0) {
                   continue;
@@ -68,15 +68,15 @@ export class FractoTileGenerate {
       }
    }
 
-   static generate_tile = async (tile, tile_points, cb) => {
+   static generate_tile = async (tile, tile_points, is_updated, cb) => {
       const parent_short_code = tile.short_code.substr(0, tile.short_code.length - 1)
       const quad_code = tile.short_code[tile.short_code.length - 1];
       const parent_tile_data = await FractoTileCache.get_tile(parent_short_code);
-      if (!parent_tile_data) {
+      if (!parent_tile_data && !is_updated) {
          cb(false)
       } else {
          FractoTileGenerate.prepare_generator(tile_points, parent_tile_data, quad_code)
-         FractoTileGenerate.calculate_tile(tile, tile_points, result => {
+         FractoTileGenerate.calculate_tile(tile, tile_points, is_updated, result => {
             cb(result)
          })
       }
@@ -118,12 +118,12 @@ export class FractoTileGenerate {
       return true
    }
 
-   static begin = (tile, cb) => {
+   static begin = (tile, is_updated, cb) => {
       // console.log('begin generate tile', tile)
       const start = performance.now()
       const tile_points = FractoTileGenerate.prepare_tile()
       let tile_copy = JSON.parse(JSON.stringify(tile))
-      FractoTileGenerate.generate_tile(tile_copy, tile_points, response => {
+      FractoTileGenerate.generate_tile(tile_copy, tile_points, is_updated, response => {
          const is_edge_tile = FractoTileGenerate.test_edge_case(tile_copy, tile_points);
          if (is_edge_tile) {
             cb('tile is blank', tile_copy, tile_points)

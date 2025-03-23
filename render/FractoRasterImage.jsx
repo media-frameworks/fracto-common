@@ -5,9 +5,9 @@ import styled from "styled-components";
 import {CoolStyles} from "common/ui/CoolImports";
 
 import FractoIndexedTiles from "fracto/common/data/FractoIndexedTiles";
-import FractoUtil from "fracto/common/FractoUtil";
 import FractoFastCalc from "fracto/common/data/FractoFastCalc";
 import FractoTileCache from "fracto/common/data/FractoTileCache";
+import FractoColors from "../styles/FractoColors";
 
 const FractoCanvas = styled.canvas`
     ${CoolStyles.narrow_box_shadow}
@@ -16,6 +16,12 @@ const FractoCanvas = styled.canvas`
 
 const MAX_LEVEL = 35;
 export var BAD_TILES = {};
+
+const GREY_BASE = 60
+const GREY_RANGE = 120
+
+const COLOR_LUM_BASE_PCT = 55
+const COLOR_LUM_BASE_RANGE_PCT = 35
 
 export const get_tiles = (
    width_px,
@@ -55,6 +61,7 @@ export class FractoRasterImage extends Component {
       disabled: PropTypes.bool,
       update_counter: PropTypes.number,
       filter_level: PropTypes.number,
+      color_handler: PropTypes.func,
    }
 
    static defaultProps = {
@@ -62,6 +69,7 @@ export class FractoRasterImage extends Component {
       disabled: false,
       update_counter: 0,
       filter_level: 0,
+      color_handler: FractoColors.pattern_color_hsl,
    }
 
    state = {
@@ -100,9 +108,9 @@ export class FractoRasterImage extends Component {
       const focal_point_x_changed = prevProps.focal_point.x !== this.props.focal_point.x;
       const focal_point_y_changed = prevProps.focal_point.y !== this.props.focal_point.y;
       const scope_changed = prevProps.scope !== this.props.scope;
-      const disabled_changed = false// prevProps.disabled !== this.props.disabled;
+      const disabled_changed = prevProps.disabled !== this.props.disabled;
       const filter_level_changed = this.props.filter_level && prevProps.filter_level !== this.props.filter_level;
-      const update_counter_changed = false// this.props.update_counter && prevProps.update_counter !== this.props.update_counter;
+      const update_counter_changed = false //this.props.update_counter && prevProps.update_counter !== this.props.update_counter;
       let canvas_buffer = this.state.canvas_buffer
       if (this.state.loading_tiles) {
          return;
@@ -125,21 +133,25 @@ export class FractoRasterImage extends Component {
    }
 
    init_canvas_buffer = () => {
-      const {canvas_buffer, ctx} = this.state
+      // const {canvas_buffer} = this.state
       const {width_px, aspect_ratio} = this.props
-      if (canvas_buffer) {
-         ctx.fillStyle = '#eeeeee'
-         ctx.fillRect(0, 0, width_px, width_px);
-         return (canvas_buffer)
-      }
-      if (!width_px) {
-         return;
-      }
       let height_px = Math.round(width_px * aspect_ratio);
       if (height_px & 1) {
          height_px -= 1
       }
-      const new_canvas_buffer = new Array(width_px).fill(0).map(() => new Array(height_px).fill([0, 4]));
+      const new_canvas_buffer = new Array(width_px)
+         .fill(0)
+         .map((x_value, x_index) => {
+            const h_dist = (width_px / 2) - x_index
+            return new Array(height_px)
+               .fill(0)
+               .map((y_value, y_index) => {
+                  const v_dist = (height_px / 2) - y_index
+                  const distance_to_center =
+                     Math.sqrt(h_dist * h_dist + v_dist * v_dist)
+                  return [0, 4, distance_to_center]
+               })
+         })
       this.setState({
          canvas_buffer: new_canvas_buffer,
          height_px: height_px
@@ -148,7 +160,6 @@ export class FractoRasterImage extends Component {
    }
 
    fill_canvas_buffer = async (canvas_buffer, ctx) => {
-      const {canvas_ref} = this.state
       const {
          width_px,
          focal_point,
@@ -183,30 +194,79 @@ export class FractoRasterImage extends Component {
          })
       })
       await this.raster_fill(canvas_buffer, level_data_sets, ctx)
+      FractoRasterImage.buffer_to_canvas(canvas_buffer, ctx)
       if (on_plan_complete) {
-         on_plan_complete(canvas_buffer, ctx, canvas_ref.current)
+         on_plan_complete(canvas_buffer, ctx)
       }
       this.setState({loading_tiles: false})
    }
 
+   static buffer_to_canvas = (canvas_buffer, ctx, scale_factor = 1) => {
+      const all_pattern_pixels = []
+      const all_not_pattern_pixels = []
+      let min_value = 1000000
+      let max_value = 0
+      for (let canvas_x = 0; canvas_x < canvas_buffer.length; canvas_x++) {
+         for (let canvas_y = 0; canvas_y < canvas_buffer[canvas_x].length; canvas_y++) {
+            const [pattern, iteration, distance_to_center] = canvas_buffer[canvas_x][canvas_y]
+            if (pattern === 0) {
+               if (min_value > iteration) {
+                  min_value = iteration
+               }
+               if (max_value < iteration) {
+                  max_value = iteration
+               }
+               all_not_pattern_pixels.push({pattern, iteration, distance_to_center, canvas_x, canvas_y})
+            } else {
+               all_pattern_pixels.push({pattern, iteration, distance_to_center, canvas_x, canvas_y})
+            }
+         }
+      }
+
+      const spread = max_value - min_value
+      const grey_range = spread > GREY_RANGE ? GREY_RANGE : spread + 10
+      const grey_base = GREY_BASE + GREY_RANGE - grey_range
+      all_not_pattern_pixels.sort((a, b) => {
+         if (a.iteration === b.iteration) {
+            return a.distance_to_center - b.distance_to_center
+         }
+         return a.iteration - b.iteration
+      }).forEach((pixel, pixel_index) => {
+         const grey_value = grey_base + grey_range -
+            Math.floor(grey_range * pixel_index / all_not_pattern_pixels.length)
+         ctx.fillStyle = `rgb(${grey_value},${grey_value},${grey_value})`
+         ctx.fillRect(scale_factor * pixel.canvas_x, scale_factor * pixel.canvas_y,
+            1.25 * scale_factor, 1.25 * scale_factor);
+      })
+
+      all_pattern_pixels.sort((a, b) => {
+         if (a.iteration === b.iteration) {
+            return a.distance_to_center - b.distance_to_center
+         }
+         return b.iteration - a.iteration
+      }).forEach((pixel, pixel_index) => {
+         const lum_factor = 1 - pixel_index / all_pattern_pixels.length
+         const hue = FractoColors.pattern_hue(pixel.pattern)
+         ctx.fillStyle = `hsl(${hue}, 85%, ${COLOR_LUM_BASE_PCT + lum_factor * COLOR_LUM_BASE_RANGE_PCT}%)`
+         ctx.fillRect(scale_factor * pixel.canvas_x, scale_factor * pixel.canvas_y,
+            1.25 * scale_factor, 1.25 * scale_factor);
+      })
+   }
+
    raster_fill = async (canvas_buffer, level_data_sets, ctx) => {
-      const {
-         width_px,
-         focal_point,
-         scope,
-         aspect_ratio,
-      } = this.props
+      const {width_px, focal_point, scope, aspect_ratio,} = this.props
+      if (!canvas_buffer) {
+         return;
+      }
       const canvas_increment = scope / width_px
+      const height_px = width_px * aspect_ratio
       const horz_scale = []
-      const leftmost = focal_point.x - scope / 2
       for (let horz_x = 0; horz_x < width_px; horz_x++) {
-         horz_scale[horz_x] = leftmost + horz_x * canvas_increment
+         horz_scale[horz_x] = focal_point.x + (horz_x - width_px / 2) * canvas_increment
       }
       const vert_scale = []
-      const topmost = focal_point.y + scope * aspect_ratio / 2
-      const height_px = width_px * aspect_ratio
       for (let vert_y = 0; vert_y < height_px; vert_y++) {
-         vert_scale[vert_y] = Math.abs(topmost - vert_y * canvas_increment)
+         vert_scale[vert_y] = Math.abs(focal_point.y - (vert_y - height_px / 2) * canvas_increment)
       }
       for (let canvas_x = 0; canvas_x < width_px; canvas_x++) {
          const x = horz_scale[canvas_x]
@@ -216,50 +276,39 @@ export class FractoRasterImage extends Component {
             for (let index = 0; index < level_data_sets.length; index++) {
                const level_data_set = level_data_sets[index]
                const tile = level_data_set.level_tiles
-                  .find(tile => tile.bounds.left < x
-                     && tile.bounds.right > x
-                     && tile.bounds.top > y
-                     && tile.bounds.bottom < y)
+                  .find(tile => tile.bounds.left <= x
+                     && tile.bounds.right >= x
+                     && tile.bounds.top >= y
+                     && tile.bounds.bottom <= y)
                if (tile) {
                   if (BAD_TILES[tile.short_code]) {
                      continue;
                   }
-                  const tile_data = await FractoTileCache.get_tile(tile.short_code)
-                  if (!tile_data) {
-                     BAD_TILES[tile.short_code] = true
+                  let tile_data = null
+                  try {
+                     tile_data = await FractoTileCache.get_tile(tile.short_code)
+                     const tile_x = Math.floor(
+                        (x - tile.bounds.left) / level_data_set.tile_increment)
+                     const tile_y = Math.floor(
+                        (tile.bounds.top - y) / level_data_set.tile_increment)
+                     const pattern = tile_data[tile_x][tile_y][0]
+                     const iteration = tile_data[tile_x][tile_y][1]
+                     canvas_buffer[canvas_x][canvas_y] = [pattern, iteration]
+                     found_point = true
+                  } catch (e) {
+                     if (!tile_data) {
+                        BAD_TILES[tile.short_code] = true
+                     }
+                     console.log('canvas_buffer size error', canvas_x, canvas_y, e)
                      continue;
                   }
-                  const tile_x = Math.floor(
-                     (x - tile.bounds.left) / level_data_set.tile_increment)
-                  if (!tile_data[tile_x]) {
-                     continue
-                  }
-                  const tile_y = Math.floor(
-                     (tile.bounds.top - y) / level_data_set.tile_increment)
-                  if (!tile_data[tile_x][tile_y]) {
-                     continue
-                  }
-                  const pattern = tile_data[tile_x][tile_y][0]
-                  const iteration = tile_data[tile_x][tile_y][1]
-                  if (canvas_buffer && canvas_buffer[canvas_x] && canvas_buffer[canvas_x][canvas_y]) {
-                     canvas_buffer[canvas_x][canvas_y] = [pattern, iteration]
-                  }
-                  const [hue, sat_pct, lum_pct] = FractoUtil.fracto_pattern_color_hsl(pattern, iteration)
-                  ctx.fillStyle = `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`
-                  ctx.fillRect(canvas_x, canvas_y, 2, 2);
-                  found_point = true
                   break;
                }
             }
-            if (!found_point && (x < -2 || x > 1 || y > 1 || y < -1)) {
+            const out_of_bounds = (x <= -2) || (x > 0.5) || (y >= 1) || (y <= 1)
+            if (!found_point && out_of_bounds) {
                const {pattern, iteration} = FractoFastCalc.calc(x, y)
-               if (canvas_buffer && canvas_buffer[canvas_x] && canvas_buffer[canvas_x][canvas_y]) {
-                  canvas_buffer[canvas_x][canvas_y] = [pattern, iteration]
-               }
-               const [hue, sat_pct, lum_pct] =
-                  FractoUtil.fracto_pattern_color_hsl(pattern, iteration)
-               ctx.fillStyle = `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`
-               ctx.fillRect(canvas_x, canvas_y, 2, 2);
+               canvas_buffer[canvas_x][canvas_y] = [pattern, iteration]
             }
          }
       }
