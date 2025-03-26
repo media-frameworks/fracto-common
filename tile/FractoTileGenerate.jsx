@@ -69,13 +69,15 @@ export class FractoTileGenerate {
    }
 
    static generate_tile = async (tile, tile_points, is_updated, cb) => {
-      const parent_short_code = tile.short_code.substr(0, tile.short_code.length - 1)
-      const quad_code = tile.short_code[tile.short_code.length - 1];
-      const parent_tile_data = await FractoTileCache.get_tile(parent_short_code);
-      if (!parent_tile_data && !is_updated) {
-         cb(false)
-      } else {
+      if (!is_updated) {
+         const parent_short_code = tile.short_code.substr(0, tile.short_code.length - 1)
+         const quad_code = tile.short_code[tile.short_code.length - 1];
+         const parent_tile_data = await FractoTileCache.get_tile(parent_short_code);
+         if (!parent_tile_data) {
+            cb(false)
+         }
          FractoTileGenerate.prepare_generator(tile_points, parent_tile_data, quad_code)
+      } else {
          FractoTileGenerate.calculate_tile(tile, tile_points, is_updated, result => {
             cb(result)
          })

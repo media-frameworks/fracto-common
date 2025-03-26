@@ -161,6 +161,7 @@ export class FractoRasterImage extends Component {
    }
 
    fill_canvas_buffer = async (canvas_buffer, ctx) => {
+      const {canvas_ref} = this.state;
       const {
          width_px,
          focal_point,
@@ -197,7 +198,7 @@ export class FractoRasterImage extends Component {
       await this.raster_fill(canvas_buffer, level_data_sets, ctx)
       FractoRasterImage.buffer_to_canvas(canvas_buffer, ctx)
       if (on_plan_complete) {
-         on_plan_complete(canvas_buffer, ctx)
+         on_plan_complete(canvas_buffer, ctx, canvas_ref.current)
       }
       this.setState({loading_tiles: false})
    }
