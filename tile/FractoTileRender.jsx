@@ -7,6 +7,7 @@ import {CoolStyles} from 'common/ui/CoolImports';
 import FractoUtil from '../FractoUtil';
 import FractoRasterImage from "../render/FractoRasterImage";
 import FractoTileCache from "../data/FractoTileCache";
+import FractoColors from "../styles/FractoColors";
 
 const RenderWrapper = styled(CoolStyles.InlineBlock)`
    background-color: #f8f8f8;
@@ -60,13 +61,13 @@ export class FractoTileRender extends Component {
       // console.log("load_tile", tile.short_code, tile_data)
       if (tile_data) {
          // FractoUtil.data_to_canvas(tile_data, ctx, width_px);
-         FractoRasterImage.buffer_to_canvas(tile_data, ctx, width_px / 256)
+         FractoColors.buffer_to_canvas(tile_data, ctx, width_px / 256)
          this.setState({tile_loaded: true})
       } else {
          const tile_data = await FractoTileCache.get_tile(tile.short_code)
          // FractoMruCache.get_tile_data(tile.short_code, tile_data => {
          //    FractoUtil.data_to_canvas(tile_data, ctx, width_px);
-         FractoRasterImage.buffer_to_canvas(tile_data, ctx, width_px / 256)
+         FractoColors.buffer_to_canvas(tile_data, ctx, width_px / 256)
             this.setState({tile_loaded: true})
          // })
       }

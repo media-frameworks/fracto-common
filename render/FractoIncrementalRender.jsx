@@ -9,6 +9,7 @@ import FractoIndexedTiles from "../data/FractoIndexedTiles";
 import TransitData from "../feature/TransitData";
 import FractoTileCache from "../data/FractoTileCache";
 import FractoRasterImage from "./FractoRasterImage";
+import FractoColors from "../styles/FractoColors";
 
 const FractoCanvas = styled.canvas`
     ${CoolStyles.narrow_box_shadow}
@@ -247,7 +248,7 @@ export class FractoIncrementalRender extends Component {
             }
          }
       }
-      FractoRasterImage.buffer_to_canvas(canvas_buffer, ctx);
+      FractoColors.buffer_to_canvas(canvas_buffer, ctx);
    }
 
    tiles_to_canvas = async (level_tiles, canvas_buffer, lowest_iteration, cb) => {

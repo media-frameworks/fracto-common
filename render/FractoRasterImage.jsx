@@ -196,63 +196,11 @@ export class FractoRasterImage extends Component {
          })
       })
       await this.raster_fill(canvas_buffer, level_data_sets, ctx)
-      FractoRasterImage.buffer_to_canvas(canvas_buffer, ctx)
+      FractoColors.buffer_to_canvas(canvas_buffer, ctx)
       if (on_plan_complete) {
          on_plan_complete(canvas_buffer, ctx, canvas_ref.current)
       }
       this.setState({loading_tiles: false})
-   }
-
-   static buffer_to_canvas = (canvas_buffer, ctx, scale_factor = 1) => {
-      const all_pattern_pixels = []
-      const all_not_pattern_pixels = []
-      let min_value = 1000000
-      let max_value = 0
-      for (let canvas_x = 0; canvas_x < canvas_buffer.length; canvas_x++) {
-         for (let canvas_y = 0; canvas_y < canvas_buffer[canvas_x].length; canvas_y++) {
-            const [pattern, iteration, distance_to_center] = canvas_buffer[canvas_x][canvas_y]
-            if (pattern === 0) {
-               if (min_value > iteration) {
-                  min_value = iteration
-               }
-               if (max_value < iteration) {
-                  max_value = iteration
-               }
-               all_not_pattern_pixels.push({pattern, iteration, distance_to_center, canvas_x, canvas_y})
-            } else {
-               all_pattern_pixels.push({pattern, iteration, distance_to_center, canvas_x, canvas_y})
-            }
-         }
-      }
-
-      const spread = max_value - min_value
-      const grey_range = spread > GREY_RANGE ? GREY_RANGE : spread + 10
-      const grey_base = GREY_BASE + GREY_RANGE - grey_range
-      all_not_pattern_pixels.sort((a, b) => {
-         if (a.iteration === b.iteration) {
-            return a.distance_to_center - b.distance_to_center
-         }
-         return a.iteration - b.iteration
-      }).forEach((pixel, pixel_index) => {
-         const grey_value = grey_base + grey_range -
-            Math.floor(grey_range * pixel_index / all_not_pattern_pixels.length)
-         ctx.fillStyle = `rgb(${grey_value},${grey_value},${grey_value})`
-         ctx.fillRect(scale_factor * pixel.canvas_x, scale_factor * pixel.canvas_y,
-            1.25 * scale_factor, 1.25 * scale_factor);
-      })
-
-      all_pattern_pixels.sort((a, b) => {
-         if (a.iteration === b.iteration) {
-            return a.distance_to_center - b.distance_to_center
-         }
-         return b.iteration - a.iteration
-      }).forEach((pixel, pixel_index) => {
-         const lum_factor = 1 - pixel_index / all_pattern_pixels.length
-         const hue = FractoColors.pattern_hue(pixel.pattern)
-         ctx.fillStyle = `hsl(${hue}, 85%, ${COLOR_LUM_BASE_PCT + lum_factor * COLOR_LUM_BASE_RANGE_PCT}%)`
-         ctx.fillRect(scale_factor * pixel.canvas_x, scale_factor * pixel.canvas_y,
-            1.25 * scale_factor, 1.25 * scale_factor);
-      })
    }
 
    raster_fill = async (canvas_buffer, level_data_sets, ctx) => {
