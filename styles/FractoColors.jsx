@@ -2,7 +2,7 @@ import FractoUtil from "../FractoUtil";
 
 const MAX_PATTERN = 20000
 
-const GREY_BASE = 90
+const GREY_BASE = 75
 const GREY_RANGE = (255 - GREY_BASE)
 
 const COLOR_LUM_BASE_PCT = 15
@@ -49,9 +49,14 @@ export class FractoColors {
       let current_grey_tone = base_value + range_value
       let current_bin_size = 0
       let total_pixel_count = 0
+      // console.log('all_sets', all_sets)
       all_sets.forEach((set, index) => {
          if (set.iteration_count > best_bin_size) {
-            current_grey_tone -= Math.floor(set.iteration_count / best_bin_size)
+            let reduce_by = Math.floor(set.iteration_count / best_bin_size)
+            if (reduce_by > 20) {
+               reduce_by = 20
+            }
+            current_grey_tone -= reduce_by
             current_bin_size = 0
          } else if (set.iteration_count + current_bin_size < best_bin_size) {
             current_bin_size += set.iteration_count
