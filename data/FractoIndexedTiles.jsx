@@ -79,7 +79,7 @@ export class FractoIndexedTiles extends Component {
          .then(response => response.text())
          .then(csv => {
             const lines = csv.split("\n");
-            console.log(`fetch_bin_async ${lines.length}`)
+            console.log(`load_short_codes ${tile_set_name} ${lines.length}`)
             cb(lines.slice(1))
          })
    }

@@ -63,10 +63,10 @@ const COVERAGE_TABLE_COLUMNS = [
       align: CELL_ALIGN_CENTER
    },
    {
-      id: "parimeter_tiles",
-      label: "parimeter",
+      id: "needs_update_tiles",
+      label: "needs update",
       type: CELL_TYPE_NUMBER,
-      width_px: 60,
+      width_px: 80,
       align: CELL_ALIGN_CENTER
    },
 ]
@@ -93,12 +93,14 @@ export class FractoTileCoverage extends Component {
       loading_indexed: true,
       loading_blanks: true,
       loading_interiors: true,
+      loading_needs_update: true,
       repairs_by_level: {},
    }
 
    static indexed_tiles = []
    static blank_tiles = []
    static interior_tiles = []
+   static needs_update = []
 
    componentDidMount() {
       if (!FractoTileCoverage.indexed_tiles.length) {
@@ -148,6 +150,22 @@ export class FractoTileCoverage extends Component {
          })
       } else {
          this.setState({loading_interiors: false})
+      }
+      if (!FractoTileCoverage.needs_update.length) {
+         for (let level = 0; level < 50; level++) {
+            FractoTileCoverage.needs_update[level] = {}
+         }
+         FractoIndexedTiles.load_short_codes('needs_update', short_codes => {
+            // console.log('needs_upate short codes:', short_codes.length)
+            short_codes.forEach(filename => {
+               const short_code = filename.replace('.gz', '')
+               const level = short_code.length
+               FractoTileCoverage.needs_update[level][short_code] = true
+            })
+            this.setState({loading_needs_update: false})
+         })
+      } else {
+         this.setState({loading_needs_update: false})
       }
    }
 
@@ -235,8 +253,13 @@ export class FractoTileCoverage extends Component {
       const can_do = []
       const blank_tiles = []
       const interior_tiles = []
+      const needs_update = []
       all_tiles.forEach(tile => {
          const short_code = tile.short_code
+         if (FractoTileCoverage.needs_update[short_code.length][short_code]) {
+            needs_update.push(short_code)
+         }
+
          const short_code_0 = `${short_code}0`
          const short_code_1 = `${short_code}1`
          const short_code_2 = `${short_code}2`
@@ -289,7 +312,17 @@ export class FractoTileCoverage extends Component {
          // console.log("level, blanks_by_level", data.level, blanks_by_level)
          const interiors_by_level = interior_tiles
             .filter(short_code => short_code.length === data.level)
+         const needs_update_by_level = needs_update
+            .filter(short_code => short_code.length === data.level)
          const interiors_with_bounds = interiors_by_level
+            .filter(cd => cd.length === data.level)
+            .map(short_code => {
+               return {
+                  short_code,
+                  bounds: FractoUtil.bounds_from_short_code(short_code)
+               }
+            })
+         const needs_update_with_bounds = needs_update_by_level
             .filter(cd => cd.length === data.level)
             .map(short_code => {
                return {
@@ -309,34 +342,16 @@ export class FractoTileCoverage extends Component {
                <CoolStyles.LinkSpan>{interiors_with_bounds.length}</CoolStyles.LinkSpan>
             </LinkedCell>
             : '-'
+         data.needs_update_tiles = needs_update_with_bounds.length
+            ? <LinkedCell
+               onClick={e => this.set_can_repair(needs_update_with_bounds, data.level)}>
+               <CoolStyles.LinkSpan>{needs_update_with_bounds.length}</CoolStyles.LinkSpan>
+            </LinkedCell>
+            : '-'
          data.tile_count = data.tiles.length ? <LinkedCell
             onClick={e => this.set_can_repair(data.tiles, data.level)}>
             <CoolStyles.LinkSpan>{data.tiles.length}</CoolStyles.LinkSpan>
          </LinkedCell> : '-'
-         const parimeter_tiles = data.tiles.filter(tile => {
-            const ul_in_cardioid = FractoFastCalc.point_in_main_cardioid(
-               tile.bounds.left, tile.bounds.top)
-            const ur_in_cardioid = FractoFastCalc.point_in_main_cardioid(
-               tile.bounds.right, tile.bounds.top)
-            const bl_in_cardioid = FractoFastCalc.point_in_main_cardioid(
-               tile.bounds.left, tile.bounds.bottom)
-            const br_in_cardioid = FractoFastCalc.point_in_main_cardioid(
-               tile.bounds.right, tile.bounds.bottom)
-            const all_match =
-               (ul_in_cardioid === ur_in_cardioid) &&
-               (bl_in_cardioid === br_in_cardioid) &&
-               (ul_in_cardioid === bl_in_cardioid)
-            return !(all_match)
-         })
-         data.parimeter_tiles = parimeter_tiles.length ? <LinkedCell
-            onClick={e => this.set_can_repair(parimeter_tiles, data.level)}>
-            <CoolStyles.LinkSpan>{parimeter_tiles.length}</CoolStyles.LinkSpan>
-         </LinkedCell> : '-'
-         const tested_for_repairs = repairs_by_level[`level_${data.level}`]
-         let repair_link = '0'
-         if (tested_for_repairs && tested_for_repairs.length) {
-            repair_link = <CoolStyles.LinkSpan>{tested_for_repairs.length}</CoolStyles.LinkSpan>
-         }
       })
       const selected_row = selected_level
          ? coverage_data.findIndex(data => data.level === selected_level)
@@ -353,8 +368,8 @@ export class FractoTileCoverage extends Component {
    }
 
    render() {
-      const {loading_blanks, loading_indexed} = this.state
-      if (loading_blanks || loading_indexed) {
+      const {loading_blanks, loading_indexed, loading_interiors, loading_needs_update} = this.state
+      if (loading_blanks || loading_indexed || loading_interiors || loading_needs_update) {
          return "loading short codes..."
       }
       const coverage = this.render_coverage()
