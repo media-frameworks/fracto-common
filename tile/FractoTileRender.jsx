@@ -10,7 +10,7 @@ import FractoTileCache from "../data/FractoTileCache";
 import FractoColors from "../styles/FractoColors";
 
 const RenderWrapper = styled(CoolStyles.InlineBlock)`
-   background-color: #f8f8f8;
+    background-color: #f8f8f8;
 `;
 
 export class FractoTileRender extends Component {
@@ -60,16 +60,14 @@ export class FractoTileRender extends Component {
       const {tile, width_px, tile_data} = this.props;
       // console.log("load_tile", tile.short_code, tile_data)
       if (tile_data) {
-         // FractoUtil.data_to_canvas(tile_data, ctx, width_px);
          FractoColors.buffer_to_canvas(tile_data, ctx, width_px / 256)
          this.setState({tile_loaded: true})
       } else {
          const tile_data = await FractoTileCache.get_tile(tile.short_code)
-         // FractoMruCache.get_tile_data(tile.short_code, tile_data => {
-         //    FractoUtil.data_to_canvas(tile_data, ctx, width_px);
-         FractoColors.buffer_to_canvas(tile_data, ctx, width_px / 256)
+         if (tile_data) {
+            FractoColors.buffer_to_canvas(tile_data, ctx, width_px / 256)
             this.setState({tile_loaded: true})
-         // })
+         }
       }
    }
 

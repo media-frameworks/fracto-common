@@ -1,9 +1,9 @@
-import {Component} from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import styled from "styled-components";
 
 import {CoolStyles, CoolButton} from 'common/ui/CoolImports';
-import FractoUtil from "../FractoUtil";
+import LinearProgress from "@mui/material/LinearProgress";
 
 const NAV_BUTTON_STYLE = {
    fontFamily: "monospace",
@@ -14,20 +14,25 @@ const NAV_BUTTON_STYLE = {
 }
 
 const NavigateWrapper = styled(CoolStyles.Block)`
-   ${CoolStyles.align_center}
-   margin: 0.5rem 0;
+    ${CoolStyles.align_center}
+    margin: 0;
+`;
+const ProgressWrapper = styled(CoolStyles.InlineBlock)`
+    ${CoolStyles.align_center}
+    margin: 0.5rem auto;
+    width: 30rem;
 `;
 
 const StatusText = styled(CoolStyles.InlineBlock)`
-   ${CoolStyles.align_center}
-   ${CoolStyles.align_middle}
-   ${CoolStyles.italic}
-   ${CoolStyles.bold}
-   background-color: #f8f8f8;
-   margin: 0 0.5rem;
-   font-size: 1.125rem;
-   color: #888888;
-   line-height: 1.5rem;
+    ${CoolStyles.align_center}
+    ${CoolStyles.align_middle}
+    ${CoolStyles.italic}
+    ${CoolStyles.bold}
+    background-color: #f8f8f8;
+    margin: 0 0.5rem;
+    font-size: 1.125rem;
+    color: #888888;
+    line-height: 1.5rem;
 `;
 
 export class FractoTileNavigate extends Component {
@@ -47,48 +52,11 @@ export class FractoTileNavigate extends Component {
       on_index_change(tile_index)
    }
 
-   next_top = () => {
-      const {tile_index, level_tiles} = this.props;
-      const base_tile = level_tiles[tile_index];
-      const base_tile_bounds = FractoUtil.bounds_from_short_code(base_tile.short_code)
-
-      let target_index = tile_index;
-      while (target_index < level_tiles.length) {
-         target_index += 1;
-         const target_tile = level_tiles[target_index];
-         const target_tile_bounds = FractoUtil.bounds_from_short_code(target_tile.short_code)
-         if (target_tile_bounds.left !== base_tile_bounds.left) {
-            this.navigate_tile(target_index);
-            return;
-         }
-      }
-      this.navigate_tile(level_tiles.length - 1);
-   }
-
-   previous_top = () => {
-      const {level_tiles, tile_index} = this.props;
-      const base_tile = level_tiles[tile_index];
-      const base_tile_bounds = FractoUtil.bounds_from_short_code(base_tile.short_code)
-
-      let target_index = tile_index;
-      let target_leftmost = 0;
-      while (target_index >= 0) {
-         target_index -= 1;
-         const target_tile = level_tiles[target_index];
-         const target_tile_bounds = FractoUtil.bounds_from_short_code(target_tile.short_code)
-         if (target_tile_bounds.left !== base_tile_bounds.left && target_leftmost === 0) {
-            target_leftmost = target_tile_bounds.left;
-         }
-         if (target_leftmost && target_tile_bounds.left !== target_leftmost) {
-            this.navigate_tile(target_index + 1);
-            return;
-         }
-      }
-      this.navigate_tile(0);
-   }
-
    render_button = (number, label) => {
       const {level_tiles, tile_index} = this.props;
+      if (Math.abs(number) > level_tiles.length) {
+         return []
+      }
       const result_number = tile_index + number;
       return <CoolButton
          key={`nav-button-${label}`}
@@ -139,31 +107,18 @@ export class FractoTileNavigate extends Component {
             on_click={r => this.navigate_tile(level_tiles.length - 1)}
          />,
       ]
-      const percent_complete = Math.round(10000 * (tile_index + 1) / level_tiles.length) / 100
-      const top_row_buttons = [
-         <CoolButton
-            key={`nav-button-${"prev. top"}`}
-            primary={true}
-            disabled={false}
-            content={"prev. top"}
-            style={NAV_BUTTON_STYLE}
-            on_click={r => this.previous_top()}
-         />,
-         <StatusText key={'just-status'}>
-            {`${tile_index + 1} of ${level_tiles.length} (${percent_complete}%)`}
-         </StatusText>,
-         <CoolButton
-            key={`nav-button-${"next top"}`}
-            primary={true}
-            disabled={false}
-            content={"next top"}
-            style={NAV_BUTTON_STYLE}
-            on_click={r => this.next_top()}
-         />,
-      ]
+      const offset = tile_index === level_tiles.length - 1 ? 1 : 0
+      const percent_complete = Math.round(10000 * (tile_index + offset) / level_tiles.length) / 100
+      const top_row_buttons = <StatusText key={'just-status'}>
+         {`${tile_index + offset} of ${level_tiles.length} (${percent_complete}%),  ${level_tiles.length - tile_index - offset} remain`}
+      </StatusText>
+      const progress_style = {width: '40rem', textAlign: 'center'};
       return [
          <NavigateWrapper key={'top-row-buttons'}>{top_row_buttons}</NavigateWrapper>,
-         <NavigateWrapper key={'nav-buttons'}>{nav_buttons}</NavigateWrapper>
+         <NavigateWrapper key={'nav-buttons'}>{nav_buttons}</NavigateWrapper>,
+         <ProgressWrapper>
+            <LinearProgress variant="determinate" value={percent_complete}/>
+         </ProgressWrapper>,
       ]
    }
 

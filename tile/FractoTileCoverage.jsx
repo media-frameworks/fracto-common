@@ -38,35 +38,35 @@ const COVERAGE_TABLE_COLUMNS = [
       id: "tile_count",
       label: "tile count",
       type: CELL_TYPE_NUMBER,
-      width_px: 40,
+      width_px: 60,
       align: CELL_ALIGN_CENTER
    },
    {
       id: "can_do",
       label: "can do",
       type: CELL_TYPE_NUMBER,
-      width_px: 120,
+      width_px: 60,
       align: CELL_ALIGN_CENTER
    },
    {
       id: "blank_tiles",
       label: "blank tiles",
       type: CELL_TYPE_NUMBER,
-      width_px: 80,
+      width_px: 60,
       align: CELL_ALIGN_CENTER
    },
    {
       id: "interior_tiles",
       label: "interior",
       type: CELL_TYPE_NUMBER,
-      width_px: 80,
+      width_px: 60,
       align: CELL_ALIGN_CENTER
    },
    {
       id: "needs_update_tiles",
       label: "needs update",
       type: CELL_TYPE_NUMBER,
-      width_px: 80,
+      width_px: 60,
       align: CELL_ALIGN_CENTER
    },
 ]
