@@ -13,7 +13,7 @@ export const CONTEXT_SIZE_PX = 350;
 export const TILE_SIZE_PX = 550;
 const AUTO_REFRESH_FLAG = "auto_refresh_flag"
 
-const AUTOMATE_TIMEOUT_MS = 500;
+const AUTOMATE_TIMEOUT_MS = 250;
 
 const ContextWrapper = styled(CoolStyles.InlineBlock)`
    margin-right: 10px;

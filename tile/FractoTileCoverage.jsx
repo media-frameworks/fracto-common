@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import styled from "styled-components";
 
-import {CoolInputText, CoolStyles} from "common/ui/CoolImports";
+import {CoolStyles} from "common/ui/CoolImports";
 import FractoIndexedTiles from "fracto/common/data/FractoIndexedTiles";
 import CoolTable, {
    CELL_ALIGN_CENTER, CELL_TYPE_LINK,
@@ -12,8 +12,6 @@ import CoolTable, {
 import {get_ideal_level} from "../data/FractoData";
 import {INSPECTOR_SIZE_PX} from "pages/constants";
 import FractoUtil from "../FractoUtil";
-import FractoTileCache from "../data/FractoTileCache";
-import FractoFastCalc from "../data/FractoFastCalc";
 
 const SectionWrapper = styled(CoolStyles.Block)`
     ${CoolStyles.align_center}
