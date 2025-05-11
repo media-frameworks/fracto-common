@@ -148,7 +148,7 @@ export class FractoIndexedTiles extends Component {
          // console.log(`no columns for level ${level} of set_name ${set_name}`)
          return []
       }
-      console.log(`tiles_in_scope columns for level ${level}: ${set_level.columns.length}`)
+      // console.log(`tiles_in_scope columns for level ${level}: ${set_level.columns.length}`)
       const columns = set_level.columns
          .filter(column => {
             if (column.left > viewport.right) {

@@ -4,9 +4,9 @@ import styled from "styled-components";
 
 import {CoolStyles} from "common/ui/CoolImports";
 import {render_coordinates} from "fracto/common/FractoStyles";
-import FractoIndexedTiles from "../data/FractoIndexedTiles";
-import {INSPECTOR_SIZE_PX} from "../../../pages/constants";
 import {get_tiles} from 'fracto/common/render/FractoRasterImage';
+
+import {INSPECTOR_SIZE_PX} from "pages/constants";
 
 const LABEL_WIDTH_PX = 100
 const MAX_LEVEL = 32

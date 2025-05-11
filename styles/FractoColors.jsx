@@ -53,8 +53,9 @@ export class FractoColors {
       all_sets.forEach((set, index) => {
          if (set.iteration_count > best_bin_size) {
             let reduce_by = Math.floor(set.iteration_count / best_bin_size)
-            if (reduce_by > 20) {
-               reduce_by = 20
+            const threshhold = (current_grey_tone - base_value) / 10
+            if (reduce_by > threshhold) {
+               reduce_by = Math.round(threshhold) + 1
             }
             current_grey_tone -= reduce_by
             current_bin_size = 0
@@ -84,20 +85,20 @@ export class FractoColors {
       const all_pattern_sets = {}
       for (let canvas_x = 0; canvas_x < canvas_buffer.length; canvas_x++) {
          for (let canvas_y = 0; canvas_y < canvas_buffer[canvas_x].length; canvas_y++) {
-            const [pattern, iteration, distance] = canvas_buffer[canvas_x][canvas_y]
-            const key = `_${iteration}`
-            if (pattern === 0) {
+            const point_data = canvas_buffer[canvas_x][canvas_y]
+            const key = `_${point_data[1]}`
+            if (point_data[0] === 0) {
                if (!all_not_pattern_sets[key]) {
                   all_not_pattern_sets[key] = 0
                }
                all_not_pattern_sets[key] += 1
-               all_not_pattern_pixels.push({iteration, canvas_x, canvas_y})
+               all_not_pattern_pixels.push({iteration: point_data[1], canvas_x, canvas_y})
             } else {
                if (!all_pattern_sets[key]) {
                   all_pattern_sets[key] = 0
                }
                all_pattern_sets[key] += 1
-               all_pattern_pixels.push({pattern, iteration, canvas_x, canvas_y})
+               all_pattern_pixels.push({pattern: point_data[0], iteration: point_data[1], canvas_x, canvas_y})
             }
          }
       }
