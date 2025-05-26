@@ -249,7 +249,7 @@ export class FractoRasterImage extends Component {
                      if (!tile_data) {
                         BAD_TILES[tile.short_code] = true
                      }
-                     console.log('canvas_buffer size error', canvas_x, canvas_y, e)
+                     // console.log('canvas_buffer size error', canvas_x, canvas_y, e)
                      continue;
                   }
                   break;

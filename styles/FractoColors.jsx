@@ -108,7 +108,7 @@ export class FractoColors {
       const pattern_greys_map = FractoColors.get_greys_map(
          all_pattern_pixels, all_pattern_sets, COLOR_LUM_BASE_PCT, COLOR_LUM_BASE_RANGE_PCT)
 
-      const pixel_size = 1.25 * scale_factor
+      const pixel_size = 1.5 * scale_factor
       all_not_pattern_pixels
          .forEach((pixel) => {
             const key = `_${pixel.iteration}`
