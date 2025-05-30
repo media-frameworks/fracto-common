@@ -87,24 +87,24 @@ export class FractoFastCalc {
          } else if (iteration > MAX_ORBITAL_SIZE) {
             orbital++
             if (Q_x === first_pos.x && Q_y === first_pos.y) {
-               const orbital_points = []
-               for (let i = 0; i < orbital + 1; i++) {
-                  Q_y = 2 * Q_x * Q_y + P_y;
-                  Q_x = Q_x_squared - Q_y_squared + P_x;
-                  Q_x_squared = Q_x * Q_x
-                  Q_y_squared = Q_y * Q_y
-                  orbital_points.push({
-                     x: Q_x,
-                     y: Q_y
-                  })
-               }
+               // const orbital_points = []
+               // for (let i = 0; i < orbital + 1; i++) {
+               //    Q_y = 2 * Q_x * Q_y + P_y;
+               //    Q_x = Q_x_squared - Q_y_squared + P_x;
+               //    Q_x_squared = Q_x * Q_x
+               //    Q_y_squared = Q_y * Q_y
+               //    orbital_points.push({
+               //       x: Q_x,
+               //       y: Q_y
+               //    })
+               // }
                if (iteration < 60000) {
                   iteration = FractoFastCalc.best_iteration(orbital, x0, y0)
                }
                return {
                   pattern: orbital,
                   iteration: iteration,
-                  orbital_points: orbital_points
+                  // orbital_points: orbital_points
                };
             }
          }
