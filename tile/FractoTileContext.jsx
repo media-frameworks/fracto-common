@@ -44,7 +44,7 @@ export class FractoTileContext extends Component {
             scope={context_scope}
             on_plan_complete={on_context_rendered}
             disabled={false}
-            filter_level={level - 2}
+            filter_level={level - 3}
             focal_point={focal_point}/>
          {tile_outline}
       </ContextWrapper>
