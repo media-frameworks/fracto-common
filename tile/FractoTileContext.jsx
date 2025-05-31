@@ -8,7 +8,7 @@ import FractoUtil from "../FractoUtil";
 import FractoRasterImage from "../render/FractoRasterImage";
 
 const ContextWrapper = styled(CoolStyles.InlineBlock)`
-   background-color: #f8f8f8;
+    background-color: #f8f8f8;
 `;
 
 export class FractoTileContext extends Component {
@@ -44,6 +44,7 @@ export class FractoTileContext extends Component {
             scope={context_scope}
             on_plan_complete={on_context_rendered}
             disabled={false}
+            filter_level={level - 1}
             focal_point={focal_point}/>
          {tile_outline}
       </ContextWrapper>
