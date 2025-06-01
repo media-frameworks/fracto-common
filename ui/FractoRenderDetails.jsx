@@ -90,7 +90,7 @@ export class FractoRenderDetails extends Component {
    render_tiles = () => {
       const {scope, focal_point} = this.props
       const coverage_data = get_tiles(
-         INSPECTOR_SIZE_PX, focal_point, scope, 1.0, true)
+         INSPECTOR_SIZE_PX, focal_point, scope, 1.0)
       // console.log('coverage_data', coverage_data)
       const coverage_str = coverage_data
          .sort((a, b) => b.level - a.level)

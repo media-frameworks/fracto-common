@@ -28,7 +28,7 @@ export const get_tiles = (
    focal_point,
    scope,
    aspect_ratio,
-   list_all = false) => {
+   filter_level = 0) => {
 
    const all_tiles = []
    const height_px = width_px * aspect_ratio
@@ -36,7 +36,9 @@ export const get_tiles = (
    const tiles_on_edge_y = Math.ceil(height_px / 256) + 1;
    const max_tiles = Math.ceil(tiles_on_edge_x * tiles_on_edge_y + 1)
    // console.log('get_tiles max_tiles', max_tiles)
-   for (let level = 2; level < MAX_LEVEL; level++) {
+   const min_level = filter_level ? filter_level : 3
+   const max_level = filter_level ? filter_level + 1 : 30
+   for (let level = min_level; level < max_level; level++) {
       const level_tiles = FractoIndexedTiles.tiles_in_scope(
          level, focal_point, scope, aspect_ratio);
       all_tiles.push({
