@@ -93,6 +93,7 @@ export class FractoTileCoverage extends Component {
       loading_interiors: true,
       loading_needs_update: true,
       repairs_by_level: {},
+      coverage: [],
    }
 
    static indexed_tiles = []
@@ -202,10 +203,14 @@ export class FractoTileCoverage extends Component {
             tiles: level_tiles
          })
       }
-      // console.log('tiles_in_scope', tiles_in_scope)
+      console.log('detect_coverage tiles_in_scope', tiles_in_scope)
       const filtered_tiles_in_scope = tiles_in_scope
          .filter(scoped => scoped.tiles.length > 1)
-      this.setState({tiles_in_scope: filtered_tiles_in_scope})
+      const coverage = this.render_coverage(filtered_tiles_in_scope)
+      this.setState({
+         coverage,
+         tiles_in_scope: filtered_tiles_in_scope
+      })
    }
 
    set_enhanced = (enhance_tiles, level) => {
@@ -228,8 +233,7 @@ export class FractoTileCoverage extends Component {
       }
    }
 
-   render_coverage = () => {
-      const {tiles_in_scope, repairs_by_level} = this.state
+   render_coverage = (tiles_in_scope) => {
       const {selected_level} = this.props
       let all_tiles = []
       const coverage_data = tiles_in_scope.map(scoped => {
@@ -366,11 +370,13 @@ export class FractoTileCoverage extends Component {
    }
 
    render() {
-      const {loading_blanks, loading_indexed, loading_interiors, loading_needs_update} = this.state
+      const {
+         loading_blanks, loading_indexed, loading_interiors, loading_needs_update,
+         coverage
+      } = this.state
       if (loading_blanks || loading_indexed || loading_interiors || loading_needs_update) {
          return "loading short codes..."
       }
-      const coverage = this.render_coverage()
       return <SectionWrapper>{coverage}</SectionWrapper>
    }
 }
