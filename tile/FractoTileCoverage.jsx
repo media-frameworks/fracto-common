@@ -67,6 +67,13 @@ const COVERAGE_TABLE_COLUMNS = [
       width_px: 60,
       align: CELL_ALIGN_CENTER
    },
+   {
+      id: "can_detail_tiles",
+      label: "can detail",
+      type: CELL_TYPE_NUMBER,
+      width_px: 60,
+      align: CELL_ALIGN_CENTER
+   },
 ]
 
 export class FractoTileCoverage extends Component {
@@ -94,6 +101,7 @@ export class FractoTileCoverage extends Component {
       loading_needs_update: true,
       repairs_by_level: {},
       coverage: [],
+      render_details: false,
    }
 
    static indexed_tiles = []
@@ -192,7 +200,7 @@ export class FractoTileCoverage extends Component {
       const tiles_in_scope = []
       const ideal_level = get_ideal_level(INSPECTOR_SIZE_PX, scope, 1.5)
 
-      for (let level = 2; level < ideal_level + 12; level++) {
+      for (let level = 2; level < ideal_level + 20; level++) {
          const level_tiles = FractoIndexedTiles.tiles_in_scope(level, focal_point, scope)
          if (level_tiles.length > 500000) {
             console.log('level_tiles.length', level_tiles.length)
@@ -215,12 +223,20 @@ export class FractoTileCoverage extends Component {
 
    set_enhanced = (enhance_tiles, level) => {
       const {on_tile_set_changed} = this.props
+      this.setState({render_details: false})
       on_tile_set_changed(enhance_tiles, level, false)
    }
 
    set_can_repair = (repair_tiles, level) => {
       const {on_tile_set_changed} = this.props
+      this.setState({render_details: false})
       on_tile_set_changed(repair_tiles, level, true)
+   }
+
+   set_can_detail = (detail_tiles, level) => {
+      const {on_tile_set_changed} = this.props
+      this.setState({render_details: true})
+      on_tile_set_changed(detail_tiles, level, true)
    }
 
    on_select_row = (row) => {
@@ -352,6 +368,10 @@ export class FractoTileCoverage extends Component {
             : '-'
          data.tile_count = data.tiles.length ? <LinkedCell
             onClick={e => this.set_can_repair(data.tiles, data.level)}>
+            <CoolStyles.LinkSpan>{data.tiles.length}</CoolStyles.LinkSpan>
+         </LinkedCell> : '-'
+         data.can_detail = data.tiles.length ? <LinkedCell
+            onClick={e => this.set_can_detail(data.tiles, data.level)}>
             <CoolStyles.LinkSpan>{data.tiles.length}</CoolStyles.LinkSpan>
          </LinkedCell> : '-'
       })
