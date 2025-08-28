@@ -1,7 +1,7 @@
 import Complex from "common/math/Complex";
 
 const MAX_ORBITAL_SIZE = 25000
-const MIN_ITERATION = 1200000
+const MIN_ITERATION = 2000000 // 2 million
 
 export class FractoFastCalc {
 

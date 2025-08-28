@@ -84,18 +84,6 @@ export class FractoIndexedTiles extends Component {
          })
    }
 
-   static load_no_cache = (cb) => {
-      cb([])
-      // const no_cache_url = `${SERVER_BASE}/package/no_cache.csv`;
-      // fetch(no_cache_url)
-      //    .then(response => response.text())
-      //    .then(csv => {
-      //       const lines = csv.split("\n");
-      //       console.log(`fetch_bin_async ${lines.length}`)
-      //       cb(lines.slice(1))
-      //    })
-   }
-
    static tiles_in_level = (level, set_name = TILE_SET_INDEXED) => {
       const set_level = FractoIndexedTiles.get_set_level(set_name, level)
       if (!set_level) {
@@ -188,29 +176,6 @@ export class FractoIndexedTiles extends Component {
       }
       return short_codes
    }
-
-   // static get_tile_scopes = (set_name, focal_point, scope) => {
-   //    console.log('get_tile_scopes = (set_name, focal_point, scope)', set_name, focal_point, scope)
-   //    const level_tiles_in_scope = []
-   //    // console.log('FractoIndexedTiles.tile_set[set_name]', set_name, FractoIndexedTiles.tile_set[set_name])
-   //    for (let level = 2; level < 35; level++) {
-   //       const tiles_in_level = FractoIndexedTiles
-   //          .tiles_in_scope(level, focal_point, scope, 1.0, set_name);
-   //       if (!tiles_in_level.length) {
-   //          continue;
-   //       }
-   //       // console.log('tiles_in_level', level, tiles_in_level)
-   //       if (tiles_in_level.length > 350) {
-   //          continue;
-   //       }
-   //       level_tiles_in_scope.push({
-   //          level: level,
-   //          tiles: tiles_in_level
-   //       })
-   //    }
-   //    return level_tiles_in_scope
-   // }
-
 }
 
 export default FractoIndexedTiles;

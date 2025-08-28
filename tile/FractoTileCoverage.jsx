@@ -224,19 +224,19 @@ export class FractoTileCoverage extends Component {
    set_enhanced = (enhance_tiles, level) => {
       const {on_tile_set_changed} = this.props
       this.setState({render_details: false})
-      on_tile_set_changed(enhance_tiles, level, false)
+      on_tile_set_changed(enhance_tiles, level, false, false)
    }
 
    set_can_repair = (repair_tiles, level) => {
       const {on_tile_set_changed} = this.props
       this.setState({render_details: false})
-      on_tile_set_changed(repair_tiles, level, true)
+      on_tile_set_changed(repair_tiles, level, true, false)
    }
 
    set_can_detail = (detail_tiles, level) => {
       const {on_tile_set_changed} = this.props
       this.setState({render_details: true})
-      on_tile_set_changed(detail_tiles, level, true)
+      on_tile_set_changed(detail_tiles, level, false, true)
    }
 
    on_select_row = (row) => {
@@ -370,7 +370,7 @@ export class FractoTileCoverage extends Component {
             onClick={e => this.set_can_repair(data.tiles, data.level)}>
             <CoolStyles.LinkSpan>{data.tiles.length}</CoolStyles.LinkSpan>
          </LinkedCell> : '-'
-         data.can_detail = data.tiles.length ? <LinkedCell
+         data.can_detail_tiles = data.tiles.length ? <LinkedCell
             onClick={e => this.set_can_detail(data.tiles, data.level)}>
             <CoolStyles.LinkSpan>{data.tiles.length}</CoolStyles.LinkSpan>
          </LinkedCell> : '-'

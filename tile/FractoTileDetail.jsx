@@ -129,6 +129,7 @@ export class FractoTileDetail {
       const increment = (tile.bounds.right - tile.bounds.left) / 256.0;
       const csv_rows = []
       csv_rows.push(CSV_COLUMNS.join(','))
+      const start = performance.now()
       for (let img_x = 0; img_x < 256; img_x++) {
          const x = tile.bounds.left + img_x * increment;
          for (let img_y = 0; img_y < 256; img_y++) {
@@ -151,6 +152,8 @@ export class FractoTileDetail {
             `)
          }
       }
+      const end = performance.now()
+      const seconds = Math.round((end - start)) / 1000
       const full_history = `${csv_rows.length} deatiled, in ${seconds}s`
       setTimeout(() => {
          cb(full_history, csv_rows)
