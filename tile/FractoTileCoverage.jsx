@@ -202,7 +202,7 @@ export class FractoTileCoverage extends Component {
 
       for (let level = 2; level < ideal_level + 20; level++) {
          const level_tiles = FractoIndexedTiles.tiles_in_scope(level, focal_point, scope)
-         if (level_tiles.length > 500000) {
+         if (level_tiles.length > 200000) {
             console.log('level_tiles.length', level_tiles.length)
             break
          }
@@ -370,10 +370,10 @@ export class FractoTileCoverage extends Component {
             onClick={e => this.set_can_repair(data.tiles, data.level)}>
             <CoolStyles.LinkSpan>{data.tiles.length}</CoolStyles.LinkSpan>
          </LinkedCell> : '-'
-         data.can_detail_tiles = data.tiles.length ? <LinkedCell
-            onClick={e => this.set_can_detail(data.tiles, data.level)}>
-            <CoolStyles.LinkSpan>{data.tiles.length}</CoolStyles.LinkSpan>
-         </LinkedCell> : '-'
+         // data.can_detail_tiles = data.tiles.length ? <LinkedCell
+         //    onClick={e => this.set_can_detail(data.tiles, data.level)}>
+         //    <CoolStyles.LinkSpan>{data.tiles.length}</CoolStyles.LinkSpan>
+         // </LinkedCell> : '-'
       })
       const selected_row = selected_level
          ? coverage_data.findIndex(data => data.level === selected_level)
