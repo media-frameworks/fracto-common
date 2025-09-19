@@ -76,6 +76,9 @@ const COVERAGE_TABLE_COLUMNS = [
    },
 ]
 
+const MAX_LEVELS = 30; // Limit the number of levels processed
+const MAX_TILES_PER_LEVEL = 250000; // Limit tiles per level to avoid memory issues
+
 export class FractoTileCoverage extends Component {
 
    static propTypes = {
@@ -110,70 +113,39 @@ export class FractoTileCoverage extends Component {
    static needs_update = []
 
    componentDidMount() {
-      if (!FractoTileCoverage.indexed_tiles.length) {
-         // FractoTileCoverage.indexed_tiles = []
-         for (let level = 0; level < 50; level++) {
-            FractoTileCoverage.indexed_tiles[level] = {}
-         }
-         FractoIndexedTiles.load_short_codes('indexed', short_codes => {
-            short_codes.forEach(short_code => {
-               const level = short_code.length
-               FractoTileCoverage.indexed_tiles[level][short_code] = true
-            })
-            this.setState({loading_indexed: false})
-         })
-
-      } else {
+      this.collect_category_tiles('indexed', result => {
+         FractoTileCoverage.indexed_tiles = result;
          this.setState({loading_indexed: false})
-      }
-      if (!FractoTileCoverage.blank_tiles.length) {
-         // FractoTileCoverage.blank_tiles = []
-         for (let level = 0; level < 50; level++) {
-            FractoTileCoverage.blank_tiles[level] = {}
-         }
-         FractoIndexedTiles.load_short_codes('blank', short_codes => {
-            console.log('blank short codes:', short_codes.length)
-            short_codes.forEach(short_code => {
-               const level = short_code.length
-               FractoTileCoverage.blank_tiles[level][short_code] = true
-            })
-            this.setState({loading_blanks: false})
-         })
-      } else {
+      })
+      this.collect_category_tiles('blank', result => {
+         FractoTileCoverage.blank_tiles = result;
          this.setState({loading_blanks: false})
-      }
-      if (!FractoTileCoverage.interior_tiles.length) {
-         // FractoTileCoverage.interior_tiles = []
-         for (let level = 0; level < 50; level++) {
-            FractoTileCoverage.interior_tiles[level] = {}
-         }
-         FractoIndexedTiles.load_short_codes('interior', short_codes => {
-            console.log('interior short codes:', short_codes.length)
-            short_codes.forEach(short_code => {
-               const level = short_code.length
-               FractoTileCoverage.interior_tiles[level][short_code] = true
-            })
-            this.setState({loading_interiors: false})
-         })
-      } else {
+      })
+      this.collect_category_tiles('interior', result => {
+         FractoTileCoverage.interior_tiles = result;
          this.setState({loading_interiors: false})
-      }
-      if (!FractoTileCoverage.needs_update.length) {
-         for (let level = 0; level < 50; level++) {
-            FractoTileCoverage.needs_update[level] = {}
-         }
-         FractoIndexedTiles.load_short_codes('needs_update', short_codes => {
-            // console.log('needs_upate short codes:', short_codes.length)
-            short_codes.forEach(filename => {
-               const short_code = filename.replace('.gz', '')
-               const level = short_code.length
-               FractoTileCoverage.needs_update[level][short_code] = true
-            })
-            this.setState({loading_needs_update: false})
-         })
-      } else {
+      })
+      this.collect_category_tiles('needs_update', result => {
+         FractoTileCoverage.needs_update = result;
          this.setState({loading_needs_update: false})
+      })
+   }
+
+   collect_category_tiles = (tile_set_name, cb) => {
+      const result = []
+      for (let level = 0; level < 30; level++) {
+         result[level] = new Set()
       }
+      FractoIndexedTiles.load_short_codes(tile_set_name, short_codes => {
+         short_codes.forEach(short_code => {
+            const level = short_code.length
+            if (!result[level]) {
+               return;
+            }
+            result[level].add(short_code)
+         })
+         cb(result)
+      })
    }
 
    componentDidUpdate(prevProps: Readonly<P>, prevState: Readonly<S>, snapshot: SS) {
@@ -196,29 +168,29 @@ export class FractoTileCoverage extends Component {
    }
 
    detect_coverage = () => {
-      const {focal_point, scope} = this.props
-      const tiles_in_scope = []
-      const ideal_level = get_ideal_level(INSPECTOR_SIZE_PX, scope, 1.5)
+      const {focal_point, scope} = this.props;
+      const tiles_in_scope = [];
+      const ideal_level = get_ideal_level(INSPECTOR_SIZE_PX, scope, 1.5);
+      const max_levels = Math.min(MAX_LEVELS, ideal_level + 10); // Only process a few levels
 
-      for (let level = 2; level < ideal_level + 20; level++) {
-         const level_tiles = FractoIndexedTiles.tiles_in_scope(level, focal_point, scope)
-         if (level_tiles.length > 200000) {
-            console.log('level_tiles.length', level_tiles.length)
-            break
+      for (let level = 2; level < max_levels; level++) {
+         const level_tiles = FractoIndexedTiles.tiles_in_scope(level, focal_point, scope);
+         if (level_tiles.length > MAX_TILES_PER_LEVEL) {
+            // Limit the number of tiles per level
+            level_tiles.length = MAX_TILES_PER_LEVEL;
          }
+         console.log('level_tiles', level, level_tiles)
          tiles_in_scope.push({
             level: level,
             tiles: level_tiles
-         })
+         });
       }
-      console.log('detect_coverage tiles_in_scope', tiles_in_scope)
-      const filtered_tiles_in_scope = tiles_in_scope
-         .filter(scoped => scoped.tiles.length > 1)
-      const coverage = this.render_coverage(filtered_tiles_in_scope)
+      const filtered_tiles_in_scope = tiles_in_scope.filter(scoped => scoped.tiles.length > 1);
+      const coverage = this.render_coverage(filtered_tiles_in_scope);
       this.setState({
          coverage,
          tiles_in_scope: filtered_tiles_in_scope
-      })
+      });
    }
 
    set_enhanced = (enhance_tiles, level) => {
@@ -250,134 +222,95 @@ export class FractoTileCoverage extends Component {
    }
 
    render_coverage = (tiles_in_scope) => {
-      const {selected_level} = this.props
-      let all_tiles = []
+      const {selected_level} = this.props;
+      let all_tiles = [];
       const coverage_data = tiles_in_scope.map(scoped => {
-         all_tiles = all_tiles.concat(scoped.tiles)
+         all_tiles = all_tiles.concat(scoped.tiles);
          return {
             level: scoped.level,
             tile_count: scoped.tiles.length,
             tiles: scoped.tiles,
-         }
-      })
+         };
+      });
       if (tiles_in_scope.length) {
          coverage_data.push({
             level: tiles_in_scope[tiles_in_scope.length - 1].level + 1,
             tile_count: 0,
             tiles: [],
-         })
+         });
       }
-      // console.log('coverage_data', coverage_data)
-      const can_do = []
-      const blank_tiles = []
-      const interior_tiles = []
-      const needs_update = []
+      // Use Sets for faster lookups and to avoid duplicates
+      const can_do = new Set();
+      const blank_tiles = new Set();
+      const interior_tiles = new Set();
+      const needs_update = new Set();
       all_tiles.forEach(tile => {
-         const short_code = tile.short_code
-         if (FractoTileCoverage.needs_update[short_code.length][short_code]) {
-            needs_update.push(short_code)
+         const short_code = tile.short_code;
+         const level = short_code.length
+         const in_update = FractoTileCoverage.needs_update[level].has(short_code);
+         if (in_update) {
+            needs_update.add(short_code);
          }
-
-         const short_code_0 = `${short_code}0`
-         const short_code_1 = `${short_code}1`
-         const short_code_2 = `${short_code}2`
-         const short_code_3 = `${short_code}3`
-         const level = short_code.length + 1
-
-         if (FractoTileCoverage.blank_tiles[level][short_code_0]) {
-            blank_tiles.push(short_code_0)
-         } else if (FractoTileCoverage.interior_tiles[level][short_code_0]) {
-            interior_tiles.push(short_code_0)
-         } else if (!FractoTileCoverage.indexed_tiles[level][short_code_0]) {
-            can_do.push(short_code_0)
+         const new_level = short_code.length + 1;
+         for (let i = 0; i < 4; i++) {
+            const sc = `${short_code}${i}`;
+            const in_blank = FractoTileCoverage.blank_tiles[new_level].has(sc);
+            if (in_blank) {
+               blank_tiles.add(sc);
+            } else {
+               const in_interior = FractoTileCoverage.interior_tiles[new_level].has(sc);
+               if (in_interior) {
+                  interior_tiles.add(sc);
+               } else {
+                  const in_indexed = FractoTileCoverage.indexed_tiles[new_level].has(sc);
+                  if (!in_indexed) {
+                     can_do.add(sc);
+                  }
+               }
+            }
          }
-
-         if (FractoTileCoverage.blank_tiles[level][short_code_1]) {
-            blank_tiles.push(short_code_1)
-         } else if (FractoTileCoverage.interior_tiles[level][short_code_1]) {
-            interior_tiles.push(short_code_1)
-         } else if (!FractoTileCoverage.indexed_tiles[level][short_code_1]) {
-            can_do.push(short_code_1)
-         }
-
-         if (FractoTileCoverage.blank_tiles[level][short_code_2]) {
-            blank_tiles.push(short_code_2)
-         } else if (FractoTileCoverage.interior_tiles[level][short_code_2]) {
-            interior_tiles.push(short_code_2)
-         } else if (!FractoTileCoverage.indexed_tiles[level][short_code_2]) {
-            can_do.push(short_code_2)
-         }
-
-         if (FractoTileCoverage.blank_tiles[level][short_code_3]) {
-            blank_tiles.push(short_code_3)
-         } else if (FractoTileCoverage.interior_tiles[level][short_code_3]) {
-            interior_tiles.push(short_code_3)
-         } else if (!FractoTileCoverage.indexed_tiles[level][short_code_3]) {
-            can_do.push(short_code_3)
-         }
-      })
+      });
       coverage_data.forEach(data => {
-         const filtered_by_level = can_do
-            .filter(cd => cd.length === data.level)
-            .map(short_code => {
-               return {
-                  short_code,
-                  bounds: FractoUtil.bounds_from_short_code(short_code)
-               }
-            })
-         const blanks_by_level = blank_tiles
-            .filter(short_code => short_code.length === data.level)
-         // console.log("level, blanks_by_level", data.level, blanks_by_level)
-         const interiors_by_level = interior_tiles
-            .filter(short_code => short_code.length === data.level)
-         const needs_update_by_level = needs_update
-            .filter(short_code => short_code.length === data.level)
-         const interiors_with_bounds = interiors_by_level
-            .filter(cd => cd.length === data.level)
-            .map(short_code => {
-               return {
-                  short_code,
-                  bounds: FractoUtil.bounds_from_short_code(short_code)
-               }
-            })
-         const needs_update_with_bounds = needs_update_by_level
-            .filter(cd => cd.length === data.level)
-            .map(short_code => {
-               return {
-                  short_code,
-                  bounds: FractoUtil.bounds_from_short_code(short_code)
-               }
-            })
-         // console.log("level, blanks_by_level", data.level, blanks_by_level)
+         const filtered_by_level = Array.from(can_do).filter(cd => cd.length === data.level).map(short_code => ({
+            short_code,
+            bounds: FractoUtil.bounds_from_short_code(short_code)
+         }));
+         const blanks_by_level = Array.from(blank_tiles).filter(short_code => short_code.length === data.level);
+         const interiors_by_level = Array.from(interior_tiles).filter(short_code => short_code.length === data.level);
+         const needs_update_by_level = Array.from(needs_update).filter(short_code => short_code.length === data.level);
+         const interiors_with_bounds = interiors_by_level.map(short_code => ({
+            short_code,
+            bounds: FractoUtil.bounds_from_short_code(short_code)
+         }));
+         const needs_update_with_bounds = needs_update_by_level.map(short_code => ({
+            short_code,
+            bounds: FractoUtil.bounds_from_short_code(short_code)
+         }));
          data.can_do = filtered_by_level.length ? <LinkedCell
             onClick={e => this.set_enhanced(filtered_by_level, data.level)}>
             <CoolStyles.LinkSpan>{filtered_by_level.length}</CoolStyles.LinkSpan>
-         </LinkedCell> : '-'
-         data.blank_tiles = blanks_by_level.length ? blanks_by_level.length : '-'
+         </LinkedCell> : '-';
+         data.blank_tiles = blanks_by_level.length ? blanks_by_level.length : '-';
          data.interior_tiles = interiors_with_bounds.length
             ? <LinkedCell
                onClick={e => this.set_enhanced(interiors_with_bounds, data.level)}>
                <CoolStyles.LinkSpan>{interiors_with_bounds.length}</CoolStyles.LinkSpan>
             </LinkedCell>
-            : '-'
+            : '-';
          data.needs_update_tiles = needs_update_with_bounds.length
             ? <LinkedCell
                onClick={e => this.set_can_repair(needs_update_with_bounds, data.level)}>
                <CoolStyles.LinkSpan>{needs_update_with_bounds.length}</CoolStyles.LinkSpan>
             </LinkedCell>
-            : '-'
+            : '-';
          data.tile_count = data.tiles.length ? <LinkedCell
             onClick={e => this.set_can_repair(data.tiles, data.level)}>
             <CoolStyles.LinkSpan>{data.tiles.length}</CoolStyles.LinkSpan>
-         </LinkedCell> : '-'
-         // data.can_detail_tiles = data.tiles.length ? <LinkedCell
-         //    onClick={e => this.set_can_detail(data.tiles, data.level)}>
-         //    <CoolStyles.LinkSpan>{data.tiles.length}</CoolStyles.LinkSpan>
-         // </LinkedCell> : '-'
-      })
+         </LinkedCell> : '-';
+      });
       const selected_row = selected_level
          ? coverage_data.findIndex(data => data.level === selected_level)
-         : -1
+         : -1;
       return <CoolStyles.InlineBlock>
          <CoolTable
             options={TABLE_CAN_SELECT}
@@ -386,7 +319,7 @@ export class FractoTileCoverage extends Component {
             on_select_row={row => this.on_select_row(coverage_data[row])}
             selected_row={selected_row}
          />
-      </CoolStyles.InlineBlock>
+      </CoolStyles.InlineBlock>;
    }
 
    render() {
