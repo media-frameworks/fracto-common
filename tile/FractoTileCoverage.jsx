@@ -193,10 +193,10 @@ export class FractoTileCoverage extends Component {
       });
    }
 
-   set_enhanced = (enhance_tiles, level) => {
+   set_enhanced = (enhance_tiles, level, add_interiors) => {
       const {on_tile_set_changed} = this.props
       this.setState({render_details: false})
-      on_tile_set_changed(enhance_tiles, level, false, false)
+      on_tile_set_changed(enhance_tiles, level, false, add_interiors)
    }
 
    set_can_repair = (repair_tiles, level) => {
@@ -287,13 +287,13 @@ export class FractoTileCoverage extends Component {
             bounds: FractoUtil.bounds_from_short_code(short_code)
          }));
          data.can_do = filtered_by_level.length ? <LinkedCell
-            onClick={e => this.set_enhanced(filtered_by_level, data.level)}>
+            onClick={e => this.set_enhanced(filtered_by_level, data.level, false)}>
             <CoolStyles.LinkSpan>{filtered_by_level.length}</CoolStyles.LinkSpan>
          </LinkedCell> : '-';
          data.blank_tiles = blanks_by_level.length ? blanks_by_level.length : '-';
          data.interior_tiles = interiors_with_bounds.length
             ? <LinkedCell
-               onClick={e => this.set_enhanced(interiors_with_bounds, data.level)}>
+               onClick={e => this.set_enhanced(interiors_with_bounds, data.level, true)}>
                <CoolStyles.LinkSpan>{interiors_with_bounds.length}</CoolStyles.LinkSpan>
             </LinkedCell>
             : '-';
