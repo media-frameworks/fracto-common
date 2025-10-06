@@ -258,11 +258,11 @@ export class FractoTileCoverage extends Component {
             if (in_blank) {
                blank_tiles.add(sc);
             } else {
+               const in_indexed = FractoTileCoverage.indexed_tiles[new_level].has(sc);
                const in_interior = FractoTileCoverage.interior_tiles[new_level].has(sc);
-               if (in_interior) {
+               if (in_interior && !in_indexed) {
                   interior_tiles.add(sc);
                } else {
-                  const in_indexed = FractoTileCoverage.indexed_tiles[new_level].has(sc);
                   if (!in_indexed) {
                      can_do.add(sc);
                   }
